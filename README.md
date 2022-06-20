@@ -8,6 +8,7 @@
 - A simple CLI to search and manage media assets in S3 and locally
 - [PyPI project](https://pypi.org/project/media-mgmt-cli}) (once published)
 - Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
+- Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
 
 ## Installation
 Install this tool using `pip`:
