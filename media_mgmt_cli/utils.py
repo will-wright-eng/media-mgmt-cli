@@ -7,7 +7,6 @@ from pathlib import Path
 from zipfile import ZipFile
 from typing import List
 
-import yaml
 from click import echo
 
 from .aws import aws
