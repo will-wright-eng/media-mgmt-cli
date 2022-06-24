@@ -9,7 +9,7 @@ import boto3
 
 from .aws import aws
 from .config import config_handler
-from .utils import utils as utils
+import media_mgmt_cli.utils as utils
 
 
 @click.group()

@@ -23,12 +23,8 @@ class ConfigHandler:
                 os.environ[key.upper()] = val
 
     def print_configs(self):
-        # print('print configs')
         print(self.config.defaults())
-        # self.config.read_file(
         for key, val in self.config.defaults().items():
-            # if key is not None:
-            # print(key.upper(),(20-int(len(key)))*' ', val)
             self.formatted_print(key, val)
 
     def write_config_file(self):
@@ -90,5 +86,14 @@ class ConfigHandler:
         key = str(key)
         val = str(val)
         print(key, (n - int(len(key))) * ".", val)
+
+    def get_configs(self):
+        if os.path.isfile(self.config_file_path):
+            return self.config.defaults()
+        else:
+            return None
+
+    def check_config_exists(self):
+        return os.path.isfile(self.config_file_path)
 
 config_handler = ConfigHandler(project_name="media_mgmt_cli")

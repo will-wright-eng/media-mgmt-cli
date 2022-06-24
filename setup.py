@@ -31,7 +31,7 @@ setup(
         [console_scripts]
         mmgmt=media_mgmt_cli.cli:cli
     """,
-    install_requires=["click"],
+    install_requires=["click", "boto3"],
     extras_require={
         "test": ["pytest"]
     },
