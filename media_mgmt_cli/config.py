@@ -13,7 +13,7 @@ class ConfigHandler:
         self.config = configparser.ConfigParser()
         if not os.path.isfile(self.config_file_path):
             print("config file does not exist, run `mmgmt configure`")
-            exit(1)
+            # exit(1)
         else:
             self.config.read(self.config_file_path)
             if self.verbose:
