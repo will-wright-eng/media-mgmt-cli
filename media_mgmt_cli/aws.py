@@ -13,15 +13,16 @@ import boto3
 from click import echo
 from botocore.exceptions import ClientError
 
-from .config import config_handler
+from .config import ConfigHandler
 
 
 class AwsStorageMgmt:
     def __init__(self):
         self.s3_resour = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
-        if config_handler.check_config_exists():
-            self.configs = config_handler.get_configs()
+        self.config = ConfigHandler(project_name="media_mgmt_cli")
+        if self.config.check_config_exists():
+            self.configs = self.config.get_configs()
             self.bucket = self.configs.get("aws_bucket", None)
             self.object_prefix = self.configs.get("aws_bucket_path", None)
         else:
@@ -36,7 +37,9 @@ class AwsStorageMgmt:
         :param object_name: S3 object name. If not specified then file_name is used
         :return: True if file was uploaded, else False
         """
-        echo(f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{self.configs.get('aws_bucket_path')}/{file_name}")
+        echo(
+            f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{self.configs.get('aws_bucket_path')}/{file_name}"
+        )
         if not object_name:
             object_name = os.path.join(self.object_prefix, file_name)
         else:
@@ -80,9 +83,9 @@ class AwsStorageMgmt:
         return True
 
     def get_bucket_object_keys(self):
-        echo('aws_media_bucket')
-        echo(self.configs.get('aws_media_bucket'))
-        my_bucket = self.s3_resour.Bucket(self.configs.get('aws_media_bucket'))
+        echo("aws_media_bucket")
+        echo(self.configs.get("aws_media_bucket"))
+        my_bucket = self.s3_resour.Bucket(self.configs.get("aws_media_bucket"))
         return [obj.key for obj in my_bucket.objects.all()]
 
     def get_obj_head(self, object_name: str):
