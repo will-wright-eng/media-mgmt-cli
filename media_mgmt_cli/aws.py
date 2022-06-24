@@ -62,7 +62,6 @@ class AwsStorageMgmt:
         :return: True if file was uploaded, else False
         """
         file_name = object_name.split("/")[-1]
-
         try:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(self.bucket, object_name, data)
@@ -81,6 +80,8 @@ class AwsStorageMgmt:
         return True
 
     def get_bucket_object_keys(self):
+        echo('aws_media_bucket')
+        echo(self.configs.get('aws_media_bucket'))
         my_bucket = self.s3_resour.Bucket(self.configs.get('aws_media_bucket'))
         return [obj.key for obj in my_bucket.objects.all()]
 
@@ -138,7 +139,6 @@ class AwsStorageMgmt:
 
     def download_from_glacier(self, object_name: str):
         """download_from_glacier docstring"""
-
         self.get_obj_head(object_name)
         try:
             tier = self.obj_head["StorageClass"]
