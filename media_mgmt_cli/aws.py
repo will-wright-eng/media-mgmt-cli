@@ -20,17 +20,12 @@ class AwsStorageMgmt:
     def __init__(self):
         self.s3_resour = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
-        self.bucket = os.getenv("AWS_BUCKET", None)
-        self.object_prefix = os.getenv("AWS_BUCKET_PATH", None)
-        if (self.bucket is None) or (self.object_prefix is None):
-            # get values from config file
-            config = config_handler
-            if config.check_config_exists():
-                # export configs to env vars
-                # TODO: this doesn't work --> create bash file that runs in .zshrc via source
-                config.export_configs()
-            else:
-                echo("config file does not exist, run `mmgmt configure`")
+        if config_handler.check_config_exists():
+            self.configs = config_handler.get_configs()
+            self.bucket = self.configs.get("aws_bucket", None)
+            self.object_prefix = self.configs.get("aws_bucket_path", None)
+        else:
+            echo("config file does not exist, run `mmgmt configure`")
 
     def upload_file(self, file_name, object_name=None):
         """Upload a file to an S3 bucket
@@ -41,20 +36,16 @@ class AwsStorageMgmt:
         :param object_name: S3 object name. If not specified then file_name is used
         :return: True if file was uploaded, else False
         """
-        echo(
-            f"uploading: {file_name} \nto S3 bucket: {os.getenv('AWS_BUCKET')}/{os.getenv('AWS_BUCKET_PATH')}/{file_name}"
-        )
+        echo(f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{self.configs.get('aws_bucket_path')}/{file_name}")
         if not object_name:
             object_name = os.path.join(self.object_prefix, file_name)
         else:
             object_name = os.path.join(object_name, file_name)
 
         try:
-            # response = self.s3_client.upload_file(file_name, self.bucket, object_name)
             with open(file_name, "rb") as data:
                 self.s3_client.upload_fileobj(data, self.bucket, object_name)
         except ClientError as e:
-            # logging.error(e)
             echo(e)
             echo("success? False\n")
             return False
@@ -90,7 +81,7 @@ class AwsStorageMgmt:
         return True
 
     def get_bucket_object_keys(self):
-        my_bucket = self.s3_resour.Bucket(os.getenv("AWS_MEDIA_BUCKET"))
+        my_bucket = self.s3_resour.Bucket(self.configs.get('aws_media_bucket'))
         return [obj.key for obj in my_bucket.objects.all()]
 
     def get_obj_head(self, object_name: str):
