@@ -9,14 +9,16 @@ class ConfigHandler:
         self.home_path = p
         self.config_path = p / ".config" / project_name
         self.config_file_path = self.config_path / "config"
-
+        self.verbose = False
         self.config = configparser.ConfigParser()
         if not os.path.isfile(self.config_file_path):
             echo("config file does not exist, run `mmgmt configure`")
+            exit(1)
         else:
             self.config.read(self.config_file_path)
-            # print("-- config file exists --")
-            # print(self.print_configs())
+            if self.verbose:
+                print("-- config file exists --")
+                print(self.print_configs())
 
     def export_configs(self):
         # export configs as environment variables
