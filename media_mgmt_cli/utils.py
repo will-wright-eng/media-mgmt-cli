@@ -78,7 +78,7 @@ def keyword_in_string(keyword, file):
 
 
 def files_in_media_dir() -> List[str]:
-    # media_dir = os.getenv("LOCAL_MEDIA_DIR")
+    # TODO: insert "LOCAL_MEDIA_DIR" into configs
     media_dir = pathlib.Path.home() / "media"
     media_dir = media_dir.resolve()
     tmp = os.listdir(media_dir)
@@ -138,32 +138,3 @@ def get_storage_tier(file_list: List[str]):
                 except Exception as e:
                     # except ClientError as e:
                     echo(f"skipping: {file_name},\t {str(e)}")
-                    # print(f"ClientError while searching for {file_name}: {str(e)}")
-
-
-# def create_directories(folders, logger=None):
-#     """create_directory docstring"""
-#     for folder in folders:
-#         try:
-#             os.mkdir(folder)
-#         except FileExistsError as e:
-#             if logger:
-#                 logger.info(e)
-#             else:
-#                 print(e)
-
-
-# def move_file(file_name, move_to):
-#     cwd = Path.cwd()
-#     create_directory([str(cwd / move_to)])
-#     os.rename(str(cwd / file_name), str(cwd / move_to / file_name))
-#     return True
-
-
-# def load_configs(source):
-#     with open(source, "r") as stream:
-#         try:
-#             data = yaml.safe_load(stream)
-#         except Exception as exc:
-#             print(exc)
-#     return data

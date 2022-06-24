@@ -1,27 +1,10 @@
-"""
-media management CLI - config setup
-- export environment varibles
-- setup dot directory at $HOME
-- grab configs from AWS secrets
-- os.environ.get("HOME", "Does not exist")
-- use builtin python configparser "import configparser"
-
-- add note to environment variable calls --> "environment variable {} not found, run `mmgmt configure` to setup"
-
-`mmgmt configure`
-- check environment variables
-- check for .mmgmt dorectory in HOME --> .mmgmt/config
-- mkdir $HOME/.mmgmt
-- touch $HOME/.mmgmt/config
-"""
-
 import os
 import pathlib
 import configparser
 
 
 class ConfigHandler:
-    def __init__(self, project_name):
+    def __init__(self, project_name="tmp"):
         p = pathlib.Path.home()
         self.home_path = p
         self.config_path = p / ".config" / project_name
@@ -30,8 +13,8 @@ class ConfigHandler:
         self.config = configparser.ConfigParser()
         if os.path.isfile(self.config_file_path):
             self.config.read(self.config_file_path)
-            # print("-- config file exists --")
-            # print(self.config.defaults())
+            print("-- config file exists --")
+            print(self.print_configs())
 
     def export_configs(self):
         # export configs as environment variables
@@ -40,9 +23,13 @@ class ConfigHandler:
                 os.environ[key.upper()] = val
 
     def print_configs(self):
+        # print('print configs')
+        print(self.config.defaults())
+        # self.config.read_file(
         for key, val in self.config.defaults().items():
-            if key is not None:
-                print(key.upper(), (20 - int(len(key))) * " ", val)
+            # if key is not None:
+            # print(key.upper(),(20-int(len(key)))*' ', val)
+            self.formatted_print(key, val)
 
     def write_config_file(self):
         # rewrite config file
@@ -57,9 +44,8 @@ class ConfigHandler:
         """
         example:
         config['DEFAULT'] = {'ServerAliveInterval': '45',
-                          'Compression': 'yes',
-                          'CompressionLevel': '8',
-                          }
+                      'Compression': 'yes',
+                      'CompressionLevel': '8',}
         """
         self.config[section] = config_dict
 
@@ -67,51 +53,42 @@ class ConfigHandler:
         self.config_file_input(config_dict)
         self.write_config_file()
 
-    def get_configs(self):
+    def put_project(self, project_name):
+        self.project_name = project_name
+        self.config_path = self.home_path / ".config" / project_name
+        self.config_file_path = self.config_path / "config"
+        self.config = configparser.ConfigParser()
         if os.path.isfile(self.config_file_path):
-            return self.config.defaults()
-        else:
-            return None
+            self.config.read(self.config_file_path)
+            print("-- config file exists --")
+            print(self.print_configs())
 
-    def check_config_exists(self):
-        return os.path.isfile(self.config_file_path)
+    def list_config_dirs(self):
+        # list directories
+        p = self.home_path / ".config"
+        active = []
+        other = []
+        for x in p.iterdir():
+            if x.is_dir():
+                tmp = x / "config"
+                if os.path.isfile(tmp):
+                    active.append(tmp.resolve())
+                    resp = "config file exists"
+                else:
+                    other.append(x.resolve())
+                    resp = "no config file"
+                self.formatted_print(x, resp, n=45)
 
+        for file_path in active:
+            print("\n-- ", file_path, " --")
+            tmp = configparser.ConfigParser()
+            tmp.read(file_path)
+            for key, val in tmp.defaults().items():
+                self.formatted_print(key, val)
+
+    def formatted_print(self, key, val, n=20):
+        key = str(key)
+        val = str(val)
+        print(key, (n - int(len(key))) * ".", val)
 
 config_handler = ConfigHandler(project_name="media_mgmt_cli")
-
-
-def find_all(name, path):
-    result = []
-    for root, dirs, files in os.walk(path):
-        if name in files:
-            result.append(os.path.join(root, name))
-    return result
-
-
-def create_res_dict_from_envrc():
-    files = find_all(".envrc", "../.")
-    projects = ["media_mgmt_cli", "twl_app"]
-    res = {}
-    for file_path, project_name in zip(files, projects):
-        tmp_res = {}
-        with open(file_path, "r") as file:
-            tmp_lines = file.readlines()
-            for pos, line in enumerate(tmp_lines):
-                tmp_var = line.replace("\n", "").replace("export ", "").split("=")
-                if "KEY" in tmp_var[0]:
-                    pass
-                else:
-                    tmp_res[tmp_var[0]] = tmp_var[1]
-        res[project_name] = tmp_res
-    return res
-
-
-def create_secret_from_dict(project_name, secrets_dict):
-    secrets_prefix = "projects/dev"
-    secret_name = os.path.join(secrets_prefix, project_name)
-    secret_string = json.dumps(secrets_dict)
-    return aws.create_secret(secret_string, secret_name)
-
-
-# for project_name in projects:
-#     create_secret_from_dict(project_name, secrets_dict=res[project_name])
