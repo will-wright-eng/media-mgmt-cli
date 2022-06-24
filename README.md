@@ -5,8 +5,9 @@
 [![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/william-cass-wright/media-mgmt-cli/blob/master/LICENSE)
 
+## Summary
 - A simple CLI to search and manage media assets in S3 and locally
-- [PyPI project](https://pypi.org/project/media-mgmt-cli}) (once published)
+- [PyPI project](https://pypi.org/project/media-mgmt-cli})
 - Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
 - Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
 
