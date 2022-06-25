@@ -94,9 +94,10 @@ def search(keyword, location):
 
 @cli.command()
 @click.option("-f", "--filename", "filename", required=True)
-def download(filename):
+@click.option("-b", "--bucket-name","bucket_name", required=False, default=None)
+def download(filename, bucket_name):
     click.echo(f"Downloading {filename} from S3...")
-    aws.download_file(object_name=filename)
+    aws.download_file(object_name=filename, bucket_name=bucket_name)
 
 
 @cli.command()
@@ -123,12 +124,18 @@ def delete(filename):
 
 @cli.command()
 @click.option("-l", "--location", "location", required=False, default="here")
-def ls(location):
-    if location in ("local", "s3", "global"):
-        files = utils.get_files(location=location)
+@click.option("-b", "--bucket-name","bucket_name", required=False, default=None)
+def ls(location, bucket_name):
+    if bucket_name:
+        files = aws.get_bucket_object_keys(bucket_name=bucket_name)
     else:
-        p = Path(".")
-        files = os.listdir(p)
+        if location in ("local", "s3", "global"):
+            files = utils.get_files(location=location)
+        elif location=="here":
+            p = Path(".")
+            files = os.listdir(p)
+        else:
+            click.echo(f"invalid location input: {location}")
 
     for file in files:
         click.echo(file)
