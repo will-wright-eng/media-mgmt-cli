@@ -13,7 +13,7 @@ import media_mgmt_cli.utils as utils
 
 
 option_location = click.option("-l", "--location", "location", required=False, default="global")
-option_bucket = click.option("-b", "--bucket-name","bucket_name", required=False, default=None)
+option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 option_filename = click.option("-f", "--filename", "filename", required=True)
 
 
@@ -21,7 +21,6 @@ option_filename = click.option("-f", "--filename", "filename", required=True)
 @click.version_option()
 def cli():
     "A simple CLI to search and manage media assets in S3 and locally"
-
 
 
 @cli.command()
@@ -115,7 +114,7 @@ def ls(location, bucket_name):
     else:
         if location in ("local", "s3", "global"):
             files = utils.get_files(location=location)
-        elif location=="here":
+        elif location == "here":
             p = Path(".")
             files = os.listdir(p)
         else:
@@ -123,6 +122,3 @@ def ls(location, bucket_name):
 
     for file in files:
         click.echo(file)
-
-
-
