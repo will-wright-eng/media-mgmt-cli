@@ -55,7 +55,7 @@ class AwsStorageMgmt:
         echo("success? True\n")
         return True
 
-    def download_file(self, object_name: str):
+    def download_file(self, object_name: str, bucket_name: str = None):
         """Download file from S3 to local
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-example-download-file.html
 
@@ -64,10 +64,13 @@ class AwsStorageMgmt:
         :param object_name: S3 object name. If not specified then file_name is used
         :return: True if file was uploaded, else False
         """
+        if not bucket_name:
+            bucket_name = self.bucket
+
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
-                self.s3_client.download_fileobj(self.bucket, object_name, data)
+                self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
             echo("success? False")
             os.remove(file_name)
@@ -82,10 +85,11 @@ class AwsStorageMgmt:
         echo("success? True")
         return True
 
-    def get_bucket_object_keys(self):
-        echo("aws_media_bucket")
-        echo(self.configs.get("aws_media_bucket"))
-        my_bucket = self.s3_resour.Bucket(self.configs.get("aws_media_bucket"))
+    def get_bucket_object_keys(self, bucket_name=None):
+        if not bucket_name:
+            bucket_name = self.configs.get("aws_media_bucket")
+        echo(f"aws_media_bucket = {bucket_name}")
+        my_bucket = self.s3_resour.Bucket(bucket_name)
         return [obj.key for obj in my_bucket.objects.all()]
 
     def get_obj_head(self, object_name: str):

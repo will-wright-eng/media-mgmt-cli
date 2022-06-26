@@ -12,32 +12,19 @@ from .config import config_handler
 import media_mgmt_cli.utils as utils
 
 
+option_location = click.option("-l", "--location", "location", required=False, default="global")
+option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
+option_filename = click.option("-f", "--filename", "filename", required=True)
+
+
 @click.group()
 @click.version_option()
 def cli():
     "A simple CLI to search and manage media assets in S3 and locally"
 
 
-# @cli.command(name="command")
-# @click.argument(
-#     "example"
-# )
-# @click.option(
-#     "-o",
-#     "--option",
-#     help="An example option",
-# )
-# def first_command(example, option):
-#     "Command description goes here"
-#     click.echo("Here is some output")
-
-
-# TODO: add check to see if zip file exists <-- this one
-# or add flag that tells the control flow to skip the zip_process
-# add clean_string method to zip_process method
-# add filter to localfiles to exclude .DS_Store (all systems files)
 @cli.command()
-@click.option("-f", "--file-or-dir", "file_or_dir", required=False, default=None)
+@option_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(file_or_dir, compression):
     p = Path(".")
@@ -69,10 +56,7 @@ def upload(file_or_dir, compression):
 
 @cli.command()
 @click.option("-k", "--keyword", "keyword", required=True)
-@click.option("-l", "--location", "location", required=False, default="global")
-# @click.option("-l", "--location", "location", required=False, default="global")
-# add verbose flag that outputs details on size, location, and full_path
-# turn `matches` list into `output` list of dicts, appending info dict for each file
+@option_location
 def search(keyword, location):
     files = utils.get_files(location=location)
 
@@ -93,21 +77,22 @@ def search(keyword, location):
 
 
 @cli.command()
-@click.option("-f", "--filename", "filename", required=True)
-def download(filename):
+@option_filename
+@option_bucket
+def download(filename, bucket_name):
     click.echo(f"Downloading {filename} from S3...")
-    aws.download_file(object_name=filename)
+    aws.download_file(object_name=filename, bucket_name=bucket_name)
 
 
 @cli.command()
-@click.option("-f", "--filename", "filename", required=True)
+@option_filename
 def get_status(filename):
     aws.get_obj_head(object_name=filename)
     click.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
 
 
 @cli.command()
-@click.option("-f", "--filename", "filename", required=True)
+@option_filename
 @click.option(
     "--yes",
     is_flag=True,
@@ -116,66 +101,24 @@ def get_status(filename):
     prompt=f"Are you sure you want to delete?",
 )
 def delete(filename):
-    # use as test: media_uploads/Tron_Legacy_(2010)_BRRip_XvidHD_720p-NPW.zip
     click.echo(f"{filename} dropped from S3")
     click.echo("jk, command not yet complete")
 
 
 @cli.command()
-@click.option("-l", "--location", "location", required=False, default="here")
-def ls(location):
-    if location in ("local", "s3", "global"):
-        files = utils.get_files(location=location)
+@option_location
+@option_bucket
+def ls(location, bucket_name):
+    if bucket_name:
+        files = aws.get_bucket_object_keys(bucket_name=bucket_name)
     else:
-        p = Path(".")
-        files = os.listdir(p)
+        if location in ("local", "s3", "global"):
+            files = utils.get_files(location=location)
+        elif location == "here":
+            p = Path(".")
+            files = os.listdir(p)
+        else:
+            click.echo(f"invalid location input: {location}")
 
     for file in files:
         click.echo(file)
-
-
-@cli.command()
-@click.option("-l", "--location", "location", required=False)
-def configure(location):
-    if location == "local":
-        # grab values from ~/.config/media_mgmt_cli/config file
-        config = config_handler
-        config_dict = config.get_configs()
-        if config_dict is None:
-            current_values = [None] * int(len(config_list))
-        else:
-            current_values = [val for key, val in config_dict.items()]
-            config_list = [key.upper() for key, val in config_dict.items()]
-    elif location == "aws":
-        # grab values from projects/dev/media_mgmt_cli secrets string
-        pass
-    else:
-        config_list = [
-            "AWS_MEDIA_BUCKET",
-            "AWS_BUCKET_PATH",
-            "LOCAL_MEDIA_DIR",
-        ]
-        current_values = [None] * int(len(config_list))
-
-    res = {}
-    for config, current_value in zip(config_list, current_values):
-        value = click.prompt(f"{config} ", type=str, default=current_value)
-        res[config] = value
-
-    # value = click.prompt("kernal language? ", type=str, default='zsh')
-    # if value=='zsh':
-    #     subprocess.run(f'echo "" >> ~/.{value}rc')
-    #     subprocess.run(f'echo "source ~/.config/media_mgmt_cli/export.sh" >> ~/.{value}rc')
-    value = click.prompt("export to AWS Secrets Manager? [Y/n]", type=str)
-    if value.lower() == "y":
-        # export to AWS
-        pass
-
-
-# mmgmt.add_command(upload)
-# mmgmt.add_command(download)
-# mmgmt.add_command(delete)
-# mmgmt.add_command(search)
-# mmgmt.add_command(ls)
-# mmgmt.add_command(get_status)
-# mmgmt.add_command(configure)
