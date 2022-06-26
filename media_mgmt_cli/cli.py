@@ -23,10 +23,7 @@ def cli():
     "A simple CLI to search and manage media assets in S3 and locally"
 
 
-# TODO: add check to see if zip file exists <-- this one
-# or add flag that tells the control flow to skip the zip_process
-# add clean_string method to zip_process method
-# add filter to localfiles to exclude .DS_Store (all systems files)
+
 @cli.command()
 @option_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
@@ -61,8 +58,6 @@ def upload(file_or_dir, compression):
 @cli.command()
 @click.option("-k", "--keyword", "keyword", required=True)
 @option_location
-# add verbose flag that outputs details on size, location, and full_path
-# turn `matches` list into `output` list of dicts, appending info dict for each file
 def search(keyword, location):
     files = utils.get_files(location=location)
 
@@ -107,7 +102,6 @@ def get_status(filename):
     prompt=f"Are you sure you want to delete?",
 )
 def delete(filename):
-    # use as test: media_uploads/Tron_Legacy_(2010)_BRRip_XvidHD_720p-NPW.zip
     click.echo(f"{filename} dropped from S3")
     click.echo("jk, command not yet complete")
 
@@ -131,38 +125,4 @@ def ls(location, bucket_name):
         click.echo(file)
 
 
-# @cli.command()
-# def configure():
-#     if location == "local":
-#         # grab values from ~/.config/media_mgmt_cli/config file
-#         config = config_handler
-#         config_dict = config.get_configs()
-#         if config_dict is None:
-#             current_values = [None] * int(len(config_list))
-#         else:
-#             current_values = [val for key, val in config_dict.items()]
-#             config_list = [key.upper() for key, val in config_dict.items()]
-#     elif location == "aws":
-#         # grab values from projects/dev/media_mgmt_cli secrets string
-#         pass
-#     else:
-#         config_list = [
-#             "AWS_MEDIA_BUCKET",
-#             "AWS_BUCKET_PATH",
-#             "LOCAL_MEDIA_DIR",
-#         ]
-#         current_values = [None] * int(len(config_list))
 
-#     res = {}
-#     for config, current_value in zip(config_list, current_values):
-#         value = click.prompt(f"{config} ", type=str, default=current_value)
-#         res[config] = value
-
-#     # value = click.prompt("kernal language? ", type=str, default='zsh')
-#     # if value=='zsh':
-#     #     subprocess.run(f'echo "" >> ~/.{value}rc')
-#     #     subprocess.run(f'echo "source ~/.config/media_mgmt_cli/export.sh" >> ~/.{value}rc')
-#     value = click.prompt("export to AWS Secrets Manager? [Y/n]", type=str)
-#     if value.lower() == "y":
-#         # export to AWS
-#         pass
