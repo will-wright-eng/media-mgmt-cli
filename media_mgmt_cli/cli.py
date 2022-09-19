@@ -8,7 +8,7 @@ import click
 import boto3
 
 from .aws import aws
-from .config import config_handler
+# from .config import config_handler
 import media_mgmt_cli.utils as utils
 
 
