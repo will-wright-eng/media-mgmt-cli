@@ -20,7 +20,7 @@ pip install media-mgmt-cli
 ## Usage
 For help, run:
 ```bash
-media-mgmt-cli --help
+mmgmt --help
 ```
 You can also use:
 ```bash
