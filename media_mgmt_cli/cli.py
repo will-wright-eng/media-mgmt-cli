@@ -26,7 +26,11 @@ def cli():
 @cli.command()
 @option_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
-def upload(file_or_dir, compression):
+def upload(filename, compression):
+    """
+    standard usage: mmgmt upload -f all -c gzip
+    """
+    file_or_dir = filename
     p = Path(".")
     localfiles = os.listdir(p)
     files_created = []
