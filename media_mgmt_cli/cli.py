@@ -8,6 +8,7 @@ import click
 import boto3
 
 from .aws import aws
+
 # from .config import config_handler
 import media_mgmt_cli.utils as utils
 
@@ -15,6 +16,7 @@ import media_mgmt_cli.utils as utils
 option_location = click.option("-l", "--location", "location", required=False, default="global")
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 option_filename = click.option("-f", "--filename", "filename", required=True)
+# filename_arg = click.argument("filename", required=True)
 
 
 @click.group()
@@ -62,6 +64,9 @@ def upload(filename, compression):
 @click.option("-k", "--keyword", "keyword", required=True)
 @option_location
 def search(keyword, location):
+    """
+    search files in local directory and cloud storage
+    """
     files = utils.get_files(location=location)
 
     click.echo(f"Searching {location} for {keyword}...")
@@ -84,6 +89,9 @@ def search(keyword, location):
 @option_filename
 @option_bucket
 def download(filename, bucket_name):
+    """
+    search files in local directory and cloud storage
+    """
     click.echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
 
@@ -91,6 +99,9 @@ def download(filename, bucket_name):
 @cli.command()
 @option_filename
 def get_status(filename):
+    """
+    search files in local directory and cloud storage
+    """
     aws.get_obj_head(object_name=filename)
     click.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
 
@@ -105,6 +116,9 @@ def get_status(filename):
     prompt=f"Are you sure you want to delete?",
 )
 def delete(filename):
+    """
+    delete file from cloud storage
+    """
     click.echo(f"{filename} dropped from S3")
     click.echo("jk, command not yet complete")
 
@@ -113,6 +127,9 @@ def delete(filename):
 @option_location
 @option_bucket
 def ls(location, bucket_name):
+    """
+    list files in location (local, s3, or global; defaults to global)
+    """
     if bucket_name:
         files = aws.get_bucket_object_keys(bucket_name=bucket_name)
     else:
