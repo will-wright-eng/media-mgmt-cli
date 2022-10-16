@@ -1,6 +1,6 @@
+import configparser
 import os
 import pathlib
-import configparser
 
 
 class ConfigHandler:
