@@ -2,16 +2,16 @@
 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
 """
 
-import os
-import json
 import base64
-import pathlib
 import configparser
+import json
+import os
+import pathlib
 from time import sleep
 
 import boto3
-from click import echo
 from botocore.exceptions import ClientError
+from click import echo
 
 from .config import ConfigHandler
 
@@ -154,7 +154,9 @@ class AwsStorageMgmt:
             elif tier == "GLACIER":
                 restore_tier = "Expedited"
         except KeyError as e:
-            echo(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
+            echo(
+                f"KeyError: {str(e)}, object not in glacier storage -- check control flow"
+            )
             return
 
         echo(f"restoring object from {tier}: {object_name}")

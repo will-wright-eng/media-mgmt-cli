@@ -6,10 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-      - name: Codeball
-        uses: sturdy-dev/codeball-action@v2
-        with:
-          approvePullRequests: "false"
-          labelPullRequestsWhenApproved: "true"
-          labelPullRequestsWhenReviewNeeded: "true"
-          failJobsWhenReviewNeeded: "false"
+    - name: Codeball
+      uses: sturdy-dev/codeball-action@v2
+      with:
+        approvePullRequests: "false"
+        labelPullRequestsWhenApproved: "true"
+        labelPullRequestsWhenReviewNeeded: "true"
+        failJobsWhenReviewNeeded: "false"

@@ -1,4 +1,5 @@
 from click.testing import CliRunner
+
 from media_mgmt_cli.cli import cli
 
 

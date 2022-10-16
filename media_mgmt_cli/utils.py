@@ -1,11 +1,11 @@
-import os
 import gzip
+import os
+import pathlib
 import shutil
 import tarfile
-import pathlib
 from pathlib import Path
-from zipfile import ZipFile
 from typing import List
+from zipfile import ZipFile
 
 from click import echo
 
@@ -82,7 +82,9 @@ def files_in_media_dir() -> List[str]:
     media_dir = media_dir.resolve()
     tmp = os.listdir(media_dir)
     tmp = [
-        os.listdir(os.path.join(media_dir, folder)) if os.path.isdir(os.path.join(media_dir, folder)) else [folder]
+        os.listdir(os.path.join(media_dir, folder))
+        if os.path.isdir(os.path.join(media_dir, folder))
+        else [folder]
         for folder in tmp
     ]
     return [item for sublist in tmp for item in sublist]
