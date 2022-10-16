@@ -1,20 +1,24 @@
 """mmgmt cli docstring"""
-import os
 import json
+import os
 from pathlib import Path
 from typing import List
 
-import click
 import boto3
-
-from .aws import aws
+import click
+from click import echo
 
 # from .config import config_handler
 import media_mgmt_cli.utils as utils
 
+from .aws import aws
 
-option_location = click.option("-l", "--location", "location", required=False, default="global")
-option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
+option_location = click.option(
+    "-l", "--location", "location", required=False, default="global"
+)
+option_bucket = click.option(
+    "-b", "--bucket-name", "bucket_name", required=False, default=None
+)
 option_filename = click.option("-f", "--filename", "filename", required=True)
 # filename_arg = click.argument("filename", required=True)
 
@@ -39,20 +43,22 @@ def upload(filename, compression):
     try:
         if file_or_dir:
             if file_or_dir == "all":
-                click.echo(f"uploading all media objects to S3")
+                echo(f"uploading all media objects to S3")
                 for _file_or_dir in localfiles:
-                    click.echo(f"{_file_or_dir}, compressing...")
-                    files_created.append(utils.upload_file_or_dir(_file_or_dir, compression))
+                    echo(f"{_file_or_dir}, compressing...")
+                    files_created.append(
+                        aws.upload_file_or_dir(_file_or_dir, compression)
+                    )
             elif file_or_dir in localfiles:
-                click.echo("file found, compressing...")
-                files_created.append(utils.upload_file_or_dir(file_or_dir, compression))
+                echo("file found, compressing...")
+                files_created.append(aws.upload_file_or_dir(file_or_dir, compression))
             else:
-                click.echo(f"invalid file or directory")
+                echo(f"invalid file or directory")
                 return False
         else:
-            click.echo("invalid file_or_dir command")
+            echo("invalid file_or_dir command")
     except Exception as e:
-        click.echo(e)
+        echo(e)
     finally:
         # remove all created files from dir
         if files_created:
@@ -67,21 +73,21 @@ def search(keyword, location):
     """
     search files in local directory and cloud storage
     """
-    files = utils.get_files(location=location)
+    files = aws.get_files(location=location)
 
-    click.echo(f"Searching {location} for {keyword}...")
+    echo(f"Searching {location} for {keyword}...")
     matches = []
     for file in files:
         if utils.keyword_in_string(keyword, file):
             matches.append(file)
 
     if len(matches) >= 1:
-        click.echo("at least one match found\n")
-        click.echo("\n".join(matches))
-        utils.get_storage_tier(matches)
+        echo("at least one match found\n")
+        echo("\n".join(matches))
+        aws.get_storage_tier(matches)
         return True
     else:
-        click.echo("no matches found\n")
+        echo("no matches found\n")
         return False
 
 
@@ -92,7 +98,7 @@ def download(filename, bucket_name):
     """
     search files in local directory and cloud storage
     """
-    click.echo(f"Downloading {filename} from S3...")
+    echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
 
 
@@ -103,7 +109,7 @@ def get_status(filename):
     search files in local directory and cloud storage
     """
     aws.get_obj_head(object_name=filename)
-    click.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
 
 
 @cli.command()
@@ -119,8 +125,8 @@ def delete(filename):
     """
     delete file from cloud storage
     """
-    click.echo(f"{filename} dropped from S3")
-    click.echo("jk, command not yet complete")
+    echo(f"{filename} dropped from S3")
+    echo("jk, command not yet complete")
 
 
 @cli.command()
@@ -134,12 +140,12 @@ def ls(location, bucket_name):
         files = aws.get_bucket_object_keys(bucket_name=bucket_name)
     else:
         if location in ("local", "s3", "global"):
-            files = utils.get_files(location=location)
+            files = aws.get_files(location=location)
         elif location == "here":
             p = Path(".")
             files = os.listdir(p)
         else:
-            click.echo(f"invalid location input: {location}")
+            echo(f"invalid location input: {location}")
 
     for file in files:
-        click.echo(file)
+        echo(file)
