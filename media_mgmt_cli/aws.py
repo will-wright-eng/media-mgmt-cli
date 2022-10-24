@@ -14,14 +14,18 @@ import boto3
 from botocore.exceptions import ClientError
 from click import echo
 
-from .config import ConfigHandler
-from .utils import files_in_media_dir, gzip_process, zip_process
+# from media_mgmt_cli import PROJECT_NAME
+from media_mgmt_cli.config import ConfigHandler
+from media_mgmt_cli.utils import files_in_media_dir, gzip_process, zip_process
+
+PROJECT_NAME = "media_mgmt_cli"
 
 
 class AwsStorageMgmt:
-    def __init__(self, project_name: str = "media_mgmt_cli"):
+    def __init__(self, project_name: str = PROJECT_NAME):
         self.s3_resour = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
+
         self.config = ConfigHandler(project_name)
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
@@ -42,6 +46,8 @@ class AwsStorageMgmt:
         """
         if additional_prefix:
             object_name = os.path.join(self.object_prefix, additional_prefix, file_name)
+        else:
+            object_name = os.path.join(self.object_prefix, file_name)
 
         echo(
             f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{object_name}"
@@ -61,20 +67,20 @@ class AwsStorageMgmt:
         """Download file from S3 to local
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-example-download-file.html
 
-        :param file_name: download to this file name
         :param bucket: Bucket to download from
-        :param object_name: S3 object name. If not specified then file_name is used
+        :param object_name:
         :return: True if file was uploaded, else False
         """
         if not bucket_name:
             bucket_name = self.bucket
 
+        echo(f"download {object_name}\n from {bucket_name}")
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
-            echo("success? False")
+            echo("success? False --> ClietError")
             os.remove(file_name)
             status = self.get_obj_restore_status(object_name)
             if status == "incomplete":
@@ -89,8 +95,8 @@ class AwsStorageMgmt:
 
     def get_bucket_object_keys(self, bucket_name=None):
         if not bucket_name:
-            bucket_name = self.configs.get("aws_media_bucket")
-        echo(f"aws_media_bucket = {bucket_name}")
+            bucket_name = self.configs.get("aws_bucket")
+        echo(f"aws_bucket = {bucket_name}")
         my_bucket = self.s3_resour.Bucket(bucket_name)
         return [obj.key for obj in my_bucket.objects.all()]
 
