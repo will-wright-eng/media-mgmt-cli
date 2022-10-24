@@ -8,10 +8,8 @@ import boto3
 import click
 from click import echo
 
-# from .config import config_handler
 import media_mgmt_cli.utils as utils
-
-from .aws import aws
+from media_mgmt_cli.aws import aws
 
 option_location = click.option(
     "-l", "--location", "location", required=False, default="global"
@@ -21,6 +19,11 @@ option_bucket = click.option(
 )
 option_filename = click.option("-f", "--filename", "filename", required=True)
 # filename_arg = click.argument("filename", required=True)
+
+
+def echo_dict(input_dict: dict):
+    for key, val in input_dict.items():
+        echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
 @click.group()
@@ -149,3 +152,11 @@ def ls(location, bucket_name):
 
     for file in files:
         echo(file)
+
+
+@cli.command()
+def config():
+    """
+    print project configs
+    """
+    echo_dict(aws.configs)
