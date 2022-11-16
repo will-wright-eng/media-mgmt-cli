@@ -199,6 +199,10 @@ class AwsStorageMgmt:
         return file_created
 
     def get_files(self, location: str):
+        """
+        location: local, s3, global
+        [global] returns a combined list of files in local media dir and S3 media bucket
+        """
         if location == "local":
             files = files_in_media_dir(local_path=self.local_media_dir)
         elif location == "s3":
