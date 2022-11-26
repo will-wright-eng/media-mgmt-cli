@@ -2,21 +2,22 @@
 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
 """
 
-import base64
-import configparser
-import json
 import os
+import json
+import base64
 import pathlib
+import configparser
 from time import sleep
 from typing import List
 
 import boto3
-from botocore.exceptions import ClientError
 from click import echo
+from botocore.exceptions import ClientError
+
+from media_mgmt_cli.utils import zip_process, gzip_process, files_in_media_dir
 
 # from media_mgmt_cli import PROJECT_NAME
 from media_mgmt_cli.config import ConfigHandler
-from media_mgmt_cli.utils import files_in_media_dir, gzip_process, zip_process
 
 PROJECT_NAME = "media_mgmt_cli"
 
@@ -49,9 +50,7 @@ class AwsStorageMgmt:
         else:
             object_name = os.path.join(self.object_prefix, file_name)
 
-        echo(
-            f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{object_name}"
-        )
+        echo(f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{object_name}")
 
         try:
             with open(file_name, "rb") as data:
@@ -162,9 +161,7 @@ class AwsStorageMgmt:
             elif tier == "GLACIER":
                 restore_tier = "Expedited"
         except KeyError as e:
-            echo(
-                f"KeyError: {str(e)}, object not in glacier storage -- check control flow"
-            )
+            echo(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
             return
 
         echo(f"restoring object from {tier}: {object_name}")
@@ -208,10 +205,7 @@ class AwsStorageMgmt:
         elif location == "s3":
             files = self.get_bucket_object_keys()
         elif location == "global":
-            files = (
-                files_in_media_dir(local_path=self.local_media_dir)
-                + self.get_bucket_object_keys()
-            )
+            files = files_in_media_dir(local_path=self.local_media_dir) + self.get_bucket_object_keys()
         else:
             echo("invalid location")
             return False

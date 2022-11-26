@@ -1,8 +1,8 @@
 """mmgmt cli docstring"""
-import json
 import os
-from pathlib import Path
+import json
 from typing import List
+from pathlib import Path
 
 import boto3
 import click
@@ -11,12 +11,8 @@ from click import echo
 import media_mgmt_cli.utils as utils
 from media_mgmt_cli.aws import aws
 
-option_location = click.option(
-    "-l", "--location", "location", required=False, default="global"
-)
-option_bucket = click.option(
-    "-b", "--bucket-name", "bucket_name", required=False, default=None
-)
+option_location = click.option("-l", "--location", "location", required=False, default="global")
+option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 option_filename = click.option("-f", "--filename", "filename", required=True)
 # filename_arg = click.argument("filename", required=True)
 
@@ -49,9 +45,7 @@ def upload(filename, compression):
                 echo(f"uploading all media objects to S3")
                 for _file_or_dir in localfiles:
                     echo(f"{_file_or_dir}, compressing...")
-                    files_created.append(
-                        aws.upload_file_or_dir(_file_or_dir, compression)
-                    )
+                    files_created.append(aws.upload_file_or_dir(_file_or_dir, compression))
             elif file_or_dir in localfiles:
                 echo("file found, compressing...")
                 files_created.append(aws.upload_file_or_dir(file_or_dir, compression))

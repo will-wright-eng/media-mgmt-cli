@@ -1,10 +1,10 @@
-import gzip
 import os
-import pathlib
+import gzip
 import shutil
+import pathlib
 import tarfile
-from pathlib import Path
 from typing import List
+from pathlib import Path
 from zipfile import ZipFile
 
 
@@ -77,9 +77,7 @@ def files_in_media_dir(local_path=None) -> List[str]:
         media_dir = media_dir.resolve()
     tmp = os.listdir(media_dir)
     tmp = [
-        os.listdir(os.path.join(media_dir, folder))
-        if os.path.isdir(os.path.join(media_dir, folder))
-        else [folder]
+        os.listdir(os.path.join(media_dir, folder)) if os.path.isdir(os.path.join(media_dir, folder)) else [folder]
         for folder in tmp
     ]
     return [item for sublist in tmp for item in sublist]
