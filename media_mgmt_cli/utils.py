@@ -62,10 +62,7 @@ def abort_if_false(ctx, param, value):
 
 
 def keyword_in_string(keyword, file):
-    if file.lower().find(keyword.lower()) != -1:
-        return True
-    else:
-        return False
+    return file.lower().find(keyword.lower()) != -1
 
 
 def files_in_media_dir(local_path=None) -> List[str]:
