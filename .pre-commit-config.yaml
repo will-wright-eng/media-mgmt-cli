@@ -34,11 +34,12 @@ repos:
   rev: 22.3.0
   hooks:
   - id: black
-  # args: ["-l 120"]
+    entry: bash -c 'black "$@" -l 120'
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:
   - id: isort
+    args: ['--order-by-type', '--length-sort', "--profile", "black", "--filter-files"]
     name: isort (python)
   - id: isort
     name: isort (cython)
@@ -50,6 +51,7 @@ repos:
   rev: 4.0.1
   hooks:
   - id: flake8
+    args: ['--ignore=E999,W504,W503']
     additional_dependencies:
     - flake8-bugbear
     - flake8-comprehensions
