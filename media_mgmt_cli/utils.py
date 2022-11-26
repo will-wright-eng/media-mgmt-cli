@@ -19,9 +19,10 @@ def zip_single_file(filename: str) -> str:
 def gzip_single_file(filename: str) -> str:
     pathname = str(Path.cwd())
     gzip_file = f"{filename}.gz"
-    with open(os.path.join(pathname, filename), "rb") as f_in:
-        with gzip.open(os.path.join(pathname, gzip_file), "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
+    with open(os.path.join(pathname, filename), "rb") as f_in, gzip.open(
+        os.path.join(pathname, gzip_file), "wb"
+    ) as f_out:
+        shutil.copyfileobj(f_in, f_out)
     return gzip_file
 
 
