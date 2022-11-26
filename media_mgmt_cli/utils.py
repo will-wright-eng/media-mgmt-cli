@@ -33,6 +33,7 @@ def zip_process(file_or_dir: str) -> str:
         zip_path = shutil.make_archive(dir_name, "zip", dir_name)
         return zip_path.split("/")[-1]
     except NotADirectoryError as e:
+        print(e)
         # if file
         return zip_single_file(file_or_dir)
 
@@ -47,6 +48,7 @@ def gzip_process(file_or_dir: str) -> str:
         tar.close()
         return gzip_file
     except NotADirectoryError as e:
+        print(e)
         return gzip_single_file(file_or_dir)
 
 
