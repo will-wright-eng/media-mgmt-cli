@@ -30,11 +30,14 @@ repos:
     - --fix
     verbose: true
     entry: bash -c 'markdownlint "$@" || true' --
+
+# python specific hooks
 - repo: https://github.com/psf/black
   rev: 22.3.0
   hooks:
   - id: black
-    entry: bash -c 'black media_mgmt_cli -l 120'
+    args:
+    - "-l 120"
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:
