@@ -13,8 +13,9 @@ from media_mgmt_cli.aws import aws
 
 option_location = click.option("-l", "--location", "location", required=False, default="global")
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
-option_filename = click.option("-f", "--filename", "filename", required=True)
-# filename_arg = click.argument("filename", required=True)
+arg_filename = click.argument("filename", required=True)
+
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 def echo_dict(input_dict: dict):
@@ -22,7 +23,7 @@ def echo_dict(input_dict: dict):
         echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
-@click.group()
+@click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
 def cli():
     "A simple CLI to search and manage media assets in S3 and locally"
