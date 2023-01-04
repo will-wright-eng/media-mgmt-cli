@@ -29,7 +29,10 @@ def echo_dict(input_dict: dict) -> None:
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
 def cli():
-    "A simple CLI to search and manage media assets in S3 and locally"
+    """
+    A simple CLI to search and manage media assets in S3 and locally.
+    Setup with `mmgmt configure`
+    """
 
 
 @cli.command()
@@ -45,9 +48,11 @@ def hello(arg, opt):
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(filename, compression):
     """
+    \b
     upload file to cloud storage
 
     `mmgmt upload "<file name in working directory>"`
+
     standard usage: `mmgmt upload all -c gzip`
 
     :argument filename:
@@ -86,11 +91,11 @@ def upload(filename, compression):
 @option_location
 def search(keyword, location):
     """
+    \b
     search files in local directory and cloud storage
 
     `mmgmt search "<search keyword(s)>"`
 
-    \b
     :argument keyword:
     :option location: (local, s3, global), defaults to global
         global: returns a combined list of files in local
@@ -119,6 +124,7 @@ def search(keyword, location):
 @option_bucket
 def download(filename, bucket_name):
     """
+    \b
     download object from cloud storage
 
     `mmgmt download "<s3 url>"`
@@ -134,6 +140,7 @@ def download(filename, bucket_name):
 @arg_filename
 def get_status(filename):
     """
+    \b
     get object head from cloud storage
 
     `mmgmt get-status "<s3 url>"`
@@ -166,11 +173,11 @@ def delete(filename):
 @option_bucket
 def ls(location, bucket_name):
     """
-    list files in location (local, s3, or global; defaults to global)
+    \b
+    list files in location (local, s3, or global)
 
     `mmgmt ls`
 
-    \b
     :option bucket_name:
     :option location: (local, s3, global), defaults to global
         global: returns a combined list of files in local

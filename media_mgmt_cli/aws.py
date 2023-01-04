@@ -250,7 +250,7 @@ class AwsStorageMgmt:
 
     def get_storage_tier(self, file_list: List[str]):
         if click.confirm("\nDisplay storage tier?"):
-            echo("")
+            echo("\nStorage Tier | Last Modfied | Object Key\n")
             for file_name in file_list:
                 try:
                     resp = self.get_obj_head(file_name)
@@ -261,9 +261,9 @@ class AwsStorageMgmt:
                     except KeyError:
                         restored = False
                     try:
-                        echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
+                        echo(f"{resp['StorageClass']} \t| {resp['LastModified']} \t| {file_name}")
                     except KeyError:
-                        echo(f"STANDARD \t {restored} \t {file_name}")
+                        echo(f"STANDARD \t| {resp['LastModified']} \t| {file_name}")
                 except Exception:
                     echo(f"Exception getting object head for '{file_name}'; skipping")
 
