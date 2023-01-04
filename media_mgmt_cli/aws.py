@@ -38,9 +38,9 @@ class AwsStorageMgmt:
 
         self.atts_list = ["bucket", "object_prefix", "local_dir"]
         self.settings_list = ["bucket", "object_prefix", "local_dir"]
-        self.load_configs()
+        self.load_config_file()
 
-    def load_configs(self):
+    def load_config_file(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
             atts_dict = {
@@ -54,15 +54,19 @@ class AwsStorageMgmt:
             if click.confirm("run manual config? [True/False]", abort=True):
                 self.set_config_manually()
 
-    def set_config_manually(self):
-        atts_dict = {}
-        for att in self.atts_list:
-            val = click.prompt(f"set {att}", type=str, default=self.__dict__.get(att))
-            val = None if val == "None" else val
-            atts_dict.update({att: val})
+    def set_config_manually(self, atts_dict: dict = None) -> None:
+        if not atts_dict:
+            atts_dict = {}
+            for att in self.atts_list:
+                val = click.prompt(f"set {att}", type=str, default=self.__dict__.get(att))
+                val = None if val == "None" else val
+                atts_dict.update({att: val})
 
         self.__dict__.update(atts_dict)
         self.configs.update(atts_dict)
+
+    def get_configs(self):
+        return self.configs
 
     def upload_file(self, file_name, additional_prefix=None):
         """Upload a file to an S3 bucket

@@ -1,15 +1,12 @@
 name: Test
 
-on:
-  pull_request:
-    types: [labeled]
+on: [push, pull_request]
 
 permissions:
   contents: read
 
 jobs:
   label-test:
-    if: ${{ github.event.label.name == 'test' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

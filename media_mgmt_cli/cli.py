@@ -28,6 +28,14 @@ def cli():
 
 
 @cli.command()
+@click.option("--opt")
+@click.argument("arg")
+def hello(arg, opt):
+    """A Simple program"""
+    click.echo("Opt: {}  Arg: {}".format(opt, arg))
+
+
+@cli.command()
 @arg_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(filename, compression):
