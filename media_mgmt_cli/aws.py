@@ -249,8 +249,8 @@ class AwsStorageMgmt:
         return files
 
     def get_storage_tier(self, file_list: List[str]):
-        check_status = str(input("display storage tier? [Y/n] "))
-        if check_status in ("Y", "n") and check_status == "Y":
+        if click.confirm("\nDisplay storage tier?"):
+            echo("")
             for file_name in file_list:
                 try:
                     resp = self.get_obj_head(file_name)
@@ -258,17 +258,14 @@ class AwsStorageMgmt:
                         restored = resp["Restore"]
                         if restored:
                             restored = True
-                    except KeyError as e:
-                        echo(e)
+                    except KeyError:
                         restored = False
                     try:
                         echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
-                    except KeyError as e:
-                        echo(e)
+                    except KeyError:
                         echo(f"STANDARD \t {restored} \t {file_name}")
                 except Exception as e:
-                    echo(e)
-                    echo(f"skipping: {file_name},\t {str(e)}")
+                    echo(f"Exception getting object head for '{file_name}'; skipping")
 
 
 aws = AwsStorageMgmt()
