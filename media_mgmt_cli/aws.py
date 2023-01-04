@@ -264,7 +264,7 @@ class AwsStorageMgmt:
                         echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
                     except KeyError:
                         echo(f"STANDARD \t {restored} \t {file_name}")
-                except Exception as e:
+                except Exception:
                     echo(f"Exception getting object head for '{file_name}'; skipping")
 
 
