@@ -4,19 +4,15 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.ht
 
 import os
 import json
-import base64
-import pathlib
-import configparser
 from time import sleep
 from typing import List
 
 import boto3
+import click
 from click import echo
 from botocore.exceptions import ClientError
 
 from media_mgmt_cli.utils import zip_process, gzip_process, files_in_media_dir
-
-# from media_mgmt_cli import PROJECT_NAME
 from media_mgmt_cli.config import ConfigHandler
 
 PROJECT_NAME = "media_mgmt_cli"
@@ -53,7 +49,7 @@ class AwsStorageMgmt:
 
     def set_config_manually(self):
         atts_dict = {}
-        for att in atts_list:
+        for att in self.atts_list:
             val = click.prompt(f"set {att} [{self.att}]", type=str, default=self.att)
             atts_dict.update({att: val})
 
@@ -102,6 +98,7 @@ class AwsStorageMgmt:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
+            echo(e)
             echo("success? False --> ClietError")
             os.remove(file_name)
             status = self.get_obj_restore_status(object_name)
@@ -191,7 +188,7 @@ class AwsStorageMgmt:
         self.restore_from_glacier(object_name=object_name, restore_tier=restore_tier)
         if tier == "GLACIER":
             restored = False
-            while restored == False:
+            while restored is False:
                 sleep(30)
                 echo("checking...")
                 status = self.get_obj_restore_status(object_name)
@@ -236,24 +233,25 @@ class AwsStorageMgmt:
 
     def get_storage_tier(self, file_list: List[str]):
         check_status = str(input("display storage tier? [Y/n] "))
-        if check_status in ("Y", "n"):
-            if check_status == "Y":
-                echo()
-                for file_name in file_list:
+        if check_status in ("Y", "n") and check_status == "Y":
+            for file_name in file_list:
+                try:
+                    resp = self.get_obj_head(file_name)
                     try:
-                        resp = self.get_obj_head(file_name)
-                        try:
-                            restored = resp["Restore"]
-                            if restored:
-                                restored = True
-                        except KeyError as e:
-                            restored = False
-                        try:
-                            echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
-                        except KeyError as e:
-                            echo(f"STANDARD \t {restored} \t {file_name}")
-                    except Exception as e:
-                        echo(f"skipping: {file_name},\t {str(e)}")
+                        restored = resp["Restore"]
+                        if restored:
+                            restored = True
+                    except KeyError as e:
+                        echo(e)
+                        restored = False
+                    try:
+                        echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
+                    except KeyError as e:
+                        echo(e)
+                        echo(f"STANDARD \t {restored} \t {file_name}")
+                except Exception as e:
+                    echo(e)
+                    echo(f"skipping: {file_name},\t {str(e)}")
 
 
 aws = AwsStorageMgmt()
