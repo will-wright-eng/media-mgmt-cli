@@ -1,10 +1,8 @@
 """mmgmt cli docstring"""
 import os
 import json
-from typing import List
 from pathlib import Path
 
-import boto3
 import click
 from click import echo
 
@@ -15,10 +13,10 @@ option_location = click.option("-l", "--location", "location", required=False, d
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 arg_filename = click.argument("filename", required=True)
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
-def echo_dict(input_dict: dict):
+def echo_dict(input_dict: dict) -> None:
     for key, val in input_dict.items():
         echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
@@ -30,7 +28,15 @@ def cli():
 
 
 @cli.command()
-@option_filename
+@click.option("--opt")
+@click.argument("arg")
+def hello(arg, opt):
+    """A Simple program"""
+    click.echo("Opt: {}  Arg: {}".format(opt, arg))
+
+
+@cli.command()
+@arg_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(filename, compression):
     """
@@ -43,7 +49,7 @@ def upload(filename, compression):
     try:
         if file_or_dir:
             if file_or_dir == "all":
-                echo(f"uploading all media objects to S3")
+                echo("uploading all media objects to S3")
                 for _file_or_dir in localfiles:
                     echo(f"{_file_or_dir}, compressing...")
                     files_created.append(aws.upload_file_or_dir(_file_or_dir, compression))
@@ -51,7 +57,7 @@ def upload(filename, compression):
                 echo("file found, compressing...")
                 files_created.append(aws.upload_file_or_dir(file_or_dir, compression))
             else:
-                echo(f"invalid file or directory")
+                echo("invalid file or directory")
                 return False
         else:
             echo("invalid file_or_dir command")
@@ -90,7 +96,7 @@ def search(keyword, location):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 @option_bucket
 def download(filename, bucket_name):
     """
@@ -101,7 +107,7 @@ def download(filename, bucket_name):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 def get_status(filename):
     """
     search files in local directory and cloud storage
@@ -111,13 +117,13 @@ def get_status(filename):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 @click.option(
     "--yes",
     is_flag=True,
     callback=utils.abort_if_false,
     expose_value=False,
-    prompt=f"Are you sure you want to delete?",
+    prompt="Are you sure you want to delete?",
 )
 def delete(filename):
     """
@@ -135,7 +141,7 @@ def ls(location, bucket_name):
     list files in location (local, s3, or global; defaults to global)
     """
     if bucket_name:
-        files = aws.get_bucket_object_keys(bucket_name=bucket_name)
+        files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
     else:
         if location in ("local", "s3", "global"):
             files = aws.get_files(location=location)
@@ -155,3 +161,4 @@ def config():
     print project configs
     """
     echo_dict(aws.configs)
+    aws.set_config_manually()

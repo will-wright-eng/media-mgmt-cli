@@ -1,22 +1,25 @@
 """
+boto3 wrapper around AWS S3
+
+- boto3.resource("s3")
+- boto3.client("s3")
+
 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
+
+TODO: split out base class and add GCP functionality
 """
 
 import os
 import json
-import base64
-import pathlib
-import configparser
 from time import sleep
 from typing import List
 
 import boto3
+import click
 from click import echo
 from botocore.exceptions import ClientError
 
 from media_mgmt_cli.utils import zip_process, gzip_process, files_in_media_dir
-
-# from media_mgmt_cli import PROJECT_NAME
 from media_mgmt_cli.config import ConfigHandler
 
 PROJECT_NAME = "media_mgmt_cli"
@@ -28,13 +31,43 @@ class AwsStorageMgmt:
         self.s3_client = boto3.client("s3")
 
         self.config = ConfigHandler(project_name)
+        self.configs = None
+        self.bucket = None
+        self.object_prefix = None
+        self.local_dir = None
+
+        self.atts_list = ["bucket", "object_prefix", "local_dir"]
+        self.settings_list = ["bucket", "object_prefix", "local_dir"]
+        self.load_config_file()
+
+    def load_config_file(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
-            self.bucket = self.configs.get("aws_bucket", None)
-            self.object_prefix = self.configs.get("object_prefix", None)
-            self.local_media_dir = self.configs.get("local_media_dir", None)
+            atts_dict = {
+                att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)
+            }
+            self.__dict__.update(atts_dict)
+            if self.bucket is None or self.object_prefix is None or self.local_dir is None:
+                echo("at least one config not found, use self.set_config_manually()")
         else:
-            echo("config file does not exist, run `mmgmt configure`")
+            echo("config file not found, run `mmgmt config` to set class attributes manually")
+
+    def set_config_manually(self, atts_dict: dict = None) -> None:
+        if not atts_dict:
+            atts_dict = {}
+            for att in self.atts_list:
+                val = click.prompt(f"set {att}", type=str, default=self.__dict__.get(att))
+                val = None if val == "None" else val
+                atts_dict.update({att: val})
+
+        self.__dict__.update(atts_dict)
+        if self.configs:
+            self.configs.update(atts_dict)
+        else:
+            self.configs = atts_dict
+
+    def get_configs(self):
+        return self.configs
 
     def upload_file(self, file_name, additional_prefix=None):
         """Upload a file to an S3 bucket
@@ -45,12 +78,14 @@ class AwsStorageMgmt:
         :param additional_prefix: additional prefix on top of config prefix
         :return: True if file was uploaded, else False
         """
-        if additional_prefix:
+        if additional_prefix and self.object_prefix:
             object_name = os.path.join(self.object_prefix, additional_prefix, file_name)
-        else:
+        elif self.object_prefix:
             object_name = os.path.join(self.object_prefix, file_name)
+        else:
+            object_name = file_name
 
-        echo(f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{object_name}")
+        echo(f"uploading: {file_name} \nto S3 bucket: {self.bucket}/{object_name}")
 
         try:
             with open(file_name, "rb") as data:
@@ -79,6 +114,7 @@ class AwsStorageMgmt:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
+            echo(e)
             echo("success? False --> ClietError")
             os.remove(file_name)
             status = self.get_obj_restore_status(object_name)
@@ -92,12 +128,15 @@ class AwsStorageMgmt:
         echo("success? True")
         return True
 
-    def get_bucket_object_keys(self, bucket_name=None):
-        if not bucket_name:
-            bucket_name = self.configs.get("aws_bucket")
-        echo(f"aws_bucket = {bucket_name}")
+    def get_bucket_objs(self, bucket_name=None):
+        if bucket_name is None:
+            bucket_name = self.bucket
+        echo(f"bucket = {bucket_name}")
         my_bucket = self.s3_resour.Bucket(bucket_name)
-        return [obj.key for obj in my_bucket.objects.all()]
+        return [obj for obj in my_bucket.objects.all()]
+
+    def get_bucket_obj_keys(self, bucket_name=None):
+        return [obj.key for obj in self.get_bucket_objs()]
 
     def get_obj_head(self, object_name: str):
         response = self.s3_client.head_object(
@@ -168,7 +207,7 @@ class AwsStorageMgmt:
         self.restore_from_glacier(object_name=object_name, restore_tier=restore_tier)
         if tier == "GLACIER":
             restored = False
-            while restored == False:
+            while restored is False:
                 sleep(30)
                 echo("checking...")
                 status = self.get_obj_restore_status(object_name)
@@ -200,12 +239,12 @@ class AwsStorageMgmt:
         location: local, s3, global
         [global] returns a combined list of files in local media dir and S3 media bucket
         """
-        if location == "local":
-            files = files_in_media_dir(local_path=self.local_media_dir)
+        if location == "local" and self.local_dir:
+            files = files_in_media_dir(local_path=self.local_dir)
         elif location == "s3":
-            files = self.get_bucket_object_keys()
+            files = self.get_bucket_obj_keys()
         elif location == "global":
-            files = files_in_media_dir(local_path=self.local_media_dir) + self.get_bucket_object_keys()
+            files = files_in_media_dir(local_path=self.local_dir) + self.get_bucket_obj_keys()
         else:
             echo("invalid location")
             return False
@@ -213,24 +252,25 @@ class AwsStorageMgmt:
 
     def get_storage_tier(self, file_list: List[str]):
         check_status = str(input("display storage tier? [Y/n] "))
-        if check_status in ("Y", "n"):
-            if check_status == "Y":
-                echo()
-                for file_name in file_list:
+        if check_status in ("Y", "n") and check_status == "Y":
+            for file_name in file_list:
+                try:
+                    resp = self.get_obj_head(file_name)
                     try:
-                        resp = self.get_obj_head(file_name)
-                        try:
-                            restored = resp["Restore"]
-                            if restored:
-                                restored = True
-                        except KeyError as e:
-                            restored = False
-                        try:
-                            echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
-                        except KeyError as e:
-                            echo(f"STANDARD \t {restored} \t {file_name}")
-                    except Exception as e:
-                        echo(f"skipping: {file_name},\t {str(e)}")
+                        restored = resp["Restore"]
+                        if restored:
+                            restored = True
+                    except KeyError as e:
+                        echo(e)
+                        restored = False
+                    try:
+                        echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
+                    except KeyError as e:
+                        echo(e)
+                        echo(f"STANDARD \t {restored} \t {file_name}")
+                except Exception as e:
+                    echo(e)
+                    echo(f"skipping: {file_name},\t {str(e)}")
 
 
 aws = AwsStorageMgmt()
