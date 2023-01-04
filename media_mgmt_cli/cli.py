@@ -112,7 +112,7 @@ def search(keyword, location):
     if len(matches) >= 1:
         echo("at least one match found\n")
         echo("\n".join(matches))
-        aws.get_storage_tier(matches)
+        aws.search_flow(matches)
         return True
     else:
         echo("no matches found\n")
