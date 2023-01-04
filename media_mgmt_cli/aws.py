@@ -50,9 +50,7 @@ class AwsStorageMgmt:
             if self.bucket is None or self.object_prefix is None or self.local_dir is None:
                 echo("at least one config not found, use self.set_config_manually()")
         else:
-            echo("config file not found, run `mmgmt configure` (TODO) or self.set_config_manually()")
-            if click.confirm("run manual config? [True/False]", abort=True):
-                self.set_config_manually()
+            echo("config file not found, run `mmgmt config` to set class attributes manually")
 
     def set_config_manually(self, atts_dict: dict = None) -> None:
         if not atts_dict:
