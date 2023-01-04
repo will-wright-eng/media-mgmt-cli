@@ -1,6 +1,6 @@
 name: Test
 
-on: [push, commit]
+on: [push]
 
 permissions:
   contents: read
