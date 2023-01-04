@@ -1,10 +1,8 @@
 """mmgmt cli docstring"""
 import os
 import json
-from typing import List
 from pathlib import Path
 
-import boto3
 import click
 from click import echo
 
@@ -18,7 +16,7 @@ arg_filename = click.argument("filename", required=True)
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
-def echo_dict(input_dict: dict):
+def echo_dict(input_dict: dict) -> None:
     for key, val in input_dict.items():
         echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
@@ -30,7 +28,7 @@ def cli():
 
 
 @cli.command()
-@option_filename
+@arg_filename
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(filename, compression):
     """
@@ -90,7 +88,7 @@ def search(keyword, location):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 @option_bucket
 def download(filename, bucket_name):
     """
@@ -101,7 +99,7 @@ def download(filename, bucket_name):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 def get_status(filename):
     """
     search files in local directory and cloud storage
@@ -111,7 +109,7 @@ def get_status(filename):
 
 
 @cli.command()
-@option_filename
+@arg_filename
 @click.option(
     "--yes",
     is_flag=True,
