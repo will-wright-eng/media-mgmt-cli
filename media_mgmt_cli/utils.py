@@ -69,7 +69,6 @@ def keyword_in_string(keyword, file):
 
 
 def files_in_media_dir(local_path=None) -> List[str]:
-    # TODO: insert "LOCAL_MEDIA_DIR" into configs
     if local_path:
         media_dir = local_path
     else:

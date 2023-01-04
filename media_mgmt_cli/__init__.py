@@ -1,1 +1,1 @@
-import media_mgmt_cli.aws as mmgmt_aws
+from media_mgmt_cli.aws import AwsStorageMgmt

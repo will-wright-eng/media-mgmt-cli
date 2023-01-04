@@ -1,5 +1,12 @@
 """
+boto3 wrapper around AWS S3
+
+- boto3.resource("s3")
+- boto3.client("s3")
+
 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
+
+TODO: split out base class and add GCP functionality
 """
 
 import os
@@ -27,20 +34,20 @@ class AwsStorageMgmt:
         self.configs = None
         self.bucket = None
         self.object_prefix = None
-        self.local_media_dir = None
+        self.local_dir = None
 
-        self.atts_list = ["bucket", "object_prefix", "local_media_dir"]
-        self.settings_list = ["aws_bucket", "object_prefix", "local_media_dir"]
+        self.atts_list = ["bucket", "object_prefix", "local_dir"]
+        self.settings_list = ["bucket", "object_prefix", "local_dir"]
         self.load_configs()
 
-    def laod_configs(self):
+    def load_configs(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
             atts_dict = {
                 att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)
             }
             self.__dict__.update(atts_dict)
-            if any(self.bucket == None, self.object_prefix == None, self.local_media_dir == None):
+            if self.bucket is None or self.object_prefix is None or self.local_dir is None:
                 echo("at least one config not found, use self.set_config_manually()")
         else:
             echo("config file not found, run `mmgmt configure` (TODO) or self.set_config_manually()")
@@ -50,10 +57,12 @@ class AwsStorageMgmt:
     def set_config_manually(self):
         atts_dict = {}
         for att in self.atts_list:
-            val = click.prompt(f"set {att} [{self.att}]", type=str, default=self.att)
+            val = click.prompt(f"set {att}", type=str, default=self.__dict__.get(att))
+            val = None if val == "None" else val
             atts_dict.update({att: val})
 
         self.__dict__.update(atts_dict)
+        self.configs.update(atts_dict)
 
     def upload_file(self, file_name, additional_prefix=None):
         """Upload a file to an S3 bucket
@@ -64,12 +73,14 @@ class AwsStorageMgmt:
         :param additional_prefix: additional prefix on top of config prefix
         :return: True if file was uploaded, else False
         """
-        if additional_prefix:
+        if additional_prefix and self.object_prefix:
             object_name = os.path.join(self.object_prefix, additional_prefix, file_name)
-        else:
+        elif self.object_prefix:
             object_name = os.path.join(self.object_prefix, file_name)
+        else:
+            object_name = file_name
 
-        echo(f"uploading: {file_name} \nto S3 bucket: {self.configs.get('aws_bucket')}/{object_name}")
+        echo(f"uploading: {file_name} \nto S3 bucket: {self.bucket}/{object_name}")
 
         try:
             with open(file_name, "rb") as data:
@@ -112,12 +123,15 @@ class AwsStorageMgmt:
         echo("success? True")
         return True
 
-    def get_bucket_object_keys(self, bucket_name=None):
-        if not bucket_name:
-            bucket_name = self.configs.get("aws_bucket")
-        echo(f"aws_bucket = {bucket_name}")
+    def get_bucket_objs(self, bucket_name=None):
+        if bucket_name is None:
+            bucket_name = self.bucket
+        echo(f"bucket = {bucket_name}")
         my_bucket = self.s3_resour.Bucket(bucket_name)
-        return [obj.key for obj in my_bucket.objects.all()]
+        return [obj for obj in my_bucket.objects.all()]
+
+    def get_bucket_obj_keys(self, bucket_name=None):
+        return [obj.key for obj in self.get_bucket_objs()]
 
     def get_obj_head(self, object_name: str):
         response = self.s3_client.head_object(
@@ -220,12 +234,12 @@ class AwsStorageMgmt:
         location: local, s3, global
         [global] returns a combined list of files in local media dir and S3 media bucket
         """
-        if location == "local":
-            files = files_in_media_dir(local_path=self.local_media_dir)
+        if location == "local" and self.local_dir:
+            files = files_in_media_dir(local_path=self.local_dir)
         elif location == "s3":
-            files = self.get_bucket_object_keys()
+            files = self.get_bucket_obj_keys()
         elif location == "global":
-            files = files_in_media_dir(local_path=self.local_media_dir) + self.get_bucket_object_keys()
+            files = files_in_media_dir(local_path=self.local_dir) + self.get_bucket_obj_keys()
         else:
             echo("invalid location")
             return False

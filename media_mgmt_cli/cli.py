@@ -135,7 +135,7 @@ def ls(location, bucket_name):
     list files in location (local, s3, or global; defaults to global)
     """
     if bucket_name:
-        files = aws.get_bucket_object_keys(bucket_name=bucket_name)
+        files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
     else:
         if location in ("local", "s3", "global"):
             files = aws.get_files(location=location)
