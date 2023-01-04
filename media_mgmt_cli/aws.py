@@ -248,10 +248,10 @@ class AwsStorageMgmt:
             return False
         return files
 
-    def get_storage_tier(self, file_list: List[str]):
+    def search_flow(self, file_list: List[str]):
         if click.confirm("\nDisplay storage tier?"):
             echo("\nStorage Tier | Last Modfied | Object Key\n")
-            for file_name in file_list:
+            for i, file_name in enumerate(file_list):
                 try:
                     resp = self.get_obj_head(file_name)
                     try:
@@ -261,11 +261,14 @@ class AwsStorageMgmt:
                     except KeyError:
                         restored = False
                     try:
-                        echo(f"{resp['StorageClass']} \t| {resp['LastModified']} \t| {file_name}")
+                        echo(f"[{i}] {resp['StorageClass']} \t| {resp['LastModified']} \t| {file_name}")
                     except KeyError:
-                        echo(f"STANDARD \t| {resp['LastModified']} \t| {file_name}")
+                        echo(f"[{i}] STANDARD \t| {resp['LastModified']} \t| {file_name}")
                 except Exception:
                     echo(f"Exception getting object head for '{file_name}'; skipping")
+        if click.confirm("\nDownload?"):
+            resp = click.prompt("Which file?", type=int)
+            self.download_file(file_list[resp])
 
 
 aws = AwsStorageMgmt()
