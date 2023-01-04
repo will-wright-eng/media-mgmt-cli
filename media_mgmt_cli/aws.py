@@ -28,13 +28,35 @@ class AwsStorageMgmt:
         self.s3_client = boto3.client("s3")
 
         self.config = ConfigHandler(project_name)
+        self.configs = None
+        self.bucket = None
+        self.object_prefix = None
+        self.local_media_dir = None
+
+        self.atts_list = ["bucket", "object_prefix", "local_media_dir"]
+        self.settings_list = ["aws_bucket", "object_prefix", "local_media_dir"]
+        self.load_configs()
+
+    def laod_configs(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
-            self.bucket = self.configs.get("aws_bucket", None)
-            self.object_prefix = self.configs.get("object_prefix", None)
-            self.local_media_dir = self.configs.get("local_media_dir", None)
+            atts_dict = {att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)}
+            self.__dict__.update(atts_dict)
+            if any(self.bucket==None, self.object_prefix==None, self.local_media_dir==None):
+                echo("at least one config not found, use self.set_config_manually()")
         else:
-            echo("config file does not exist, run `mmgmt configure`")
+            echo("config file not found, run `mmgmt configure` (TODO) or self.set_config_manually()")
+            resp = click.prompt("config manually? [True/False]", type=str)
+            if bool(resp):
+                self.set_config_manually()
+
+    def set_config_manually(self):
+        atts_dict = {}
+        for att in atts_list:
+            val = click.prompt(f"set {att} [{self.att}]", type=str, default=self.att)
+            atts_dict.update({att:val})
+
+        self.__dict__.update(atts_dict)
 
     def upload_file(self, file_name, additional_prefix=None):
         """Upload a file to an S3 bucket
