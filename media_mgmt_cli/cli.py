@@ -155,3 +155,4 @@ def config():
     print project configs
     """
     echo_dict(aws.configs)
+    aws.set_config_manually()
