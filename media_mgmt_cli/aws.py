@@ -267,7 +267,7 @@ class AwsStorageMgmt:
                 except Exception:
                     echo(f"Exception getting object head for '{file_name}'; skipping")
         if click.confirm("\nDownload?"):
-            resp = click.prompt("Which file?", type=int)
+            resp = click.prompt("Which file? [#]", type=int)
             self.download_file(file_list[resp])
 
 
