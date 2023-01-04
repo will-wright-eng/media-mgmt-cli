@@ -13,7 +13,7 @@ option_location = click.option("-l", "--location", "location", required=False, d
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 arg_filename = click.argument("filename", required=True)
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
 def echo_dict(input_dict: dict) -> None:
@@ -41,7 +41,7 @@ def upload(filename, compression):
     try:
         if file_or_dir:
             if file_or_dir == "all":
-                echo(f"uploading all media objects to S3")
+                echo("uploading all media objects to S3")
                 for _file_or_dir in localfiles:
                     echo(f"{_file_or_dir}, compressing...")
                     files_created.append(aws.upload_file_or_dir(_file_or_dir, compression))
@@ -49,7 +49,7 @@ def upload(filename, compression):
                 echo("file found, compressing...")
                 files_created.append(aws.upload_file_or_dir(file_or_dir, compression))
             else:
-                echo(f"invalid file or directory")
+                echo("invalid file or directory")
                 return False
         else:
             echo("invalid file_or_dir command")
@@ -115,7 +115,7 @@ def get_status(filename):
     is_flag=True,
     callback=utils.abort_if_false,
     expose_value=False,
-    prompt=f"Are you sure you want to delete?",
+    prompt="Are you sure you want to delete?",
 )
 def delete(filename):
     """
