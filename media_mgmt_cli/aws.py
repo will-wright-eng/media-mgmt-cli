@@ -40,21 +40,22 @@ class AwsStorageMgmt:
     def laod_configs(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
-            atts_dict = {att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)}
+            atts_dict = {
+                att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)
+            }
             self.__dict__.update(atts_dict)
-            if any(self.bucket==None, self.object_prefix==None, self.local_media_dir==None):
+            if any(self.bucket == None, self.object_prefix == None, self.local_media_dir == None):
                 echo("at least one config not found, use self.set_config_manually()")
         else:
             echo("config file not found, run `mmgmt configure` (TODO) or self.set_config_manually()")
-            resp = click.prompt("config manually? [True/False]", type=str)
-            if bool(resp):
+            if click.confirm("run manual config? [True/False]", abort=True):
                 self.set_config_manually()
 
     def set_config_manually(self):
         atts_dict = {}
         for att in atts_list:
             val = click.prompt(f"set {att} [{self.att}]", type=str, default=self.att)
-            atts_dict.update({att:val})
+            atts_dict.update({att: val})
 
         self.__dict__.update(atts_dict)
 
