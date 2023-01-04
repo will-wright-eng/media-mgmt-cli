@@ -61,7 +61,10 @@ class AwsStorageMgmt:
                 atts_dict.update({att: val})
 
         self.__dict__.update(atts_dict)
-        self.configs.update(atts_dict)
+        if self.configs:
+            self.configs.update(atts_dict)
+        else:
+            self.configs = atts_dict
 
     def get_configs(self):
         return self.configs
