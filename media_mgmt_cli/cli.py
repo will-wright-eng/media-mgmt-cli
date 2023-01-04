@@ -1,4 +1,8 @@
-"""mmgmt cli docstring"""
+"""
+Media Management CLI
+
+A simple CLI to search and manage media assets in S3 and locally
+"""
 import os
 import json
 from pathlib import Path
@@ -12,6 +16,7 @@ from media_mgmt_cli.aws import aws
 option_location = click.option("-l", "--location", "location", required=False, default="global")
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
 arg_filename = click.argument("filename", required=True)
+arg_keyword = click.argument("keyword", required=True)
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
@@ -24,14 +29,17 @@ def echo_dict(input_dict: dict) -> None:
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
 def cli():
-    "A simple CLI to search and manage media assets in S3 and locally"
+    """
+    A simple CLI to search and manage media assets in S3 and locally.
+    Setup with `mmgmt configure`
+    """
 
 
 @cli.command()
 @click.option("--opt")
 @click.argument("arg")
 def hello(arg, opt):
-    """A Simple program"""
+    """test endpoint"""
     click.echo("Opt: {}  Arg: {}".format(opt, arg))
 
 
@@ -40,7 +48,15 @@ def hello(arg, opt):
 @click.option("-c", "--compression", "compression", required=False, default="gzip")
 def upload(filename, compression):
     """
-    standard usage: mmgmt upload -f all -c gzip
+    \b
+    upload file to cloud storage
+
+    `mmgmt upload "<file name in working directory>"`
+
+    standard usage: `mmgmt upload all -c gzip`
+
+    :argument filename:
+    :option compression:
     """
     file_or_dir = filename
     p = Path(".")
@@ -71,11 +87,19 @@ def upload(filename, compression):
 
 
 @cli.command()
-@click.option("-k", "--keyword", "keyword", required=True)
+@arg_keyword
 @option_location
 def search(keyword, location):
     """
+    \b
     search files in local directory and cloud storage
+
+    `mmgmt search "<search keyword(s)>"`
+
+    :argument keyword:
+    :option location: (local, s3, global), defaults to global
+        global: returns a combined list of files in local
+        media dir and bucket object keys
     """
     files = aws.get_files(location=location)
 
@@ -100,7 +124,13 @@ def search(keyword, location):
 @option_bucket
 def download(filename, bucket_name):
     """
-    search files in local directory and cloud storage
+    \b
+    download object from cloud storage
+
+    `mmgmt download "<s3 url>"`
+
+    :argument keyword:
+    :option bucket_name:
     """
     echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
@@ -110,7 +140,12 @@ def download(filename, bucket_name):
 @arg_filename
 def get_status(filename):
     """
-    search files in local directory and cloud storage
+    \b
+    get object head from cloud storage
+
+    `mmgmt get-status "<s3 url>"`
+
+    :argument filename:
     """
     aws.get_obj_head(object_name=filename)
     echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
@@ -127,7 +162,7 @@ def get_status(filename):
 )
 def delete(filename):
     """
-    delete file from cloud storage
+    delete file from cloud storage - TODO -
     """
     echo(f"{filename} dropped from S3")
     echo("jk, command not yet complete")
@@ -138,7 +173,15 @@ def delete(filename):
 @option_bucket
 def ls(location, bucket_name):
     """
-    list files in location (local, s3, or global; defaults to global)
+    \b
+    list files in location (local, s3, or global)
+
+    `mmgmt ls`
+
+    :option bucket_name:
+    :option location: (local, s3, global), defaults to global
+        global: returns a combined list of files in local
+        media dir and bucket object keys
     """
     if bucket_name:
         files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
@@ -156,9 +199,12 @@ def ls(location, bucket_name):
 
 
 @cli.command()
-def config():
+def configure():
     """
-    print project configs
+    print project configs & set configs manually
+
+    `mmgmt configure`
     """
     echo_dict(aws.configs)
-    aws.set_config_manually()
+    if click.confirm("\nManually set configs?"):
+        aws.set_config_manually()

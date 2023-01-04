@@ -37,15 +37,12 @@ class AwsStorageMgmt:
         self.local_dir = None
 
         self.atts_list = ["bucket", "object_prefix", "local_dir"]
-        self.settings_list = ["bucket", "object_prefix", "local_dir"]
         self.load_config_file()
 
     def load_config_file(self):
         if self.config.check_config_exists():
             self.configs = self.config.get_configs()
-            atts_dict = {
-                att: self.configs.get(setting, None) for att, setting in zip(self.atts_list, self.settings_list)
-            }
+            atts_dict = {att: self.configs.get(att, None) for att in self.atts_list}
             self.__dict__.update(atts_dict)
             if self.bucket is None or self.object_prefix is None or self.local_dir is None:
                 echo("at least one config not found, use self.set_config_manually()")
@@ -129,13 +126,14 @@ class AwsStorageMgmt:
         return True
 
     def get_bucket_objs(self, bucket_name=None):
-        if bucket_name is None:
+        if not bucket_name:
             bucket_name = self.bucket
         echo(f"bucket = {bucket_name}")
         my_bucket = self.s3_resour.Bucket(bucket_name)
+        print(my_bucket)
         return [obj for obj in my_bucket.objects.all()]
 
-    def get_bucket_obj_keys(self, bucket_name=None):
+    def get_bucket_obj_keys(self):
         return [obj.key for obj in self.get_bucket_objs()]
 
     def get_obj_head(self, object_name: str):
@@ -251,8 +249,8 @@ class AwsStorageMgmt:
         return files
 
     def get_storage_tier(self, file_list: List[str]):
-        check_status = str(input("display storage tier? [Y/n] "))
-        if check_status in ("Y", "n") and check_status == "Y":
+        if click.confirm("\nDisplay storage tier?"):
+            echo("\nStorage Tier | Last Modfied | Object Key\n")
             for file_name in file_list:
                 try:
                     resp = self.get_obj_head(file_name)
@@ -260,17 +258,14 @@ class AwsStorageMgmt:
                         restored = resp["Restore"]
                         if restored:
                             restored = True
-                    except KeyError as e:
-                        echo(e)
+                    except KeyError:
                         restored = False
                     try:
-                        echo(f"{resp['StorageClass']} \t {restored} \t {file_name}")
-                    except KeyError as e:
-                        echo(e)
-                        echo(f"STANDARD \t {restored} \t {file_name}")
-                except Exception as e:
-                    echo(e)
-                    echo(f"skipping: {file_name},\t {str(e)}")
+                        echo(f"{resp['StorageClass']} \t| {resp['LastModified']} \t| {file_name}")
+                    except KeyError:
+                        echo(f"STANDARD \t| {resp['LastModified']} \t| {file_name}")
+                except Exception:
+                    echo(f"Exception getting object head for '{file_name}'; skipping")
 
 
 aws = AwsStorageMgmt()
