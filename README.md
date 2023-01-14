@@ -3,7 +3,7 @@
 [![Changelog](https://img.shields.io/github/v/release/william-cass-wright/media-mgmt-cli?include_prereleases&label=changelog)](https://github.com/william-cass-wright/media-mgmt-cli/releases)
 [![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
 [![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
-[![Supported Versions](https://img.shields.io/pypi/pyversions/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli/)
+[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/media-mgmt-cli/)
 [![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
