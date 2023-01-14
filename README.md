@@ -7,6 +7,7 @@
 [![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli)
 [![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
+[![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
 ## Summary
 
