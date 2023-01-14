@@ -1,11 +1,9 @@
 # Media MGMT CLI
 
-[![PyPI](https://img.shields.io/pypi/v/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli/)
 [![Changelog](https://img.shields.io/github/v/release/william-cass-wright/media-mgmt-cli?include_prereleases&label=changelog)](https://github.com/william-cass-wright/media-mgmt-cli/releases)
 [![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/william-cass-wright/media-mgmt-cli/blob/master/LICENSE)
 [![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
-[![Supported Versions](https://img.shields.io/pypi/pyversions/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli/)
 [![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
@@ -13,7 +11,7 @@
 
 **A simple CLI to search and manage media asset locally and in S3**
 
-- [PyPI project](https://pypi.org/project/media-mgmt-cli)
+- [PyPI Package](https://pypi.org/project/media-mgmt-cli)
 - Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
 - Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
 
