@@ -1,10 +1,12 @@
-## this PR is doing
+## Type of Change
 
-- [ ] `aws.py` change
-- [ ] new endpoint
+- [ ] new command
+- [ ] modified command
 - [ ] bug fix
+- [ ] core change (eg `aws.py`)
+- [ ] bump version
 
-## development context
+## Context
 
 - [ ] adjustmet for package import
 - [ ] expanding CLI functionality

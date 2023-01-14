@@ -1,6 +1,6 @@
 ## release process
 
-1. upversion string in `setup.py` file
+1. upversion string in `setup.py` file using symantic versioning (major, minor, patch)
 
 ```python
 VERSION = "0.3.0"
@@ -9,9 +9,9 @@ VERSION = "0.3.0"
 2. tag branch
 
 ```bash
-git tag -a v0.2.0 -m "description of release"
+git tag -a v0.3.0 -m "description of release"
 ```
 
-3. git add/commit/push
-4. merge pull request once tests pass
-5. create new release (consistent with `git tag`)
+3. [local] git add/commit/push
+4. [GitHub] merge pull request once tests pass
+5. [GitHub] create new release
