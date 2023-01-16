@@ -6,11 +6,13 @@ import configparser
 class ConfigHandler:
     def __init__(self, project_name="tmp"):
         p = pathlib.Path.home()
-        print(p)
+        print(p)  # tmp print statement to understand behavior in docker container
         self.home_path = p
         self.config_path = p / ".config" / project_name
         self.config_file_path = self.config_path / "config"
-        print(f"config file path: {self.config_file_path}")
+        print(
+            f"config file path: {self.config_file_path}"
+        )  # tmp print statement to understand behavior in docker container
         self.verbose = False
         self.config = configparser.ConfigParser()
         if not os.path.isfile(self.config_file_path):
