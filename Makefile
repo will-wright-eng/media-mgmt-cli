@@ -26,11 +26,11 @@ poetry-download: ## poetry-download
 poetry-remove: ## poetry-remove
 	curl -sSL https://install.python-poetry.org | $(PYTHON) - --uninstall
 
-ADD_REQ_TXT := $(shell cat requirements.txt | grep -E '^[^# ]' | cut -d= -f1 | xargs -n 1 poetry add)
-# ADD_REQ_TXT := $(shell cat requirements.txt | xargs poetry add) # <-- if version numbers aren't included in requirements txt
-poetry-init: ## init repo and add requirements.txt (with version numbers) to pypackage.toml
-	poetry init # to generate pyproject toml (appended to existing)
-	$(ADD_REQ_TXT)
+# ADD_REQ_TXT := $(shell cat requirements.txt | grep -E '^[^# ]' | cut -d= -f1 | xargs -n 1 poetry add)
+# # ADD_REQ_TXT := $(shell cat requirements.txt | xargs poetry add) # <-- if version numbers aren't included in requirements txt
+# poetry-init: ## init repo and add requirements.txt (with version numbers) to pypackage.toml
+# 	poetry init # to generate pyproject toml (appended to existing)
+# 	${ADD_REQ_TXT}
 
 #* Installation
 install: ## install

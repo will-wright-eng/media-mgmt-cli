@@ -21,9 +21,9 @@ arg_keyword = click.argument("keyword", required=True)
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
-def get_project_name():
-    PROJECT_NAME = "mmgmt"
-    return PROJECT_NAME
+# def get_project_name():
+#     PROJECT_NAME = "mmgmt"
+#     return PROJECT_NAME
 
 
 def echo_dict(input_dict: dict) -> None:

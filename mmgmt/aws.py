@@ -19,7 +19,7 @@ import click
 from click import echo
 from botocore.exceptions import ClientError
 
-from mmgmt.cli import get_project_name
+# from mmgmt.cli import get_project_name
 from mmgmt.utils import zip_process, gzip_process, files_in_media_dir
 from mmgmt.config import ConfigHandler
 
@@ -271,4 +271,5 @@ class AwsStorageMgmt:
             self.download_file(file_list[resp])
 
 
-aws = AwsStorageMgmt(project_name=get_project_name())
+PROJECT_NAME = "mmgmt"
+aws = AwsStorageMgmt(project_name=PROJECT_NAME)
