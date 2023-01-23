@@ -36,26 +36,9 @@ poetry-init: ## init repo and add requirements.txt (with version numbers) to pyp
 install: ## install
 	poetry lock -n && poetry export --without-hashes > requirements.txt
 	poetry install -n
-# 	-poetry run mypy --install-types --non-interactive ./
-
-pc-init: ## pre-commit install within poetry
-	poetry run pre-commit install
 
 pc-run: ## pre-commit run --all-files within poetry
 	poetry run pre-commit run --all-files
-
-#* Formatters
-codestyle: ## codestyle
-	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
-	poetry run isort --settings-path pyproject.toml ./
-	poetry run black --config pyproject.toml ./
-
-check-codestyle: ## check-codestyle
-	poetry run isort --diff --check-only --settings-path pyproject.toml ./
-	poetry run black --diff --check --config pyproject.toml ./
-
-mypy: ## mypy
-	poetry run mypy --config-file pyproject.toml ./
 
 #* Cleaning
 pycache-remove: ## cleanup subcommand - pycache-remove
