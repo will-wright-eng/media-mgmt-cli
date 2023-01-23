@@ -105,14 +105,15 @@ class AwsStorageMgmt:
         if not bucket_name:
             bucket_name = self.bucket
 
-        echo(f"download {object_name}\n from {bucket_name}")
+        echo(f"downloading `{object_name}` from `{bucket_name}`")
         file_name = object_name.split("/")[-1]
+        flag = True
         try:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
-            echo(e)
-            echo("success? False --> ClietError")
+            flag = False
+            echo(f"-- ClietError --\n{str(e)}")
             os.remove(file_name)
             status = self.get_obj_restore_status(object_name)
             if status == "incomplete":
@@ -122,7 +123,7 @@ class AwsStorageMgmt:
                 self.download_from_glacier(object_name=object_name)
                 return True
             return False
-        echo("success? True")
+        echo("download successful" if flag else "unsuccessful download, see errors above")
         return True
 
     def get_bucket_objs(self, bucket_name=None):
