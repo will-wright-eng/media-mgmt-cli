@@ -1,23 +1,17 @@
-# Media MGMT CLI
+# Media Management Command Line Interface
 
-[![PyPI](https://img.shields.io/pypi/v/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli/)
-[![Changelog](https://img.shields.io/github/v/release/william-cass-wright/media-mgmt-cli?include_prereleases&label=changelog)](https://github.com/william-cass-wright/media-mgmt-cli/releases)
-[![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/william-cass-wright/media-mgmt-cli/blob/master/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/media-mgmt-cli)](https://pypi.org/project/media-mgmt-cli/)
 [![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
-[![Supported Versions](https://img.shields.io/pypi/pyversions/media-mgmt-cli.svg)](https://pypi.org/project/media-mgmt-cli)
+[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/media-mgmt-cli/)
 [![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
+[![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
 ## Summary
 
-**A simple CLI to search and manage media asset locally and in S3**
+**An intuitive CLI wrapper around boto3 to search and manage media assets**
 
-- [PyPI project](https://pypi.org/project/media-mgmt-cli)
-- Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
-- Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
-
-## Installing Media MGMT CLI and Supported Versions
+## Installing Media MGMT CLI & Supported Versions
 
 mmgmt is available on PyPI:
 
@@ -25,9 +19,9 @@ mmgmt is available on PyPI:
 python -m pip install media-mgmt-cli
 ```
 
-Media MGMT CLI officially supports Python 3.8+.
+Media Management Command Line Interface officially supports Python 3.8+.
 
-## Supported Features & Best–Practices
+## Supported Features & Usage
 
 For help, run:
 
@@ -64,6 +58,43 @@ Commands:
   upload      upload file to cloud storage
 ```
 
+Why not use `awscli`?
+
+You can, and I do, in tandem with `mmgmt` -- the purpose is to create an additional interface that minimized the lookup/copy/paste process I found myself frequently going through.
+
+Another use case is for rapid prototyping applications that require an S3 interface.
+
+For example:
+
+```python
+import pandas as pd
+import media_mgmt_cli as mmgmt
+
+aws = mmgmt.AwsStorageMgmt(project_name="media_mgmt_cli")
+obj_list = aws.get_bucket_objs()
+
+res = []
+for s3_obj in obj_list:
+    res.append(
+      [
+        str(s3_obj.key),
+        str(s3_obj.key.split('/')[0]),
+        s3_obj.last_modified,
+        s3_obj.storage_class,
+        s3_obj.size
+      ]
+    )
+
+df = pd.DataFrame(res)
+df.columns = [
+  'key',
+  'group',
+  'last_modified',
+  'storage_class',
+  'size'
+]
+```
+
 ## Development
 
 To contribute to this tool, first checkout the code:
@@ -98,3 +129,9 @@ Install pre-commit before submitting a PR:
 brew install pre-commit
 pre-commit install
 ```
+
+## References
+
+- [PyPI Package](https://pypi.org/project/media-mgmt-cli)
+- Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
+- Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
