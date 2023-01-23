@@ -1,4 +1,4 @@
-# Media MGMT CLI
+# Media Management Command Line Interface
 
 [![PyPI](https://img.shields.io/pypi/v/media-mgmt-cli)](https://pypi.org/project/media-mgmt-cli/)
 [![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
@@ -19,7 +19,7 @@ mmgmt is available on PyPI:
 python -m pip install media-mgmt-cli
 ```
 
-Media MGMT CLI officially supports Python 3.8+.
+Media Management Command Line Interface officially supports Python 3.8+.
 
 ## Supported Features & Usage
 
