@@ -2,6 +2,8 @@ import os
 import pathlib
 import configparser
 
+from mmgmt.cli import get_project_name
+
 
 class ConfigHandler:
     def __init__(self, project_name="tmp"):
@@ -105,4 +107,4 @@ class ConfigHandler:
         return os.path.isfile(self.config_file_path)
 
 
-config_handler = ConfigHandler(project_name="media_mgmt_cli")
+config_handler = ConfigHandler(project_name=get_project_name())

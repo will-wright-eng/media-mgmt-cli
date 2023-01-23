@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 
-from media_mgmt_cli.cli import cli
+from mmgmt.cli import cli
 
 
 def test_hello_world():

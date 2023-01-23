@@ -30,7 +30,7 @@ Mocking boto3 S3 client method Python
 https://stackoverflow.com/a/37144161/14343465
 """
 
-from media_mgmt_cli.aws import AwsStorageMgmt
+from mmgmt.aws import AwsStorageMgmt
 
 
 def test_aws_config_flow():
@@ -39,4 +39,4 @@ def test_aws_config_flow():
     result = aws.get_configs()
     assert isinstance(result, dict)
     assert result.get("key") == "val"
-    assert "media_mgmt_cli" in str(aws.config.config_path)
+    assert "mmgmt" in str(aws.config.config_path)

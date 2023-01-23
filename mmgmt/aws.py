@@ -19,14 +19,13 @@ import click
 from click import echo
 from botocore.exceptions import ClientError
 
-from media_mgmt_cli.utils import zip_process, gzip_process, files_in_media_dir
-from media_mgmt_cli.config import ConfigHandler
-
-PROJECT_NAME = "media_mgmt_cli"
+from mmgmt.cli import get_project_name
+from mmgmt.utils import zip_process, gzip_process, files_in_media_dir
+from mmgmt.config import ConfigHandler
 
 
 class AwsStorageMgmt:
-    def __init__(self, project_name: str = PROJECT_NAME):
+    def __init__(self, project_name: str = None):
         self.s3_resour = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
 
@@ -272,4 +271,4 @@ class AwsStorageMgmt:
             self.download_file(file_list[resp])
 
 
-aws = AwsStorageMgmt()
+aws = AwsStorageMgmt(project_name=get_project_name())
