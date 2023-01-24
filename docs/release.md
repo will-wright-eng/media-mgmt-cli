@@ -15,6 +15,6 @@ git tag -a v0.1.0 -m "description of release"
 git push origin v0.1.0
 ```
 
-3. [local] git add/commit/push
-4. [GitHub] merge pull request once tests pass
-5. [GitHub] create new release
+3. git add/commit/push
+4. merge pull request once tests pass
+5. create new release
