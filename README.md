@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/mmgmt)](https://pypi.org/project/mmgmt/)
 [![Downloads](https://static.pepy.tech/badge/mmgmt/month)](https://pepy.tech/project/mmgmt)
 [![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/mmgmt/)
-[![Contributors](https://img.shields.io/github/contributors/will-wright-eng/mmgmt.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
+[![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
 [![Tests](https://github.com/will-wright-eng/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions?query=workflow%3ATest)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
