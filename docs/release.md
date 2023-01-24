@@ -1,4 +1,6 @@
-## release process
+# release notes
+
+## process
 
 1. upversion string in `setup.py` file using symantic versioning (major, minor, patch)
 
