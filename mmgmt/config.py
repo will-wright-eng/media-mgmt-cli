@@ -2,11 +2,11 @@ import os
 import pathlib
 import configparser
 
-from mmgmt.cli import get_project_name
+# from mmgmt.cli import get_project_name
 
 
 class ConfigHandler:
-    def __init__(self, project_name="tmp"):
+    def __init__(self, project_name: str = None):
         p = pathlib.Path.home()
         print(p)  # tmp print statement to understand behavior in docker container
         self.home_path = p

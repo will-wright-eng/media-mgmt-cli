@@ -117,7 +117,7 @@ class AwsStorageMgmt:
             status = self.get_obj_restore_status(object_name)
             if status == "incomplete":
                 echo("restore in process")
-                echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+                echo(json.dumps(self.obj_head, indent=4, sort_keys=True, default=str))
             elif e.response["Error"]["Code"] == "InvalidObjectState":
                 self.download_from_glacier(object_name=object_name)
                 return True

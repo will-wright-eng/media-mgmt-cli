@@ -1,8 +1,13 @@
+# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
 [tool.poetry]
 name = "mmgmt"
-version = "0.1.0"
+version = "0.4.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+authors = ["Will Wright <you@example.com>"]
+license = "GNU GPL v3.0"
+repository = "https://github.com/will-wright-eng/media-mgmt-cli"
+homepage = "https://github.com/will-wright-eng/media-mgmt-cli"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -22,3 +27,8 @@ urllib3 = "^1.26.14"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+# Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
+[tool.poetry.scripts]
+"cync" = "common_sync.__main__:cli"
+"mmgmt" = "mmgmt.cli:cli"

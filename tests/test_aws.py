@@ -34,7 +34,8 @@ from mmgmt.aws import AwsStorageMgmt
 
 
 def test_aws_config_flow():
-    aws = AwsStorageMgmt()
+    PROJECT_NAME = "mmgmt"
+    aws = AwsStorageMgmt(project_name=PROJECT_NAME)
     aws.set_config_manually(atts_dict={"key": "val"})
     result = aws.get_configs()
     assert isinstance(result, dict)
