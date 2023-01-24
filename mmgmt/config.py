@@ -2,20 +2,14 @@ import os
 import pathlib
 import configparser
 
-# from mmgmt.cli import get_project_name
-
 
 class ConfigHandler:
-    def __init__(self, project_name: str = None):
+    def __init__(self, project_name: str = None, verbose: bool = False):
         p = pathlib.Path.home()
-        print(p)  # tmp print statement to understand behavior in docker container
         self.home_path = p
         self.config_path = p / ".config" / project_name
         self.config_file_path = self.config_path / "config"
-        print(
-            f"config file path: {self.config_file_path}"
-        )  # tmp print statement to understand behavior in docker container
-        self.verbose = False
+        self.verbose = verbose  # TODO: add verbose to config file
         self.config = configparser.ConfigParser()
         if not os.path.isfile(self.config_file_path):
             print("config file does not exist, run `mmgmt configure`")
@@ -25,6 +19,9 @@ class ConfigHandler:
             if self.verbose:
                 print("-- config file exists --")
                 print(self.print_configs())
+        if self.verbose:
+            print(p)
+            print(f"config file path: {self.config_file_path}")
 
     def export_configs(self):
         # export configs as environment variables
@@ -105,7 +102,3 @@ class ConfigHandler:
 
     def check_config_exists(self):
         return os.path.isfile(self.config_file_path)
-
-
-# PROJECT_NAME = "mmgmt"
-# config_handler = ConfigHandler(project_name=PROJECT_NAME)

@@ -6,10 +6,14 @@ from mmgmt.cli import cli
 def test_hello_world():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(cli, ["hello", "--opt", "An Option", "An Arg"])
+        result = runner.invoke(cli, ["hello", "will"])
         assert result.exit_code == 0
-        assert result.output == "Opt: An Option  Arg: An Arg\n"
+        assert result.output == "Hello Will\n"
 
-        result = runner.invoke(cli, ["hello", "An Arg"])
+
+def test_version():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert result.output == "Opt: None  Arg: An Arg\n"
+        assert result.output.startswith("cli, version ")
