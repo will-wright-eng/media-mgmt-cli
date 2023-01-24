@@ -10,8 +10,8 @@ from pathlib import Path
 import click
 from click import echo
 
-import media_mgmt_cli.utils as utils
-from media_mgmt_cli.aws import aws
+import mmgmt.utils as utils
+from mmgmt.aws import AwsStorageMgmt
 
 option_location = click.option("-l", "--location", "location", required=False, default="global")
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
@@ -19,6 +19,13 @@ arg_filename = click.argument("filename", required=True)
 arg_keyword = click.argument("keyword", required=True)
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+
+PROJECT_NAME = "mmgmt"
+aws = AwsStorageMgmt(project_name=PROJECT_NAME)
+
+# def get_project_name():
+#     PROJECT_NAME = "mmgmt"
+#     return PROJECT_NAME
 
 
 def echo_dict(input_dict: dict) -> None:

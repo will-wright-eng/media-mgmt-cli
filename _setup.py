@@ -14,23 +14,23 @@ def get_long_description():
 
 
 setup(
-    name="media-mgmt-cli",
+    name="mmgmt",
     description="A simple CLI to search and manage media assets in S3 and locally",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     author="Will Wright",
-    url="https://github.com/william-cass-wright/media-mgmt-cli",
+    url="https://github.com/will-wright-eng/media-mgmt-cli",
     project_urls={
-        "Issues": "https://github.com/william-cass-wright/media-mgmt-cli/issues",
-        "CI": "https://github.com/william-cass-wright/media-mgmt-cli/actions",
-        "Changelog": "https://github.com/william-cass-wright/media-mgmt-cli/releases",
+        "Issues": "https://github.com/will-wright-eng/media-mgmt-cli/issues",
+        "CI": "https://github.com/will-wright-eng/media-mgmt-cli/actions",
+        "Changelog": "https://github.com/will-wright-eng/media-mgmt-cli/releases",
     },
     license="Apache License, Version 2.0",
     version=VERSION,
-    packages=["media_mgmt_cli"],
+    packages=["mmgmt"],
     entry_points="""
         [console_scripts]
-        mmgmt=media_mgmt_cli.cli:cli
+        mmgmt=mmgmt.cli:cli
     """,
     install_requires=["click", "boto3"],
     extras_require={"test": ["pytest"]},

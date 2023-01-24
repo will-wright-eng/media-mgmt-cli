@@ -1,10 +1,10 @@
 # Media Management Command Line Interface
 
-[![PyPI](https://img.shields.io/pypi/v/media-mgmt-cli)](https://pypi.org/project/media-mgmt-cli/)
-[![Downloads](https://static.pepy.tech/badge/media-mgmt-cli/month)](https://pepy.tech/project/media-mgmt-cli)
-[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/media-mgmt-cli/)
-[![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
-[![Tests](https://github.com/william-cass-wright/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/william-cass-wright/media-mgmt-cli/actions?query=workflow%3ATest)
+[![PyPI](https://img.shields.io/pypi/v/mmgmt)](https://pypi.org/project/mmgmt/)
+[![Downloads](https://static.pepy.tech/badge/mmgmt/month)](https://pepy.tech/project/mmgmt)
+[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/mmgmt/)
+[![Contributors](https://img.shields.io/github/contributors/will-wright-eng/mmgmt.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
+[![Tests](https://github.com/will-wright-eng/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions?query=workflow%3ATest)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
 
 ## Summary
@@ -16,7 +16,7 @@
 mmgmt is available on PyPI:
 
 ```bash
-python -m pip install media-mgmt-cli
+python -m pip install mmgmt
 ```
 
 Media Management Command Line Interface officially supports Python 3.8+.
@@ -32,7 +32,7 @@ mmgmt --help
 You can also use:
 
 ```bash
-python -m media_mgmt_cli --help
+python -m mmgmt --help
 ```
 
 Commands:
@@ -68,9 +68,9 @@ For example:
 
 ```python
 import pandas as pd
-import media_mgmt_cli as mmgmt
+import mmgmt as mmgmt
 
-aws = mmgmt.AwsStorageMgmt(project_name="media_mgmt_cli")
+aws = mmgmt.AwsStorageMgmt(project_name="mmgmt")
 obj_list = aws.get_bucket_objs()
 
 res = []
@@ -132,6 +132,6 @@ pre-commit install
 
 ## References
 
-- [PyPI Package](https://pypi.org/project/media-mgmt-cli)
-- Based on cookiecutter template [william-cass-wright/click-app](https://github.com/william-cass-wright/click-app)
-- Rewrite of original project [william-cass-wright/media_mgmt_cli](https://github.com/william-cass-wright/media_mgmt_cli)
+- [PyPI Package](https://pypi.org/project/mmgmt)
+- Based on cookiecutter template [will-wright-eng/click-app](https://github.com/will-wright-eng/click-app)
+- Rewrite of original project [will-wright-eng/media_mgmt_cli](https://github.com/will-wright-eng/media_mgmt_cli)

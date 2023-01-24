@@ -2,9 +2,11 @@ import os
 import pathlib
 import configparser
 
+# from mmgmt.cli import get_project_name
+
 
 class ConfigHandler:
-    def __init__(self, project_name="tmp"):
+    def __init__(self, project_name: str = None):
         p = pathlib.Path.home()
         print(p)  # tmp print statement to understand behavior in docker container
         self.home_path = p
@@ -105,4 +107,5 @@ class ConfigHandler:
         return os.path.isfile(self.config_file_path)
 
 
-config_handler = ConfigHandler(project_name="media_mgmt_cli")
+# PROJECT_NAME = "mmgmt"
+# config_handler = ConfigHandler(project_name=PROJECT_NAME)
