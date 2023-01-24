@@ -11,7 +11,7 @@ import click
 from click import echo
 
 import mmgmt.utils as utils
-from mmgmt.aws import aws
+from mmgmt.aws import AwsStorageMgmt
 
 option_location = click.option("-l", "--location", "location", required=False, default="global")
 option_bucket = click.option("-b", "--bucket-name", "bucket_name", required=False, default=None)
@@ -20,6 +20,8 @@ arg_keyword = click.argument("keyword", required=True)
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
+PROJECT_NAME = "mmgmt"
+aws = AwsStorageMgmt(project_name=PROJECT_NAME)
 
 # def get_project_name():
 #     PROJECT_NAME = "mmgmt"

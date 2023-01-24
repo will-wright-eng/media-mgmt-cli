@@ -271,5 +271,5 @@ class AwsStorageMgmt:
             self.download_file(file_list[resp])
 
 
-PROJECT_NAME = "mmgmt"
-aws = AwsStorageMgmt(project_name=PROJECT_NAME)
+# PROJECT_NAME = "mmgmt"
+# aws = AwsStorageMgmt(project_name=PROJECT_NAME)

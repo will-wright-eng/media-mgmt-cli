@@ -107,5 +107,5 @@ class ConfigHandler:
         return os.path.isfile(self.config_file_path)
 
 
-PROJECT_NAME = "mmgmt"
-config_handler = ConfigHandler(project_name=PROJECT_NAME)
+# PROJECT_NAME = "mmgmt"
+# config_handler = ConfigHandler(project_name=PROJECT_NAME)
