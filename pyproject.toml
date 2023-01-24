@@ -10,7 +10,7 @@ repository = "https://github.com/will-wright-eng/media-mgmt-cli"
 homepage = "https://github.com/will-wright-eng/media-mgmt-cli"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 boto3 = "^1.26.54"
 botocore = "^1.29.54"
 certifi = "^2022.12.7"
