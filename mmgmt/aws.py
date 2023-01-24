@@ -19,7 +19,6 @@ import click
 from click import echo
 from botocore.exceptions import ClientError
 
-# from mmgmt.cli import get_project_name
 from mmgmt.utils import zip_process, gzip_process, files_in_media_dir
 from mmgmt.config import ConfigHandler
 
@@ -269,7 +268,3 @@ class AwsStorageMgmt:
         if click.confirm("\nDownload?"):
             resp = click.prompt("Which file? [#]", type=int)
             self.download_file(file_list[resp])
-
-
-# PROJECT_NAME = "mmgmt"
-# aws = AwsStorageMgmt(project_name=PROJECT_NAME)

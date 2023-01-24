@@ -1,7 +1,7 @@
 # Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
 [tool.poetry]
 name = "mmgmt"
-version = "0.4.1"
+version = "0.4.2"
 description = ""
 readme = "README.md"
 authors = ["Will Wright <willwright@example.com>"]
@@ -48,7 +48,6 @@ build-backend = "poetry.core.masonry.api"
 
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
 [tool.poetry.scripts]
-"cync" = "common_sync.__main__:cli"
 "mmgmt" = "mmgmt.cli:cli"
 
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file

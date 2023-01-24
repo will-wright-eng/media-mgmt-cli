@@ -1,8 +1,3 @@
-"""
-Media Management CLI
-
-A simple CLI to search and manage media assets in S3 and locally
-"""
 import os
 import json
 from pathlib import Path
@@ -23,10 +18,6 @@ CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 PROJECT_NAME = "mmgmt"
 aws = AwsStorageMgmt(project_name=PROJECT_NAME)
 
-# def get_project_name():
-#     PROJECT_NAME = "mmgmt"
-#     return PROJECT_NAME
-
 
 def echo_dict(input_dict: dict) -> None:
     for key, val in input_dict.items():
@@ -43,11 +34,10 @@ def cli():
 
 
 @cli.command()
-@click.option("--opt")
-@click.argument("arg")
-def hello(arg, opt):
+@click.argument("name")
+def hello(name):
     """test endpoint"""
-    click.echo("Opt: {}  Arg: {}".format(opt, arg))
+    echo(f"Hello {name.title()}")
 
 
 @cli.command()
