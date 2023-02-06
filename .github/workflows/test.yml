@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  run-pytest:
+  test-py:
     runs-on: ubuntu-latest
     strategy:
       matrix:
