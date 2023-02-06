@@ -37,7 +37,12 @@ install: ## install
 	poetry lock -n && poetry export --without-hashes > requirements.txt
 	poetry install -n
 
-pc-run: ## pre-commit run --all-files within poetry
+pcreset: ## reset pre-commit
+	poetry run pre-commit uninstall
+	poetry run pre-commit clean
+	poetry run pre-commit install
+
+pcrun: ## pre-commit run --all-files within poetry
 	poetry run pre-commit run --all-files
 
 #* Cleaning
