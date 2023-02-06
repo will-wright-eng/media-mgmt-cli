@@ -1,6 +1,5 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-
 default_language_version:
   python: python3.10
 
@@ -59,16 +58,3 @@ repos:
     - flake8-simplify
     verbose: true
     entry: bash -c 'flake8 "$@" || true' --
-
-# - repo: https://github.com/pycqa/isort
-#   rev: 5.11.2
-#   hooks:
-#   - id: isort
-#     args: ['--order-by-type', '--length-sort', "--profile", "black", "--filter-files"]
-#     name: isort (python)
-#   - id: isort
-#     name: isort (cython)
-#     types: [cython]
-#   - id: isort
-#     name: isort (pyi)
-#     types: [pyi]
