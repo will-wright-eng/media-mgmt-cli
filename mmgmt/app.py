@@ -8,12 +8,14 @@ from rich.table import Table
 from rich.console import Console
 
 from mmgmt.aws import AwsStorageMgmt
+from mmgmt.log import Log
 from mmgmt.files import FileManager
 from mmgmt.config import Config
 
 app = typer.Typer()
 file_mgmt = FileManager()
 aws = AwsStorageMgmt()
+logger = Log(debug=True)
 
 
 def echo_dict(input_dict: dict) -> None:

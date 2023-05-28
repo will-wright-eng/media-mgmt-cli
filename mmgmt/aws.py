@@ -1,7 +1,5 @@
 import os
 from time import sleep
-from typing import List
-from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
