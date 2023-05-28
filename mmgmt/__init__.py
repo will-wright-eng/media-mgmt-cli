@@ -1,6 +1,9 @@
-from mmgmt.aws import AwsStorageMgmt as AwsStorageMgmt
-from mmgmt.config import ConfigHandler as ConfigHandler
+# from mmgmt.aws import AwsStorageMgmt as AwsStorageMgmt
+# from mmgmt.config import ConfigHandler as ConfigHandler
+# from .app import main as main
+from .app import entry_point as cli  # noqa: F401
 
+__version__ = "0.1.0"
 __docformat__ = "restructuredtext"
 
 """

@@ -43,7 +43,7 @@ build-backend = "poetry.core.masonry.api"
 
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
 [tool.poetry.scripts]
-"mmgmt" = "mmgmt.cli:cli"
+"mmgmt" = "mmgmt:cli"
 
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 [tool.mypy]
