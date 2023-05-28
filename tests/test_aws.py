@@ -3,17 +3,13 @@ Mocking boto3 S3 client method Python
 https://stackoverflow.com/a/37144161/14343465
 """
 
-from unittest.mock import MagicMock
-
 import pytest
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
-from mmgmt import (  # Replace mmgmt with the actual module name
-    delete,
-    search,
-    upload,
-    download,
-)
+from mmgmt import AwsStorageMgmt
+from mmgmt.cli import delete, search, upload, download
+
+# aws = AwsStorageMgmt()
 
 
 @pytest.fixture
