@@ -1,43 +1,57 @@
 """
-aws.__dir__()
-
-['s3_resour',
-'s3_client',
-'config',
-'configs',
-'bucket',
-'object_prefix',
-'local_media_dir',
-'atts_list',
-'settings_list',
-'__module__',
-'__init__',
-'load_configs',
-'set_config_manually',
-'upload_file',
-'download_file',
-'get_bucket_objs',
-'get_bucket_obj_keys',
-'get_obj_head',
-'get_obj_restore_status',
-'restore_from_glacier',
-'download_from_glacier',
-'upload_file_or_dir',
-'get_files',
-'get_storage_tier']
-
 Mocking boto3 S3 client method Python
 https://stackoverflow.com/a/37144161/14343465
 """
 
-from mmgmt.aws import AwsStorageMgmt
+from unittest.mock import MagicMock
+
+import pytest
+from click.testing import CliRunner
+
+from mmgmt import (  # Replace mmgmt with the actual module name
+    delete,
+    search,
+    upload,
+    download,
+)
 
 
-def test_aws_config_flow():
-    PROJECT_NAME = "mmgmt"
-    aws = AwsStorageMgmt(project_name=PROJECT_NAME)
-    aws.set_config_manually(atts_dict={"key": "val"})
-    result = aws.get_configs()
-    assert isinstance(result, dict)
-    assert result.get("key") == "val"
-    assert "mmgmt" in str(aws.config.config_path)
+@pytest.fixture
+def runner():
+    return CliRunner()
+
+
+def test_upload(mocker, runner):
+    mock_aws = mocker.patch("mmgmt.AwsStorageMgmt")
+    mock_aws.upload_file_or_dir.return_value = "test_file.gz"
+    result = runner.invoke(upload, ["test_file", "--compression", "gzip"])
+    mock_aws.upload_file_or_dir.assert_called_once_with("test_file", "gzip")
+    assert result.exit_code == 0
+
+
+def test_download(mocker, runner):
+    mock_aws = mocker.patch("mmgmt.AwsStorageMgmt")
+    mock_aws.download_file.return_value = "test_file"
+    result = runner.invoke(download, ["test_file", "--bucket_name", "test_bucket"])
+    mock_aws.download_file.assert_called_once_with("test_file", "test_bucket")
+    assert result.exit_code == 0
+
+
+def test_search(mocker, runner):
+    mock_file_mgmt = mocker.patch("mmgmt.FileManager")
+    mock_aws = mocker.patch("mmgmt.AwsStorageMgmt")
+    mock_aws.get_files.return_value = (["test_file"], ["s3_test_file"])
+    mock_file_mgmt.keyword_in_string.return_value = True
+    result = runner.invoke(search, ["test", "--location", "global"])
+    mock_aws.get_files.assert_called_once_with(location="global")
+    mock_file_mgmt.keyword_in_string.assert_called()
+    assert result.exit_code == 0
+
+
+def test_delete(mocker, runner):
+    mock_aws = mocker.patch("mmgmt.AwsStorageMgmt")
+    mock_aws.delete_file.return_value = None
+    with mocker.patch("mmgmt.typer.confirm", return_value=True):
+        result = runner.invoke(delete, ["test_file"])
+    mock_aws.delete_file.assert_called_once_with("test_file")
+    assert result.exit_code == 0
