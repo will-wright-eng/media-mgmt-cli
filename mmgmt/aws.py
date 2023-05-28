@@ -10,23 +10,23 @@ from mmgmt.log import Log
 from mmgmt.files import FileManager
 from mmgmt.config import Config
 
-file_mgmt = FileManager()
 logger = Log(debug=True)
 
 
 class AwsStorageMgmt:
-    def __init__(self, project_name: str = None):
+    def __init__(self):
         self.s3_resource = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
-        self.config = Config(Path(project_name) if project_name else None)
+        self.config = Config()
         self.load_config_file()
 
     def load_config_file(self):
-        if self.config.path and self.config.dotenv_path.is_file():
+        if self.config.check_exists():
             configs = self.config.get_configs()
             self.bucket = configs.get("bucket")
             self.object_prefix = configs.get("object_prefix")
             self.local_dir = configs.get("local_dir")
+            self.file_mgmt = FileManager(self.local_dir)
         else:
             logger.info("Config file not found. Please run `mmgmt config` to set up the configuration.")
 
@@ -141,33 +141,20 @@ class AwsStorageMgmt:
 
     def upload_file_or_dir(self, file_or_dir, compression):
         if compression == "zip":
-            file_created = file_mgmt.zip_process(file_or_dir)
+            file_created = self.file_mgmt.zip_process(file_or_dir)
         elif compression == "gzip":
-            file_created = file_mgmt.gzip_process(file_or_dir)
+            file_created = self.file_mgmt.gzip_process(file_or_dir)
         self.upload_file(file_name=file_created)
         return file_created
 
     def get_files(self, location: str):
         if location == "local" and self.local_dir:
-            files = file_mgmt.files_in_media_dir(local_path=self.local_dir)
+            return self.file_mgmt.files_in_media_dir()
         elif location == "s3":
-            files = self.get_bucket_obj_keys()
+            return self.get_bucket_obj_keys()
         elif location == "global" and self.local_dir:
-            files = file_mgmt.files_in_media_dir(local_path=self.local_dir) + self.get_bucket_obj_keys()
+            return self.file_mgmt.files_in_media_dir(), self.get_bucket_obj_keys()
         else:
-            logger.info("invalid location")
+            logger.error("invalid location")
+            logger.error(self.local_dir)
             return False
-        return files
-
-    def search_flow(self, file_list: List[str]):
-        logger.info("\nStorage Tier | Last Modified | Object Key\n")
-        for i, file_name in enumerate(file_list):
-            try:
-                resp = self.get_obj_head(file_name)
-                storage_class = resp.get("StorageClass", "STANDARD")
-                last_modified = resp.get("LastModified", "")
-                logger.info(f"[{i}] {storage_class} \t| {last_modified} \t| {file_name}")
-            except Exception:
-                logger.error(f"Exception getting object head for '{file_name}'; skipping")
-
-        return file_list
