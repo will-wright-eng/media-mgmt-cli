@@ -19,12 +19,27 @@ aws = AwsStorageMgmt(project_name=PROJECT_NAME)
 
 
 def echo_dict(input_dict: dict) -> None:
+    """
+    Prints a dictionary with its keys and values. If a key is longer than 17 characters, it is truncated and '..' is appended.
+    Each line is formatted as follows: [key...][.....][value]
+
+    Args:
+        input_dict (dict): The dictionary to be printed.
+    """
     for key, val in input_dict.items():
         typer.echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
 @app.command()
 def upload(filename: str, compression: Optional[str] = "gzip"):
+    """
+    Uploads the specified file to S3. If 'all' is passed as a filename, all files in the current directory are uploaded.
+    All uploaded files are compressed using the specified compression algorithm.
+
+    Args:
+        filename (str): The name of the file or directory to upload. Use 'all' to upload all files in the directory.
+        compression (Optional[str]): The compression algorithm to use. Defaults to 'gzip'.
+    """
     file_or_dir = filename
     p = Path(".")
     localfiles = os.listdir(p)
@@ -54,6 +69,13 @@ def upload(filename: str, compression: Optional[str] = "gzip"):
 
 @app.command()
 def search(keyword: str, location: Optional[str] = "global"):
+    """
+    Searches for files that contain the specified keyword in their names. The location to search in can be specified.
+
+    Args:
+        keyword (str): The keyword to search for in file names.
+        location (Optional[str]): The location to search in. Defaults to 'global'.
+    """
     files = aws.get_files(location=location)
 
     typer.echo(f"Searching {location} for {keyword}...")
@@ -80,30 +102,59 @@ def search(keyword: str, location: Optional[str] = "global"):
 
 @app.command()
 def download(filename: str, bucket_name: Optional[str] = None):
+    """
+    Downloads the specified file from S3.
+
+    Args:
+        filename (str): The name of the file to download.
+        bucket_name (Optional[str]): The name of the bucket from which to download the file. If not provided, the default bucket is used.
+    """
     typer.echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
 
 
 @app.command()
 def get_status(filename: str):
+    """
+    Retrieves and prints the metadata of the specified file.
+
+    Args:
+        filename (str): The name of the file to get the metadata for.
+    """
     aws.get_obj_head(object_name=filename)
     typer.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
 
 
 @app.command()
-def delete(filename: str, confirm: bool = typer.Option(False, prompt="Are you sure you want to delete?")):
-    if confirm:
+def delete(filename: str):
+    """
+    Deletes the specified file from S3. Requires confirmation.
+
+    Args:
+        filename (str): The name of the file to delete.
+    """
+    aws.get_obj_head(object_name=filename)
+    typer.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    if not typer.prompt("Confirm deletion?", default=False, confirm=True):
+        typer.echo("Aborted.")
+        return
+    else:
         try:
             aws.delete_file(filename)
             typer.echo(f"{filename} successfully deleted from S3")
         except Exception as e:
             typer.echo(f"An error occurred while deleting {filename}: {e}")
-    else:
-        typer.echo("Deletion cancelled.")
 
 
 @app.command()
 def ls(location: Optional[str] = "global", bucket_name: Optional[str] = None):
+    """
+    Lists the files in the specified location.
+
+    Args:
+        location (Optional[str]): The location to list files in. Defaults to 'global'.
+        bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
+    """
     if bucket_name:
         files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
     else:
@@ -121,6 +172,10 @@ def ls(location: Optional[str] = "global", bucket_name: Optional[str] = None):
 
 @app.command()
 def configure():
+    """
+    Configures the application by setting the AWS Access Key, Secret Key, and Region.
+    These are prompted from the user interactively.
+    """
     config = Config(Path("~/configs/mmgt"))
     config.load_env()
     config.print_current_config()
@@ -138,7 +193,7 @@ def configure():
 
 
 def entry_point() -> None:
-    app.run()
+    app()
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from mmgmt.log import Log
-from mmgmt.utils import FileManager
+from mmgmt.files import FileManager
 from mmgmt.config import Config
 
 file_mgmt = FileManager()
