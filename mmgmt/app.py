@@ -59,7 +59,7 @@ def upload(filename: str, compression: Optional[str] = "gzip"):
         else:
             typer.echo("invalid file_or_dir command")
     except Exception as e:
-        typer.echo(e)
+        logger.error(e)
     finally:
         if files_created:
             for file in files_created:
@@ -160,7 +160,7 @@ def delete(filename: str):
             aws.delete_file(filename)
             typer.echo(f"{filename} successfully deleted from S3")
         except Exception as e:
-            typer.echo(f"An error occurred while deleting {filename}: {e}")
+            logger.error(f"An error occurred while deleting {filename}: {e}")
 
 
 @app.command()

@@ -6,11 +6,14 @@ import tarfile
 from typing import List
 from zipfile import ZipFile
 
+from mmgmt.log import Log
+
 
 class FileManager:
     def __init__(self, base_path=None):
+        self.logger = Log(debug=True)
         if base_path:
-            self.base_path = base_path
+            self.base_path = pathlib.Path(base_path)
         else:
             self.base_path = pathlib.Path.home() / "media"
             self.base_path = self.base_path.resolve()
@@ -35,19 +38,21 @@ class FileManager:
             zip_path = shutil.make_archive(dir_name, "zip", dir_name)
             return zip_path.split("/")[-1]
         except NotADirectoryError as e:
-            print(e)
+            self.logger.error(e)
             return self.zip_single_file(file_or_dir)
 
     def gzip_process(self, file_or_dir: str) -> str:
+        self.logger.info("gzip_process")
         try:
             dir_path = str(self.base_path / file_or_dir)
+            self.logger.info(dir_path)
             gzip_file = f"{file_or_dir}.tar.gz"
             tar = tarfile.open(gzip_file, "w:gz")
             tar.add(dir_path, arcname=file_or_dir)
             tar.close()
             return gzip_file
         except NotADirectoryError as e:
-            print(e)
+            self.logger.error(e)
             return self.gzip_single_file(file_or_dir)
 
     def files_in_media_dir(self) -> List[str]:
