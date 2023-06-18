@@ -249,7 +249,7 @@ class AwsStorageMgmt:
 
     def search_flow(self, file_list: List[str]):
         if click.confirm("\nDisplay storage tier?"):
-            echo("\nStorage Tier | Last Modfied | Object Key\n")
+            echo("\nStorage Tier | Last Modified | Object Key\n")
             for i, file_name in enumerate(file_list):
                 try:
                     resp = self.get_obj_head(file_name)
