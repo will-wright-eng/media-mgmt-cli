@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import dotenv
@@ -31,13 +32,19 @@ class Config:
                 print(f"Current configuration:\n{f.read()}")
 
     def get_configs(self):
-        configs = {}
+        # configs = {}
         if self.dotenv_path.is_file():
-            with self.dotenv_path.open() as f:
-                for line in f:
-                    if not line.startswith("#"):
-                        key, value = line.split("=")
-                        configs[key.strip()] = value.strip()
+            self.load_env()
+            configs = {
+                "BUCKET": os.getenv("BUCKET"),
+                "OBJECT_PREFIX": os.getenv("OBJECT_PREFIX"),
+                "LOCAL_DIR": os.getenv("LOCAL_DIR"),
+            }
+            # with self.dotenv_path.open() as f:
+            #     for line in f:
+            #         if not line.startswith("#"):
+            #             key, value = line.split("=")
+            #             configs[key.strip()] = value.strip()
         return configs
 
     def ask_overwrite(self) -> bool:

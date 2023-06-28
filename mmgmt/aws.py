@@ -19,10 +19,10 @@ class AwsStorageMgmt:
 
     def load_config_file(self):
         if self.config.check_exists():
-            configs = self.config.get_configs()
-            self.bucket = configs.get("bucket")
-            self.object_prefix = configs.get("object_prefix")
-            self.local_dir = configs.get("local_dir")
+            self.configs = self.config.get_configs()
+            self.bucket = configs.get("BUCKET")
+            self.object_prefix = configs.get("OBJECT_PREFIX")
+            self.local_dir = configs.get("LOCAL_DIR")
             self.file_mgmt = FileManager(self.local_dir)
         else:
             self.logger.info("Config file not found. Please run `mmgmt config` to set up the configuration.")

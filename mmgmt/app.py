@@ -13,9 +13,9 @@ from mmgmt.files import FileManager
 from mmgmt.config import Config
 
 app = typer.Typer()
-file_mgmt = FileManager()
 aws = AwsStorageMgmt()
 logger = Log(debug=True)
+# file_mgmt = FileManager()
 
 
 def echo_dict(input_dict: dict) -> None:
@@ -78,6 +78,7 @@ def search(keyword: str, location: Optional[str] = "global"):
     local_files, s3_keys = aws.get_files(location=location)
 
     typer.echo(f"\nSearching `{location}` for keyword `{keyword}`...")
+    file_mgmt = FileManager()
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
 
