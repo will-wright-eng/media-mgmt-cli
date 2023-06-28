@@ -1,5 +1,5 @@
 from .app import entry_point as cli  # noqa: F401
-from .aws import AwsStorageMgmt as AwsStorageMgmt
+from .aws import AwsStorageMgmt
 
 __version__ = "0.1.0"
 __docformat__ = "restructuredtext"
@@ -30,7 +30,7 @@ Features
 # Use __all__ to let type checkers know what is part of the public API.
 # Pandas is not (yet) a py.typed library: the public API is determined
 # based on the documentation.
-__all__ = [
-    "AwsStorageMgmt",
-    "ConfigHandler",
-]
+# __all__ = [
+#     "AwsStorageMgmt",
+#     "ConfigHandler",
+# ]

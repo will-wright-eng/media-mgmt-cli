@@ -1,7 +1,6 @@
 import pytest
-from typer.testing import CliRunner
-
 from mmgmt.app import app
+from typer.testing import CliRunner
 
 
 @pytest.fixture

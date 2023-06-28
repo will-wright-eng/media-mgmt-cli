@@ -7,15 +7,15 @@ import typer
 from rich.table import Table
 from rich.console import Console
 
-from mmgmt.aws import AwsStorageMgmt
-from mmgmt.log import Log
-from mmgmt.files import FileManager
-from mmgmt.config import Config
+from mgmt.aws import AwsStorageMgmt
+from mgmt.log import Log
+from mgmt.files import FileManager
+from mgmt.config import Config
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
 logger = Log(debug=True)
-# file_mgmt = FileManager()
+file_mgmt = FileManager()
 
 
 def echo_dict(input_dict: dict) -> None:
@@ -32,8 +32,7 @@ def echo_dict(input_dict: dict) -> None:
 @app.command()
 def upload(filename: str, compression: Optional[str] = "gzip"):
     """
-    Uploads the specified file to S3. If 'all' is passed as a filename, all files in the current directory are uploaded.
-    All uploaded files are compressed using the specified compression algorithm.
+    Uploads the specified file to S3
 
     Args:
         filename (str): The name of the file or directory to upload. Use 'all' to upload all files in the directory.
@@ -69,7 +68,7 @@ def upload(filename: str, compression: Optional[str] = "gzip"):
 @app.command()
 def search(keyword: str, location: Optional[str] = "global"):
     """
-    Searches for files that contain the specified keyword in their names. The location to search in can be specified.
+    Searches for files that contain the specified keyword in their names
 
     Args:
         keyword (str): The keyword to search for in file names.
@@ -78,7 +77,6 @@ def search(keyword: str, location: Optional[str] = "global"):
     local_files, s3_keys = aws.get_files(location=location)
 
     typer.echo(f"\nSearching `{location}` for keyword `{keyword}`...")
-    file_mgmt = FileManager()
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
 
@@ -121,7 +119,7 @@ def search(keyword: str, location: Optional[str] = "global"):
 @app.command()
 def download(filename: str, bucket_name: Optional[str] = None):
     """
-    Downloads the specified file from S3.
+    Downloads the specified file from S3
 
     Args:
         filename (str): The name of the file to download.
@@ -132,9 +130,9 @@ def download(filename: str, bucket_name: Optional[str] = None):
 
 
 @app.command()
-def get_status(filename: str):
+def status(filename: str):
     """
-    Retrieves and prints the metadata of the specified file.
+    Retrieves and prints the metadata of the specified file
 
     Args:
         filename (str): The name of the file to get the metadata for.
@@ -146,7 +144,7 @@ def get_status(filename: str):
 @app.command()
 def delete(filename: str):
     """
-    Deletes the specified file from S3. Requires confirmation.
+    Deletes the specified file from S3; requires confirmation
 
     Args:
         filename (str): The name of the file to delete.
@@ -165,9 +163,9 @@ def delete(filename: str):
 
 
 @app.command()
-def ls(location: Optional[str] = "global", bucket_name: Optional[str] = None):
+def list(location: Optional[str] = "global", bucket_name: Optional[str] = None):
     """
-    Lists the files in the specified location.
+    Lists the files in the specified location
 
     Args:
         location (Optional[str]): The location to list files in. Defaults to 'global'.
@@ -193,24 +191,13 @@ def ls(location: Optional[str] = "global", bucket_name: Optional[str] = None):
 @app.command()
 def config():
     """
-    Configures the application by setting the AWS Access Key, Secret Key, and Region.
-    These are prompted from the user interactively.
+    Configures the application
     """
     config = Config()
     config.load_env()
     config.print_current_config()
     if not config.ask_overwrite():
         return
-
-    # TODO: fix this to include the values within the aws class
-
-    # aws_access_key = typer.prompt("AWS Access Key", hide_input=True)
-    # aws_secret_key = typer.prompt("AWS Secret Key", hide_input=True)
-    # region = typer.prompt("AWS Region")
-
-    # config.set_key("AWS_ACCESS_KEY_ID", aws_access_key)
-    # config.set_key("AWS_SECRET_ACCESS_KEY", aws_secret_key)
-    # config.set_key("AWS_REGION", region)
 
     typer.echo("Configuration complete.")
 

@@ -4,9 +4,9 @@ from time import sleep
 import boto3
 from botocore.exceptions import ClientError
 
-from mmgmt.log import Log
-from mmgmt.files import FileManager
-from mmgmt.config import Config
+from mgmt.log import Log
+from mgmt.files import FileManager
+from mgmt.config import Config
 
 
 class AwsStorageMgmt:
@@ -20,23 +20,19 @@ class AwsStorageMgmt:
     def load_config_file(self):
         if self.config.check_exists():
             self.configs = self.config.get_configs()
-            self.bucket = configs.get("BUCKET")
-            self.object_prefix = configs.get("OBJECT_PREFIX")
-            self.local_dir = configs.get("LOCAL_DIR")
+            self.bucket = self.configs.get("BUCKET")
+            self.object_prefix = self.configs.get("OBJECT_PREFIX")
+            self.local_dir = self.configs.get("LOCAL_DIR")
             self.file_mgmt = FileManager(self.local_dir)
         else:
-            self.logger.info("Config file not found. Please run `mmgmt config` to set up the configuration.")
-
-    # TODO set base path to cwd
-    # def set_base_path(self):
-    #     self.file_mgmt = FileManager(self.local_dir)
+            self.logger.debug("Config file not found. Please run `mgmt config` to set up the configuration.")
 
     def upload_file(self, file_name, additional_prefix=None) -> bool:
         object_name = file_name
         if self.object_prefix:
             object_name = os.path.join(self.object_prefix, additional_prefix or "", file_name)
 
-        self.logger.info(f"Uploading: {file_name} to S3 bucket: {self.bucket}/{object_name}")
+        self.logger.debug(f"Uploading: {file_name} to S3 bucket: {self.bucket}/{object_name}")
         try:
             with open(file_name, "rb") as data:
                 self.s3_client.upload_fileobj(data, self.bucket, object_name)
@@ -48,7 +44,7 @@ class AwsStorageMgmt:
     def download_file(self, object_name: str, bucket_name: str = None) -> bool:
         if not bucket_name:
             bucket_name = self.bucket
-        self.logger.info(f"Downloading `{object_name}` from `{bucket_name}`")
+        self.logger.debug(f"Downloading `{object_name}` from `{bucket_name}`")
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
@@ -62,9 +58,9 @@ class AwsStorageMgmt:
     def get_bucket_objs(self, bucket_name=None):
         if not bucket_name:
             bucket_name = self.bucket
-        self.logger.info(f"bucket = {bucket_name}")
+        self.logger.debug(f"bucket = {bucket_name}")
         my_bucket = self.s3_resource.Bucket(bucket_name)
-        self.logger.info(my_bucket)
+        self.logger.debug(my_bucket)
         return [obj for obj in my_bucket.objects.all()]
 
     def get_bucket_obj_keys(self):
@@ -81,7 +77,7 @@ class AwsStorageMgmt:
         response = self.get_obj_head(object_name)
         try:
             resp_string = response["Restore"]
-            self.logger.info(resp_string)
+            self.logger.debug(resp_string)
             if "ongoing-request" in resp_string and "true" in resp_string:
                 status = "incomplete"
             elif "ongoing-request" in resp_string and "false" in resp_string:
@@ -90,7 +86,7 @@ class AwsStorageMgmt:
                 status = "unknown"
         except Exception as e:
             status = str(e)
-        self.logger.info(status)
+        self.logger.debug(status)
         return status
 
     def restore_from_glacier(self, object_name: str, restore_tier: str):
@@ -118,30 +114,30 @@ class AwsStorageMgmt:
             self.logger.error(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
             return
 
-        self.logger.info(f"restoring object from {tier}: {object_name}")
+        self.logger.debug(f"restoring object from {tier}: {object_name}")
         self.restore_from_glacier(object_name=object_name, restore_tier=restore_tier)
         if tier == "GLACIER":
             restored = False
             while not restored:
                 sleep(30)
-                self.logger.info("checking...")
+                self.logger.debug("checking...")
                 status = self.get_obj_restore_status(object_name)
                 if status == "incomplete":
                     pass
                 elif status == "complete":
-                    self.logger.info("restored = True")
+                    self.logger.debug("restored = True")
                     restored = True
                 else:
-                    self.logger.info(f"status: {status}, exiting...")
+                    self.logger.debug(f"status: {status}, exiting...")
                     return
-            self.logger.info("downloading restored file")
+            self.logger.debug("downloading restored file")
             return self.download_file(object_name=object_name)
         else:
-            self.logger.info(f"object in {tier}, object will be restored in 12-24 hours")
+            self.logger.debug(f"object in {tier}, object will be restored in 12-24 hours")
             return
 
     def upload_file_or_dir(self, file_or_dir, compression):
-        self.logger.info(f"upload_file_or_dir: {file_or_dir} {compression}")
+        self.logger.debug(f"upload_file_or_dir: {file_or_dir} {compression}")
         if compression == "zip":
             file_created = self.file_mgmt.zip_process(file_or_dir)
         elif compression == "gzip":

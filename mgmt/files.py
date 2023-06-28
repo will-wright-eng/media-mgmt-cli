@@ -6,7 +6,7 @@ import tarfile
 from typing import List
 from zipfile import ZipFile
 
-from mmgmt.log import Log
+from mgmt.log import Log
 
 
 class FileManager:
