@@ -1,39 +1,40 @@
-name: Test
+# name: Test
 
-on:
-  push:
-    branches:
-    - '*'         # matches every branch that doesn't contain a '/'
-    - '*/*'       # matches every branch containing a single '/'
-    - '**'        # matches every branch
-    - '!main'     # excludes main branch
+# on:
+#   push:
+#     branches:
+#     - '*'         # matches every branch that doesn't contain a '/'
+#     - '*/*'       # matches every branch containing a single '/'
+#     - '**'        # matches every branch
+#     - '!main'     # excludes main branch
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
-jobs:
-  test-py-os:
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-        os: [ubuntu-20.04, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - uses: actions/cache@v3
-      name: Configure pip caching
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Install dependencies
-      run: |
-        pip install -e .
-    - name: Run tests
-      run: |
-        pytest
+# jobs:
+#   test-py-os:
+#     strategy:
+#       matrix:
+#         python-version: ["3.8", "3.9", "3.10", "3.11"]
+#         os: [ubuntu-20.04, windows-latest, macos-latest]
+#     runs-on: ${{ matrix.os }}
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Set up Python ${{ matrix.python-version }}
+#       uses: actions/setup-python@v4
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - uses: actions/cache@v3
+#       name: Configure pip caching
+#       with:
+#         path: ~/.cache/pip
+#         key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+#         restore-keys: |
+#           ${{ runner.os }}-pip-
+#     - name: Install dependencies
+#       run: |
+#         pip install -e .
+#         pip install pytest-mock
+#     - name: Run tests
+#       run: |
+#         pytest

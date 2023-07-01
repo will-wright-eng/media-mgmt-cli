@@ -1,8 +1,8 @@
 # Media Management Command Line Interface
 
-[![PyPI](https://img.shields.io/pypi/v/mmgmt)](https://pypi.org/project/mmgmt/)
-[![Downloads](https://static.pepy.tech/badge/mmgmt/month)](https://pepy.tech/project/mmgmt)
-[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/mmgmt/)
+[![PyPI](https://img.shields.io/pypi/v/mgmt)](https://pypi.org/project/mgmt/)
+[![Downloads](https://static.pepy.tech/badge/mgmt/month)](https://pepy.tech/project/mgmt)
+[![Supported Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://pypi.org/project/mgmt/)
 [![Contributors](https://img.shields.io/github/contributors/will-wright-eng/media-mgmt-cli.svg)](https://github.com/will-wright-eng/media-mgmt-cli/graphs/contributors)
 [![Tests](https://github.com/will-wright-eng/media-mgmt-cli/workflows/Test/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions?query=workflow%3ATest)
 [![Codeball](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml/badge.svg)](https://github.com/will-wright-eng/media-mgmt-cli/actions/workflows/codeball.yml)
@@ -12,12 +12,12 @@
 
 **An intuitive command line interface wrapper around boto3 to search and manage media assets**
 
-## Installing `mmgmt` & Supported Versions
+## Installing `mgmt` & Supported Versions
 
-`mmgmt` is available on PyPI:
+`mgmt` is available on PyPI:
 
 ```bash
-python -m pip install mmgmt
+python -m pip install mgmt
 ```
 
 Media Management Command Line Interface officially supports Python 3.8+.
@@ -27,22 +27,22 @@ Media Management Command Line Interface officially supports Python 3.8+.
 For help, run:
 
 ```bash
-mmgmt --help
+mgmt --help
 ```
 
 You can also use:
 
 ```bash
-python -m mmgmt --help
+python -m mgmt --help
 ```
 
 Commands:
 
 ```bash
-Usage: mmgmt [OPTIONS] COMMAND [ARGS]...
+Usage: mgmt [OPTIONS] COMMAND [ARGS]...
 
   A simple CLI to search and manage media assets in S3 and locally. Setup with
-  `mmgmt configure`
+  `mgmt configure`
 
 Options:
   --version   Show the version and exit.
@@ -61,7 +61,7 @@ Commands:
 
 Why not use `awscli`?
 
-You can, and I do, in tandem with `mmgmt` -- the purpose is to create an additional interface that minimized the lookup/copy/paste process I found myself frequently going through.
+You can, and I do, in tandem with `mgmt` -- the purpose is to create an additional interface that minimized the lookup/copy/paste process I found myself frequently going through.
 
 Another use case is for rapid prototyping applications that require an S3 interface.
 
@@ -69,9 +69,9 @@ For example:
 
 ```python
 import pandas as pd
-import mmgmt as mmgmt
+import mgmt as mgmt
 
-aws = mmgmt.AwsStorageMgmt(project_name="mmgmt")
+aws = mgmt.AwsStorageMgmt(project_name="mgmt")
 obj_list = aws.get_bucket_objs()
 
 res = []
@@ -133,6 +133,6 @@ pre-commit install
 
 ## References
 
-- [PyPI Package](https://pypi.org/project/mmgmt)
+- [PyPI Package](https://pypi.org/project/mgmt)
 - Based on cookiecutter template [will-wright-eng/click-app](https://github.com/will-wright-eng/click-app)
 - Rewrite of original project [will-wright-eng/media_mgmt_cli](https://github.com/will-wright-eng/media_mgmt_cli)

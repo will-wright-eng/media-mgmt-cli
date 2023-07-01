@@ -1,0 +1,161 @@
+import os
+from time import sleep
+
+import boto3
+from botocore.exceptions import ClientError
+
+from mgmt.log import Log
+from mgmt.files import FileManager
+from mgmt.config import Config
+
+
+class AwsStorageMgmt:
+    def __init__(self):
+        self.s3_resource = boto3.resource("s3")
+        self.s3_client = boto3.client("s3")
+        self.config = Config()
+        self.load_config_file()
+        self.logger = Log(debug=False)
+
+    def load_config_file(self):
+        if self.config.check_exists():
+            self.configs = self.config.get_configs()
+            self.bucket = self.configs.get("BUCKET")
+            self.object_prefix = self.configs.get("OBJECT_PREFIX")
+            self.local_dir = self.configs.get("LOCAL_DIR")
+            self.file_mgmt = FileManager(self.local_dir)
+        else:
+            self.logger.debug("Config file not found. Please run `mgmt config` to set up the configuration.")
+
+    def upload_file(self, file_name) -> bool:
+        self.logger.debug("upload_file")
+        object_name = file_name.split("/")[-1]
+        if self.object_prefix:
+            object_name = os.path.join(self.object_prefix, object_name)
+
+        self.logger.info(f"File Upload: {file_name}")
+        self.logger.info(f"S3 Location: {self.bucket}/{object_name}")
+        try:
+            with open(file_name, "rb") as data:
+                self.s3_client.upload_fileobj(data, self.bucket, object_name)
+        except ClientError as e:
+            self.logger.error(e)
+            return False
+        return True
+
+    def download_file(self, object_name: str, bucket_name: str = None) -> bool:
+        if not bucket_name:
+            bucket_name = self.bucket
+        self.logger.debug(f"Downloading `{object_name}` from `{bucket_name}`")
+        file_name = object_name.split("/")[-1]
+        try:
+            with open(file_name, "wb") as data:
+                self.s3_client.download_fileobj(bucket_name, object_name, data)
+        except ClientError as e:
+            self.logger.error(f"-- ClientError --\n{str(e)}")
+            os.remove(file_name)
+            return False
+        return True
+
+    def get_bucket_objs(self, bucket_name=None):
+        if not bucket_name:
+            bucket_name = self.bucket
+        self.logger.debug(f"bucket = {bucket_name}")
+        my_bucket = self.s3_resource.Bucket(bucket_name)
+        self.logger.debug(my_bucket)
+        return [obj for obj in my_bucket.objects.all()]
+
+    def get_bucket_obj_keys(self):
+        return [obj.key for obj in self.get_bucket_objs()]
+
+    def get_obj_head(self, object_name: str):
+        response = self.s3_client.head_object(
+            Bucket=self.bucket,
+            Key=object_name,
+        )
+        return response
+
+    def get_obj_restore_status(self, object_name):
+        response = self.get_obj_head(object_name)
+        try:
+            resp_string = response["Restore"]
+            self.logger.debug(resp_string)
+            if "ongoing-request" in resp_string and "true" in resp_string:
+                status = "incomplete"
+            elif "ongoing-request" in resp_string and "false" in resp_string:
+                status = "complete"
+            else:
+                status = "unknown"
+        except Exception as e:
+            status = str(e)
+        self.logger.debug(status)
+        return status
+
+    def restore_from_glacier(self, object_name: str, restore_tier: str):
+        response = self.s3_client.restore_object(
+            Bucket=self.bucket,
+            Key=object_name,
+            RestoreRequest={
+                "Days": 10,
+                "GlacierJobParameters": {
+                    "Tier": restore_tier,
+                },
+            },
+        )
+        return response
+
+    def download_from_glacier(self, object_name: str):
+        self.get_obj_head(object_name)
+        try:
+            tier = self.obj_head["StorageClass"]
+            if tier == "DEEP_ARCHIVE":
+                restore_tier = "Standard"
+            elif tier == "GLACIER":
+                restore_tier = "Expedited"
+        except KeyError as e:
+            self.logger.error(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
+            return
+
+        self.logger.debug(f"restoring object from {tier}: {object_name}")
+        self.restore_from_glacier(object_name=object_name, restore_tier=restore_tier)
+        if tier == "GLACIER":
+            restored = False
+            while not restored:
+                sleep(30)
+                self.logger.debug("checking...")
+                status = self.get_obj_restore_status(object_name)
+                if status == "incomplete":
+                    pass
+                elif status == "complete":
+                    self.logger.debug("restored = True")
+                    restored = True
+                else:
+                    self.logger.debug(f"status: {status}, exiting...")
+                    return
+            self.logger.debug("downloading restored file")
+            return self.download_file(object_name=object_name)
+        else:
+            self.logger.debug(f"object in {tier}, object will be restored in 12-24 hours")
+            return
+
+    def upload_target(self, target_path, compression):
+        self.logger.debug(f"upload_target: {str(target_path)} {compression}")
+        if compression == "zip":
+            file_created = self.file_mgmt.zip_process(target_path)
+        elif compression == "gzip":
+            self.logger.debug("gzip")
+            file_created = self.file_mgmt.gzip_process(target_path)
+        self.upload_file(file_name=file_created)
+        return file_created
+
+    def get_files(self, location: str):
+        if location == "local" and self.local_dir:
+            return self.file_mgmt.files_in_media_dir()
+        elif location == "s3":
+            return self.get_bucket_obj_keys()
+        elif location == "global" and self.local_dir:
+            return self.file_mgmt.files_in_media_dir(), self.get_bucket_obj_keys()
+        else:
+            self.logger.error("invalid location")
+            self.logger.error(self.local_dir)
+            return False
