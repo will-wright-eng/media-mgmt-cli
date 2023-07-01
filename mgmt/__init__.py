@@ -1,7 +1,7 @@
 from .app import entry_point as cli  # noqa: F401
 from .aws import AwsStorageMgmt
 
-__version__ = "0.1.0"
+__version__ = "0.6.0"
 __docformat__ = "restructuredtext"
 
 """
