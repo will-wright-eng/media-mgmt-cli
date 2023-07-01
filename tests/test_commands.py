@@ -10,7 +10,7 @@ def runner():
 
 
 def test_upload(mocker):
-    mock_aws = mocker.patch("mmgmt.aws.AwsStorageMgmt")
+    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
     mock_aws.upload_file_or_dir.return_value = "test_file.gz"
     runner = CliRunner()
     result = runner.invoke(app, ["upload", "test_file", "--compression", "gzip"])
@@ -19,7 +19,7 @@ def test_upload(mocker):
 
 
 def test_download(mocker):
-    mock_aws = mocker.patch("mmgmt.aws.AwsStorageMgmt")
+    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
     mock_aws.download_file.return_value = "test_file"
     runner = CliRunner()
     result = runner.invoke(app, ["download", "test_file", "--bucket_name", "test_bucket"])
@@ -28,8 +28,8 @@ def test_download(mocker):
 
 
 def test_search(mocker):
-    mock_file_mgmt = mocker.patch("mmgmt.files.FileManager")
-    mock_aws = mocker.patch("mmgmt.aws.AwsStorageMgmt")
+    mock_file_mgmt = mocker.patch("mgmt.files.FileManager")
+    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
     mock_aws.get_files.return_value = (["test_file"], ["s3_test_file"])
     mock_file_mgmt.keyword_in_string.return_value = True
     runner = CliRunner()
@@ -40,9 +40,9 @@ def test_search(mocker):
 
 
 def test_delete(mocker):
-    mock_aws = mocker.patch("mmgmt.aws.AwsStorageMgmt")
+    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
     mock_aws.delete_file.return_value = None
-    with mocker.patch("mmgmt.app.typer.confirm", return_value=True):
+    with mocker.patch("mgmt.app.typer.confirm", return_value=True):
         runner = CliRunner()
         result = runner.invoke(app, ["delete", "test_file"])
     mock_aws.delete_file.assert_called_once_with("test_file")
