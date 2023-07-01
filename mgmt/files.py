@@ -11,7 +11,7 @@ from mgmt.log import Log
 
 class FileManager:
     def __init__(self, base_path=None):
-        self.logger = Log(debug=True)
+        self.logger = Log(debug=False)
         if base_path:
             self.base_path = pathlib.Path(base_path)
         else:
@@ -32,28 +32,32 @@ class FileManager:
             shutil.copyfileobj(f_in, f_out)
         return gzip_file
 
-    def zip_process(self, file_or_dir: str) -> str:
+    def zip_process(self, target_path: pathlib.Path) -> str:
         try:
-            dir_name = str(self.base_path / file_or_dir)
+            # dir_name = str(self.base_path / target_path)
+            dir_name = str(target_path)
             zip_path = shutil.make_archive(dir_name, "zip", dir_name)
             return zip_path.split("/")[-1]
         except NotADirectoryError as e:
             self.logger.error(e)
-            return self.zip_single_file(file_or_dir)
+            return self.zip_single_file(target_path)
 
-    def gzip_process(self, file_or_dir: str) -> str:
-        self.logger.info("gzip_process")
+    def gzip_process(self, target_path: pathlib.Path) -> str:
+        self.logger.debug("gzip_process")
         try:
-            dir_path = str(self.base_path / file_or_dir)
-            self.logger.info(dir_path)
-            gzip_file = f"{file_or_dir}.tar.gz"
+            # dir_path = str(self.base_path / target_path)
+            dir_path = str(target_path)
+            self.logger.debug(dir_path)
+            gzip_file = f"{target_path}.tar.gz"
+            self.logger.debug("tarfile open")
             tar = tarfile.open(gzip_file, "w:gz")
-            tar.add(dir_path, arcname=file_or_dir)
+            self.logger.debug("tarfile add")
+            tar.add(dir_path, arcname=target_path)
             tar.close()
             return gzip_file
         except NotADirectoryError as e:
             self.logger.error(e)
-            return self.gzip_single_file(file_or_dir)
+            return self.gzip_single_file(target_path)
 
     def files_in_media_dir(self) -> List[str]:
         tmp = os.listdir(self.base_path)

@@ -4,6 +4,7 @@ from typing import Optional
 from pathlib import Path
 
 import typer
+from typer import echo
 from rich.table import Table
 from rich.console import Console
 
@@ -14,7 +15,7 @@ from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
-logger = Log(debug=True)
+logger = Log(debug=False)
 file_mgmt = FileManager()
 
 
@@ -26,11 +27,11 @@ def echo_dict(input_dict: dict) -> None:
         input_dict (dict): The dictionary to be printed.
     """
     for key, val in input_dict.items():
-        typer.echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
+        echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
 @app.command()
-def upload(filename: str, compression: Optional[str] = "gzip"):
+def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     """
     Uploads the specified file to S3
 
@@ -38,27 +39,35 @@ def upload(filename: str, compression: Optional[str] = "gzip"):
         filename (str): The name of the file or directory to upload. Use 'all' to upload all files in the directory.
         compression (Optional[str]): The compression algorithm to use. Defaults to 'gzip'.
     """
-    file_or_dir = filename
-    p = Path(".")
-    localfiles = os.listdir(p)
+    target = filename
+    cwd = Path(".").resolve()
+    target_path = cwd / target
+    # localfiles = os.listdir(p)
     files_created = []
+
+    # if not target:
+    #     echo("invalid target command")
+    #     return
+    # print(str(target_path)," in ",str(os.listdir(cwd)))
+
     try:
-        if file_or_dir:
-            if file_or_dir == "all":
-                typer.echo("uploading all media objects to S3")
-                for _file_or_dir in localfiles:
-                    typer.echo(f"{_file_or_dir}, compressing...")
-                    files_created.append(aws.upload_file_or_dir(_file_or_dir, compression))
-            elif file_or_dir in localfiles:
-                typer.echo("file found, compressing...")
-                files_created.append(aws.upload_file_or_dir(file_or_dir, compression))
-            else:
-                typer.echo("invalid file or directory")
-                return False
+        if target == "all":
+            echo("uploading all media objects to S3")
+            for _file_or_dir in cwd.iterdir():
+                echo()
+                echo("compressing...")
+                echo(str(_file_or_dir))
+                files_created.append(aws.upload_target(_file_or_dir, compression))
+        elif target in os.listdir(cwd):
+            echo()
+            echo("file found, compressing...")
+            echo(str(target))
+            files_created.append(aws.upload_target(target_path, compression))
         else:
-            typer.echo("invalid file_or_dir command")
+            echo("invalid file or directory")
+            return False
     except Exception as e:
-        logger.error(e)
+        logger.error(f"An error occurred while uploading: {e}")
     finally:
         if files_created:
             for file in files_created:
@@ -66,7 +75,7 @@ def upload(filename: str, compression: Optional[str] = "gzip"):
 
 
 @app.command()
-def search(keyword: str, location: Optional[str] = "global"):
+def search(keyword: str, location: Optional[str] = "global") -> None:
     """
     Searches for files that contain the specified keyword in their names
 
@@ -76,14 +85,14 @@ def search(keyword: str, location: Optional[str] = "global"):
     """
     local_files, s3_keys = aws.get_files(location=location)
 
-    typer.echo(f"\nSearching `{location}` for keyword `{keyword}`...")
+    echo(f"\nSearching `{location}` for keyword `{keyword}`...")
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
 
     if len(local_matches + s3_matches) >= 1:
-        typer.echo("at least one match found\n")
-        typer.echo("Local File Matches")
-        typer.echo("\n".join(local_matches))
+        echo("at least one match found\n")
+        echo("Local File Matches")
+        echo("\n".join(local_matches))
 
         console = Console()
         table = Table(title="AWS S3 Search Matches")
@@ -100,24 +109,23 @@ def search(keyword: str, location: Optional[str] = "global"):
                 table.add_row(storage_class, str(last_modified), file_name)
                 doptions[i] = file_name
             except Exception as e:
-                logger.error(f"skipping file: {file_name}")
-                logger.error(e)
+                logger.error(f"An error occurred while getting metadata: {e}")
 
         console.print(table)
         if not typer.confirm("Download?", default=False):
-            typer.echo("Aborted.")
+            echo("Aborted.")
             return
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
             aws.download_file(doptions[resp])
             return
     else:
-        typer.echo("no matches found\n")
+        echo("no matches found\n")
         return
 
 
 @app.command()
-def download(filename: str, bucket_name: Optional[str] = None):
+def download(filename: str, bucket_name: Optional[str] = None) -> None:
     """
     Downloads the specified file from S3
 
@@ -125,12 +133,12 @@ def download(filename: str, bucket_name: Optional[str] = None):
         filename (str): The name of the file to download.
         bucket_name (Optional[str]): The name of the bucket from which to download the file. If not provided, the default bucket is used.
     """
-    typer.echo(f"Downloading {filename} from S3...")
+    echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
 
 
 @app.command()
-def status(filename: str):
+def status(filename: str) -> None:
     """
     Retrieves and prints the metadata of the specified file
 
@@ -138,11 +146,11 @@ def status(filename: str):
         filename (str): The name of the file to get the metadata for.
     """
     aws.get_obj_head(object_name=filename)
-    typer.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
 
 
 @app.command()
-def delete(filename: str):
+def delete(filename: str) -> None:
     """
     Deletes the specified file from S3; requires confirmation
 
@@ -150,20 +158,20 @@ def delete(filename: str):
         filename (str): The name of the file to delete.
     """
     aws.get_obj_head(object_name=filename)
-    typer.echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
     if not typer.confirm("Confirm deletion?", default=False):
-        typer.echo("Aborted.")
+        echo("Aborted.")
         return
     else:
         try:
             aws.delete_file(filename)
-            typer.echo(f"{filename} successfully deleted from S3")
+            echo(f"{filename} successfully deleted from S3")
         except Exception as e:
             logger.error(f"An error occurred while deleting {filename}: {e}")
 
 
 @app.command()
-def list(location: Optional[str] = "global", bucket_name: Optional[str] = None):
+def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) -> None:
     """
     Lists the files in the specified location
 
@@ -182,14 +190,14 @@ def list(location: Optional[str] = "global", bucket_name: Optional[str] = None):
             p = Path(".")
             files = os.listdir(p)
         else:
-            typer.echo(f"invalid location input: {location}")
+            echo(f"invalid location input: {location}")
 
     for file in files:
-        typer.echo(file)
+        echo(file)
 
 
 @app.command()
-def config():
+def config() -> None:
     """
     Configures the application
     """
@@ -199,7 +207,7 @@ def config():
     if not config.ask_overwrite():
         return
 
-    typer.echo("Configuration complete.")
+    echo("Configuration complete.")
 
 
 def entry_point() -> None:

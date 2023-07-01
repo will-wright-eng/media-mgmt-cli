@@ -11,7 +11,7 @@ class Config:
         self.path = Path("~/.config/mmgmt").expanduser()
         self.path.mkdir(parents=True, exist_ok=True)
         self.dotenv_path = self.path / "config"
-        self.logger = Log(debug=True)
+        self.logger = Log(debug=False)
         if not self.check_exists():
             self.logger.error("config file not found")
             self.logger.info(f"check config file exists: {str(self.check_exists())}")

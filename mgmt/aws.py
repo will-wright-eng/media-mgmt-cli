@@ -15,7 +15,7 @@ class AwsStorageMgmt:
         self.s3_client = boto3.client("s3")
         self.config = Config()
         self.load_config_file()
-        self.logger = Log(debug=True)
+        self.logger = Log(debug=False)
 
     def load_config_file(self):
         if self.config.check_exists():
@@ -27,12 +27,14 @@ class AwsStorageMgmt:
         else:
             self.logger.debug("Config file not found. Please run `mgmt config` to set up the configuration.")
 
-    def upload_file(self, file_name, additional_prefix=None) -> bool:
-        object_name = file_name
+    def upload_file(self, file_name) -> bool:
+        self.logger.debug("upload_file")
+        object_name = file_name.split("/")[-1]
         if self.object_prefix:
-            object_name = os.path.join(self.object_prefix, additional_prefix or "", file_name)
+            object_name = os.path.join(self.object_prefix, object_name)
 
-        self.logger.debug(f"Uploading: {file_name} to S3 bucket: {self.bucket}/{object_name}")
+        self.logger.info(f"File Upload: {file_name}")
+        self.logger.info(f"S3 Location: {self.bucket}/{object_name}")
         try:
             with open(file_name, "rb") as data:
                 self.s3_client.upload_fileobj(data, self.bucket, object_name)
@@ -136,12 +138,13 @@ class AwsStorageMgmt:
             self.logger.debug(f"object in {tier}, object will be restored in 12-24 hours")
             return
 
-    def upload_file_or_dir(self, file_or_dir, compression):
-        self.logger.debug(f"upload_file_or_dir: {file_or_dir} {compression}")
+    def upload_target(self, target_path, compression):
+        self.logger.debug(f"upload_target: {str(target_path)} {compression}")
         if compression == "zip":
-            file_created = self.file_mgmt.zip_process(file_or_dir)
+            file_created = self.file_mgmt.zip_process(target_path)
         elif compression == "gzip":
-            file_created = self.file_mgmt.gzip_process(file_or_dir)
+            self.logger.debug("gzip")
+            file_created = self.file_mgmt.gzip_process(target_path)
         self.upload_file(file_name=file_created)
         return file_created
 
