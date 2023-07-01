@@ -1,17 +1,17 @@
-name: Codeball
+# name: Codeball
 
-on: [pull_request]
+# on: [pull_request]
 
-jobs:
-  codeball-job:
-    runs-on: ubuntu-latest
-    name: Codeball
-    steps:
-    - name: Codeball
-      uses: sturdy-dev/codeball-action@v2
-      with:
-        approvePullRequests: "false"
-        labelPullRequestsWhenApproved: "true"
-        labelPullRequestsWhenReviewNeeded: "true"
-        failJobsWhenReviewNeeded: "false"
-        codeSuggestionsFromComments: "true"
+# jobs:
+#   codeball-job:
+#     runs-on: ubuntu-latest
+#     name: Codeball
+#     steps:
+#     - name: Codeball
+#       uses: sturdy-dev/codeball-action@v2
+#       with:
+#         approvePullRequests: "false"
+#         labelPullRequestsWhenApproved: "true"
+#         labelPullRequestsWhenReviewNeeded: "true"
+#         failJobsWhenReviewNeeded: "false"
+#         codeSuggestionsFromComments: "true"
