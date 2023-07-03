@@ -4,6 +4,7 @@ from typing import Optional
 from pathlib import Path
 
 import typer
+from rich import box
 from typer import echo
 from rich.table import Table
 from rich.console import Console
@@ -80,11 +81,11 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         echo("\n".join(local_matches))
 
         console = Console()
-        table = Table(title="AWS S3 Search Matches")
-        table.add_column("Option #")
-        table.add_column("Storage Tier")
+        table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
+        table.add_column("Option #", style="cyan", no_wrap=True)
+        table.add_column("Storage Tier", style="green")
         table.add_column("Last Modified")
-        table.add_column("Object Key")
+        table.add_column("Object Key", style="magenta")
         table.add_column("Restored Status")
         doptions = {}
         for i, file_name in enumerate(s3_matches):
@@ -95,7 +96,7 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
                 restored_status = resp.get("Restore")
                 if restored_status:
                     restored_status = str(restored_status).split("expiry-date=")[-1].replace('"', "")
-                table.add_row(str(i), storage_class, str(last_modified), file_name, str(restored_status))
+                table.add_row(str(i), storage_class, str(last_modified).split(" ")[0], file_name, str(restored_status))
                 doptions[i] = file_name
             except Exception as e:
                 logger.error(f"An error occurred while getting metadata: {e}")
