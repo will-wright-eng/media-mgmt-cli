@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Optional
+from typing import Optional
 from pathlib import Path
 
 import typer
@@ -11,7 +11,7 @@ from rich.console import Console
 from mgmt.aws import AwsStorageMgmt
 from mgmt.log import Log
 from mgmt.files import FileManager
-from mgmt.utils import echo_dict, check_selection
+from mgmt.utils import check_selection
 from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
