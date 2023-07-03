@@ -11,23 +11,13 @@ from rich.console import Console
 from mgmt.aws import AwsStorageMgmt
 from mgmt.log import Log
 from mgmt.files import FileManager
+from mgmt.utils import echo_dict, check_selection
 from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
 logger = Log(debug=False)
 file_mgmt = FileManager()
-
-
-def echo_dict(input_dict: dict) -> None:
-    """
-    Prints a dictionary with its keys and values
-
-    Args:
-        input_dict (dict): The dictionary to be printed.
-    """
-    for key, val in input_dict.items():
-        echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
 @app.command()
@@ -42,13 +32,7 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     target = filename
     cwd = Path(".").resolve()
     target_path = cwd / target
-    # localfiles = os.listdir(p)
     files_created = []
-
-    # if not target:
-    #     echo("invalid target command")
-    #     return
-    # print(str(target_path)," in ",str(os.listdir(cwd)))
 
     try:
         if target == "all":
@@ -72,14 +56,7 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
         if files_created:
             for file in files_created:
                 os.remove(file)
-
-
-def check_selection(selection: int, option_list: List[int]):
-    if selection in option_list:
-        return True
-    else:
-        echo("Invalid selection. Aborting")
-    return False
+    return
 
 
 @app.command()
@@ -126,25 +103,25 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         console.print(table)
         if not typer.confirm("Download?", default=False):
             echo("Aborted.")
-            # return
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
             if check_selection(resp, list(doptions)):
                 aws.download_file(object_name=doptions[resp])
-            return
+                return
+            else:
+                return
 
         if not typer.confirm("Check Status?", default=False):
             echo("Aborted.")
-            # return
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
             if check_selection(resp, list(doptions)):
                 aws.get_obj_head(object_name=doptions[resp])
                 echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
-            return
-    # else:
-    #     echo("no matches found\n")
-    #     return
+                return
+            else:
+                return
+    return
 
 
 @app.command()
@@ -158,6 +135,7 @@ def download(filename: str, bucket_name: Optional[str] = None) -> None:
     """
     echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
+    return
 
 
 @app.command()
@@ -170,6 +148,7 @@ def status(filename: str) -> None:
     """
     aws.get_obj_head(object_name=filename)
     echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    return
 
 
 @app.command()
@@ -191,21 +170,23 @@ def delete(filename: str) -> None:
             echo(f"{filename} successfully deleted from S3")
         except Exception as e:
             logger.error(f"An error occurred while deleting {filename}: {e}")
+    return
 
 
-# @app.command()
-# def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) -> None:
-#     """
-#     Lists the files in the specified location
+@app.command()
+def ls(location: Optional[str] = "global") -> None:
+    """
+    Lists the files in the specified location
 
-#     Args:
-#         location (Optional[str]): The location to list files in. Defaults to 'global'.
-#         bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
-#     """
-#     file_list = aws.list_func(location=location, bucket_name=bucket_name)
-#     for file in file_list:
-#         echo(file)
-#     return
+    Args:
+        location (Optional[str]): The location to list files in. Defaults to 'global'.
+        bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
+    """
+    local_files, s3_keys = aws.get_files(location=location)
+    obj_list = local_files + s3_keys
+    for obj in obj_list:
+        echo(obj)
+    return
 
 
 @app.command()

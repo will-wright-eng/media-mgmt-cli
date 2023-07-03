@@ -161,17 +161,16 @@ class AwsStorageMgmt:
             self.logger.error(self.local_dir)
             return False
 
-    # def list_func(self, location: str, bucket_name: str):
-    #     if bucket_name:
-    #         files = self.get_bucket_obj_keys(bucket_name=bucket_name)
-    #     else:
-    #         if location in ("local", "s3", "global"):
-    #             if location == "global":
-    #                 local_files, s3_keys = self.get_files(location=location)
-    #                 files = local_files + s3_keys
-    #         elif location == "here":
-    #             p = Path(".")
-    #             files = os.listdir(p)
-    #         else:
-    #             self.logger.error(f"invalid location input: {location}")
-    #     return files
+    def list_func(self, location: str):
+        file_list = []
+        if location in ("local", "s3", "global"):
+            if location == "global":
+                local_files, s3_keys = self.get_files(location=location)
+                file_list = local_files + s3_keys
+        elif location == "here":
+            p = Path(".")
+            file_list = os.listdir(p)
+        else:
+            self.logger.error("invalid location input")
+            self.logger.error(location)
+        return file_list
