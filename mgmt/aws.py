@@ -15,7 +15,7 @@ class AwsStorageMgmt:
         self.s3_client = boto3.client("s3")
         self.config = Config()
         self.load_config_file()
-        self.logger = Log(debug=False)
+        self.logger = Log(debug=True)
 
     def load_config_file(self):
         if self.config.check_exists():
@@ -46,7 +46,7 @@ class AwsStorageMgmt:
     def download_file(self, object_name: str, bucket_name: str = None) -> bool:
         if not bucket_name:
             bucket_name = self.bucket
-        self.logger.debug(f"Downloading `{object_name}` from `{bucket_name}`")
+        self.logger.info(f"Downloading `{object_name}` from `{bucket_name}`")
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
@@ -73,6 +73,7 @@ class AwsStorageMgmt:
             Bucket=self.bucket,
             Key=object_name,
         )
+        self.obj_head = response
         return response
 
     def get_obj_restore_status(self, object_name):
@@ -159,3 +160,18 @@ class AwsStorageMgmt:
             self.logger.error("invalid location")
             self.logger.error(self.local_dir)
             return False
+
+    # def list_func(self, location: str, bucket_name: str):
+    #     if bucket_name:
+    #         files = self.get_bucket_obj_keys(bucket_name=bucket_name)
+    #     else:
+    #         if location in ("local", "s3", "global"):
+    #             if location == "global":
+    #                 local_files, s3_keys = self.get_files(location=location)
+    #                 files = local_files + s3_keys
+    #         elif location == "here":
+    #             p = Path(".")
+    #             files = os.listdir(p)
+    #         else:
+    #             self.logger.error(f"invalid location input: {location}")
+    #     return files

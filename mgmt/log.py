@@ -1,4 +1,5 @@
 import sys
+import inspect
 import logging
 
 
@@ -18,13 +19,25 @@ class Log:
         self.logger.setLevel(log_level)
 
     def debug(self, message):
-        self.logger.debug(message)
+        frame = inspect.currentframe().f_back
+        file_name = frame.f_code.co_filename
+        method_name = frame.f_code.co_name
+        self.logger.debug(f"{file_name} - {method_name} - {message}")
 
     def info(self, message):
-        self.logger.info(message)
+        frame = inspect.currentframe().f_back
+        file_name = frame.f_code.co_filename
+        method_name = frame.f_code.co_name
+        self.logger.info(f"{file_name} - {method_name} - {message}")
 
     def warning(self, message):
-        self.logger.warning(message)
+        frame = inspect.currentframe().f_back
+        file_name = frame.f_code.co_filename
+        method_name = frame.f_code.co_name
+        self.logger.warning(f"{file_name} - {method_name} - {message}")
 
     def error(self, message):
-        self.logger.error(message)
+        frame = inspect.currentframe().f_back
+        file_name = frame.f_code.co_filename
+        method_name = frame.f_code.co_name
+        self.logger.error(f"{file_name} - {method_name} - {message}")

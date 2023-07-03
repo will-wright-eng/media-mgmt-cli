@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Optional
+from typing import List, Optional
 from pathlib import Path
 
 import typer
@@ -74,6 +74,14 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
                 os.remove(file)
 
 
+def check_selection(selection: int, option_list: List[int]):
+    if selection in option_list:
+        return True
+    else:
+        echo("Invalid selection. Aborting")
+    return False
+
+
 @app.command()
 def search(keyword: str, location: Optional[str] = "global") -> None:
     """
@@ -100,13 +108,17 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         table.add_column("Storage Tier")
         table.add_column("Last Modified")
         table.add_column("Object Key")
+        table.add_column("Restored Status")
         doptions = {}
         for i, file_name in enumerate(s3_matches):
             try:
                 resp = aws.get_obj_head(file_name)
                 storage_class = resp.get("StorageClass", "STANDARD")
                 last_modified = resp.get("LastModified", "")
-                table.add_row(storage_class, str(last_modified), file_name)
+                restored_status = resp.get("Restore")
+                if restored_status:
+                    restored_status = str(restored_status).split("expiry-date=")[-1].replace('"', "")
+                table.add_row(str(i), storage_class, str(last_modified), file_name, str(restored_status))
                 doptions[i] = file_name
             except Exception as e:
                 logger.error(f"An error occurred while getting metadata: {e}")
@@ -114,14 +126,25 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         console.print(table)
         if not typer.confirm("Download?", default=False):
             echo("Aborted.")
-            return
+            # return
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
-            aws.download_file(doptions[resp])
+            if check_selection(resp, list(doptions)):
+                aws.download_file(object_name=doptions[resp])
             return
-    else:
-        echo("no matches found\n")
-        return
+
+        if not typer.confirm("Check Status?", default=False):
+            echo("Aborted.")
+            # return
+        else:
+            resp = typer.prompt("Which file? [option #]", type=int)
+            if check_selection(resp, list(doptions)):
+                aws.get_obj_head(object_name=doptions[resp])
+                echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+            return
+    # else:
+    #     echo("no matches found\n")
+    #     return
 
 
 @app.command()
@@ -170,30 +193,19 @@ def delete(filename: str) -> None:
             logger.error(f"An error occurred while deleting {filename}: {e}")
 
 
-@app.command()
-def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) -> None:
-    """
-    Lists the files in the specified location
+# @app.command()
+# def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) -> None:
+#     """
+#     Lists the files in the specified location
 
-    Args:
-        location (Optional[str]): The location to list files in. Defaults to 'global'.
-        bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
-    """
-    if bucket_name:
-        files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
-    else:
-        if location in ("local", "s3", "global"):
-            if location == "global":
-                local_files, s3_keys = aws.get_files(location=location)
-                files = local_files + s3_keys
-        elif location == "here":
-            p = Path(".")
-            files = os.listdir(p)
-        else:
-            echo(f"invalid location input: {location}")
-
-    for file in files:
-        echo(file)
+#     Args:
+#         location (Optional[str]): The location to list files in. Defaults to 'global'.
+#         bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
+#     """
+#     file_list = aws.list_func(location=location, bucket_name=bucket_name)
+#     for file in file_list:
+#         echo(file)
+#     return
 
 
 @app.command()
