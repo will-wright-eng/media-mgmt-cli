@@ -11,23 +11,13 @@ from rich.console import Console
 from mgmt.aws import AwsStorageMgmt
 from mgmt.log import Log
 from mgmt.files import FileManager
+from mgmt.utils import check_selection
 from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
 logger = Log(debug=False)
 file_mgmt = FileManager()
-
-
-def echo_dict(input_dict: dict) -> None:
-    """
-    Prints a dictionary with its keys and values
-
-    Args:
-        input_dict (dict): The dictionary to be printed.
-    """
-    for key, val in input_dict.items():
-        echo(f"{key[:18]+'..' if len(key)>17 else key}{(20-int(len(key)))*'.'}{val}")
 
 
 @app.command()
@@ -42,13 +32,7 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     target = filename
     cwd = Path(".").resolve()
     target_path = cwd / target
-    # localfiles = os.listdir(p)
     files_created = []
-
-    # if not target:
-    #     echo("invalid target command")
-    #     return
-    # print(str(target_path)," in ",str(os.listdir(cwd)))
 
     try:
         if target == "all":
@@ -72,6 +56,7 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
         if files_created:
             for file in files_created:
                 os.remove(file)
+    return
 
 
 @app.command()
@@ -100,13 +85,17 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         table.add_column("Storage Tier")
         table.add_column("Last Modified")
         table.add_column("Object Key")
+        table.add_column("Restored Status")
         doptions = {}
         for i, file_name in enumerate(s3_matches):
             try:
                 resp = aws.get_obj_head(file_name)
                 storage_class = resp.get("StorageClass", "STANDARD")
                 last_modified = resp.get("LastModified", "")
-                table.add_row(storage_class, str(last_modified), file_name)
+                restored_status = resp.get("Restore")
+                if restored_status:
+                    restored_status = str(restored_status).split("expiry-date=")[-1].replace('"', "")
+                table.add_row(str(i), storage_class, str(last_modified), file_name, str(restored_status))
                 doptions[i] = file_name
             except Exception as e:
                 logger.error(f"An error occurred while getting metadata: {e}")
@@ -114,14 +103,25 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         console.print(table)
         if not typer.confirm("Download?", default=False):
             echo("Aborted.")
-            return
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
-            aws.download_file(doptions[resp])
-            return
-    else:
-        echo("no matches found\n")
-        return
+            if check_selection(resp, list(doptions)):
+                aws.download_file(object_name=doptions[resp])
+                return
+            else:
+                return
+
+        if not typer.confirm("Check Status?", default=False):
+            echo("Aborted.")
+        else:
+            resp = typer.prompt("Which file? [option #]", type=int)
+            if check_selection(resp, list(doptions)):
+                aws.get_obj_head(object_name=doptions[resp])
+                echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+                return
+            else:
+                return
+    return
 
 
 @app.command()
@@ -135,6 +135,7 @@ def download(filename: str, bucket_name: Optional[str] = None) -> None:
     """
     echo(f"Downloading {filename} from S3...")
     aws.download_file(object_name=filename, bucket_name=bucket_name)
+    return
 
 
 @app.command()
@@ -147,6 +148,7 @@ def status(filename: str) -> None:
     """
     aws.get_obj_head(object_name=filename)
     echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+    return
 
 
 @app.command()
@@ -168,10 +170,11 @@ def delete(filename: str) -> None:
             echo(f"{filename} successfully deleted from S3")
         except Exception as e:
             logger.error(f"An error occurred while deleting {filename}: {e}")
+    return
 
 
 @app.command()
-def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) -> None:
+def ls(location: Optional[str] = "global") -> None:
     """
     Lists the files in the specified location
 
@@ -179,21 +182,11 @@ def list(location: Optional[str] = "global", bucket_name: Optional[str] = None) 
         location (Optional[str]): The location to list files in. Defaults to 'global'.
         bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
     """
-    if bucket_name:
-        files = aws.get_bucket_obj_keys(bucket_name=bucket_name)
-    else:
-        if location in ("local", "s3", "global"):
-            if location == "global":
-                local_files, s3_keys = aws.get_files(location=location)
-                files = local_files + s3_keys
-        elif location == "here":
-            p = Path(".")
-            files = os.listdir(p)
-        else:
-            echo(f"invalid location input: {location}")
-
-    for file in files:
-        echo(file)
+    local_files, s3_keys = aws.get_files(location=location)
+    obj_list = local_files + s3_keys
+    for obj in obj_list:
+        echo(obj)
+    return
 
 
 @app.command()
