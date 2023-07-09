@@ -1,10 +1,12 @@
 import os
 import gzip
 import shutil
-import pathlib
 import tarfile
 from typing import List
+from pathlib import Path
 from zipfile import ZipFile
+
+import rarfile
 
 from mgmt.log import Log
 
@@ -13,10 +15,12 @@ class FileManager:
     def __init__(self, base_path=None):
         self.logger = Log(debug=False)
         if base_path:
-            self.base_path = pathlib.Path(base_path)
+            self.base_path = Path(base_path)
         else:
-            self.base_path = pathlib.Path.home() / "media"
+            self.base_path = Path.home() / "media"
             self.base_path = self.base_path.resolve()
+        if not self.base_path.exists():
+            raise ValueError(f"Path {str(self.base_path)} does not exist")
 
     def zip_single_file(self, filename: str) -> str:
         zip_file = filename.split(".")[0] + ".zip"
@@ -32,7 +36,7 @@ class FileManager:
             shutil.copyfileobj(f_in, f_out)
         return gzip_file
 
-    def zip_process(self, target_path: pathlib.Path) -> str:
+    def zip_process(self, target_path: Path) -> str:
         try:
             # dir_name = str(self.base_path / target_path)
             dir_name = str(target_path)
@@ -42,7 +46,7 @@ class FileManager:
             self.logger.error(e)
             return self.zip_single_file(target_path)
 
-    def gzip_process(self, target_path: pathlib.Path) -> str:
+    def gzip_process(self, target_path: Path) -> str:
         self.logger.debug("gzip_process")
         try:
             # dir_path = str(self.base_path / target_path)
@@ -69,6 +73,14 @@ class FileManager:
         ]
         return [item for sublist in tmp for item in sublist]
 
+    def list_all_files(self):
+        for file in self.base_path.glob("**/*"):
+            self.logger.info(file)
+
+    def list_all_dirs(self):
+        for directory in self.base_path.glob("**/"):
+            self.logger.info(directory)
+
     @staticmethod
     def clean_string(string: str) -> str:
         string = "".join(e for e in string if e.isalnum() or e == " " or e == "/")
@@ -83,3 +95,25 @@ class FileManager:
     def abort_if_false(ctx, param, value):
         if not value:
             ctx.abort()
+
+
+class RarHandler:
+    def __init__(self, path):
+        self.path = Path(path)
+        if not self.path.exists():
+            raise ValueError(f"Path {path} does not exist")
+
+    def extract_all(self, destination):
+        destination = Path(destination)
+        if not destination.exists():
+            destination.mkdir(parents=True)
+
+        for rar_file in self.path.glob("**/*.rar"):
+            with rarfile.RarFile(rar_file) as rf:
+                rf.extractall(destination)
+
+    def list_all(self):
+        for rar_file in self.path.glob("**/*.rar"):
+            with rarfile.RarFile(rar_file) as rf:
+                self.logger.info(f"Contents of {rar_file}:")
+                self.logger.info(rf.namelist())

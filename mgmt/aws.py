@@ -15,8 +15,8 @@ class AwsStorageMgmt:
         self.s3_resource = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
         self.config = Config()
+        self.logger = Log(debug=False)
         self.load_config_file()
-        self.logger = Log(debug=True)
 
     def load_config_file(self):
         if self.config.check_exists():
