@@ -8,7 +8,7 @@ from mgmt.log import Log
 
 class Config:
     def __init__(self):
-        self.path = Path("~/.config/mmgmt").expanduser()
+        self.path = Path("~/.config/mgmt").expanduser()
         self.path.mkdir(parents=True, exist_ok=True)
         self.dotenv_path = self.path / "config"
         self.logger = Log(debug=False)
