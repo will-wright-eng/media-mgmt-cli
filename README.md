@@ -10,7 +10,7 @@
 
 ## Summary
 
-**An intuitive command line interface wrapper around boto3 to search and manage media assets**
+**An intuitive command line interface that wraps boto3 to search and manage media assets**
 
 ## Installing `mgmt` & Supported Versions
 
@@ -30,71 +30,31 @@ For help, run:
 mgmt --help
 ```
 
-You can also use:
-
-```bash
-python -m mgmt --help
-```
-
 Commands:
 
 ```bash
-Usage: mgmt [OPTIONS] COMMAND [ARGS]...
+➜  media-mgmt-cli git:(cleanup6) mgmt --help                                                                 22:02:55
 
-  A simple CLI to search and manage media assets in S3 and locally. Setup with
-  `mgmt configure`
+ Usage: mgmt [OPTIONS] COMMAND [ARGS]...
 
-Options:
-  --version   Show the version and exit.
-  -h, --help  Show this message and exit.
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ config         Configures the application                                                                          │
+│ delete         Deletes the specified file from S3; requires confirmation                                           │
+│ download       Downloads the specified file from S3                                                                │
+│ ls             Lists the files in the specified location                                                           │
+│ search         Searches for files that contain the specified keyword in their names                                │
+│ status         Retrieves and prints the metadata of the specified file                                             │
+│ upload         Uploads the specified file to S3                                                                    │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-Commands:
-  configure   print project configs & set configs manually
-  delete      delete file from cloud storage - TODO -
-  download    download object from cloud storage
-  get-status  get object head from cloud storage
-  hello       test endpoint
-  ls          list files in location (local, s3, or global)
-  search      search files in local directory and cloud storage
-  upload      upload file to cloud storage
 ```
 
 Why not use `awscli`?
 
-You can, and I do, in tandem with `mgmt` -- the purpose is to create an additional interface that minimized the lookup/copy/paste process I found myself frequently going through.
-
-Another use case is for rapid prototyping applications that require an S3 interface.
-
-For example:
-
-```python
-import pandas as pd
-import mgmt as mgmt
-
-aws = mgmt.AwsStorageMgmt(project_name="mgmt")
-obj_list = aws.get_bucket_objs()
-
-res = []
-for s3_obj in obj_list:
-    res.append(
-      [
-        str(s3_obj.key),
-        str(s3_obj.key.split('/')[0]),
-        s3_obj.last_modified,
-        s3_obj.storage_class,
-        s3_obj.size
-      ]
-    )
-
-df = pd.DataFrame(res)
-df.columns = [
-  'key',
-  'group',
-  'last_modified',
-  'storage_class',
-  'size'
-]
-```
+You can, and I do, in tandem with `mgmt` -- the purpose is to create an additional interface that minimized the lookup/copy/paste process I found myself frequently going through
 
 ## Development
 
