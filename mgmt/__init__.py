@@ -10,7 +10,4 @@ mgmt - an intuitive cli wrapper around boto3 to search and manage media assets
 =====================================================================
 **mgmt** (Media Management Command Line Interface) is a Python package for a unified interface
 to assets and objects, both local and within cloud storage.
-Features
--------------
-- A central feature is the config handler that provides a gloabally aware interface
 """
