@@ -1,7 +1,7 @@
 # Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
 [tool.poetry]
 name = "mgmt"
-version = "0.6.1"
+version = "0.6.2"
 description = ""
 readme = "README.md"
 authors = ["Will Wright <willwright@example.com>"]
@@ -38,6 +38,7 @@ pytest = "^7.2.1"
 typer = "^0.9.0"
 rich = "^13.3.5"
 python-dotenv = "^1.0.0"
+rarfile = "^4.0"
 
 [package.optional-dependencies]
 test = [

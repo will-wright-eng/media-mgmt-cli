@@ -114,7 +114,6 @@ files = [
 name = "markdown-it-py"
 version = "2.2.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -139,7 +138,6 @@ testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
 name = "mdurl"
 version = "0.1.2"
 description = "Markdown URL utilities"
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -177,7 +175,6 @@ testing = ["pytest", "pytest-benchmark"]
 name = "pygments"
 version = "2.15.1"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -228,7 +225,6 @@ six = ">=1.5"
 name = "python-dotenv"
 version = "1.0.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -240,10 +236,20 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "rarfile"
+version = "4.0"
+description = "RAR archive reader for Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "rarfile-4.0-py3-none-any.whl", hash = "sha256:1094869119012f95c31a6f22cc3a9edbdca61861b805241116adbe2d737b68f8"},
+    {file = "rarfile-4.0.tar.gz", hash = "sha256:67548769229c5bda0827c1663dce3f54644f9dbfba4ae86d4da2b2afd3e602a1"},
+]
+
+[[package]]
 name = "rich"
 version = "13.3.5"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-category = "main"
 optional = false
 python-versions = ">=3.7.0"
 files = [
@@ -302,7 +308,6 @@ files = [
 name = "typer"
 version = "0.9.0"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
-category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -324,7 +329,6 @@ test = ["black (>=22.3.0,<23.0.0)", "coverage (>=6.2,<7.0)", "isort (>=5.0.6,<6.
 name = "typing-extensions"
 version = "4.6.2"
 description = "Backported and Experimental Type Hints for Python 3.7+"
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -351,4 +355,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "81daeeb603165166e46699e24b7bb156f620aede9a6d8c336f0cf3513d85a2da"
+content-hash = "f7c12f5ca60eef3cee54b91a20fd35bbe5fda673165f153d802beb2a3c52a05f"
