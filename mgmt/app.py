@@ -34,15 +34,17 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     cwd = Path(".").resolve()
     target_path = cwd / target
     files_created = []
+    skip_files = [".DS_Store"]
 
     try:
         if target == "all":
             echo("uploading all media objects to S3")
             for _file_or_dir in cwd.iterdir():
-                echo()
-                echo("compressing...")
-                echo(str(_file_or_dir))
-                files_created.append(aws.upload_target(_file_or_dir, compression))
+                if str(_file_or_dir) not in skip_files:
+                    echo()
+                    echo("compressing...")
+                    echo(str(_file_or_dir))
+                    files_created.append(aws.upload_target(_file_or_dir, compression))
         elif target in os.listdir(cwd):
             echo()
             echo("file found, compressing...")
