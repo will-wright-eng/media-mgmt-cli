@@ -10,7 +10,7 @@ from rich.table import Table
 from rich.console import Console
 
 from mgmt.aws import AwsStorageMgmt
-from mgmt.log import Log
+# from mgmt.log import Log
 from mgmt.files import FileManager
 from mgmt.utils import check_selection
 from mgmt.config import Config
@@ -61,14 +61,14 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
 
 
 @app.command()
-def search(keyword: str, location: Optional[str] = "global") -> None:
+def search(keyword: str) -> None:
     """
     Searches for files that contain the specified keyword in their names
 
     Args:
-        keyword (str): The keyword to search for in file names.
-        location (Optional[str]): The location to search in. Defaults to 'global'.
+        keyword (str): The keyword to search for in file names
     """
+    location = "global"
     file_mgmt = FileManager()
     local_files, s3_keys = aws.get_files(location=location)
 
@@ -181,19 +181,31 @@ def ls(location: Optional[str] = "global") -> None:
     Lists the files in the specified location
 
     Args:
-        location (Optional[str]): The location to list files in. Defaults to 'global'.
-        bucket_name (Optional[str]): The name of the bucket to list files in. If not provided, the default bucket is used.
+        location (Optional[str]): The location to list files in: 'local', 'gloabl', or 's3'. Defaults to 'global'.
     """
-    local_files, s3_keys = aws.get_files(location=location)
-    obj_list = local_files + s3_keys
-    for obj in obj_list:
+    if location=='global':
+        local_files, s3_keys = aws.get_files(location=location)
+    elif location=='local':
+        local_files = aws.get_files(location=location)
+        s3_keys = ['']
+    elif location=='s3':
+        s3_keys = aws.get_files(location=location)
+        local_files = ['']
+
+    echo()
+    echo('Local Files...')
+    for obj in local_files:
         echo(obj)
-    return
+    echo()
+    echo('Bucket Objects...')
+    for obj in s3_keys:
+        echo(obj)
+
 
 
 def write_config(config):
-    echo('aws buckets...')
-    echo('\n'.join(aws.get_bucket_list()))
+    echo("aws buckets...")
+    echo("\n".join(aws.get_bucket_list()))
     config.dotenv_path.unlink(missing_ok=True)
     config.dotenv_path.touch()
     echo()
@@ -208,6 +220,7 @@ def write_config(config):
         res = typer.prompt(f"{key} ({val.get('note')})", type=str, default=res_default)
         env_vars[key] = res
     config.write_env_vars(env_vars)
+
 
 @app.command()
 def config() -> None:

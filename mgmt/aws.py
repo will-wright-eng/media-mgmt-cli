@@ -178,5 +178,5 @@ class AwsStorageMgmt:
 
     def get_bucket_list(self):
         response = self.s3_client.list_buckets()
-        buckets = [bucket['Name'] for bucket in response['Buckets']]
+        buckets = [bucket["Name"] for bucket in response["Buckets"]]
         return buckets

@@ -12,7 +12,11 @@ class Config:
         self.path.mkdir(parents=True, exist_ok=True)
         self.dotenv_path = self.path / "config"
         self.logger = Log(debug=False)
-        self.keys_dict = {"aws_bucket":{"name":"MGMT_BUCKET","note":"storage bucket in aws"}, "MGMT_OBJECT_PREFIX":{"name":"MGMT_OBJECT_PREFIX","note":"prefix added to storage blob"}, "local_dir":{"name":"MGMT_LOCAL_DIR","note":"local path from root to media dir"}}
+        self.keys_dict = {
+            "aws_bucket": {"name": "MGMT_BUCKET", "note": "storage bucket in aws"},
+            "object_prefix": {"name": "MGMT_OBJECT_PREFIX", "note": "prefix added to storage blob"},
+            "local_dir": {"name": "MGMT_LOCAL_DIR", "note": "full path to media dir on local machine"},
+        }
         self.keys = [ele.get("name") for key, ele in self.keys_dict.items()]
         if not self.check_exists():
             self.logger.error("config file not found")
@@ -38,7 +42,7 @@ class Config:
     def get_configs(self):
         if self.dotenv_path.is_file():
             self.load_env()
-            configs = { key: os.getenv(key) for key in self.keys }
+            configs = {key: os.getenv(key) for key in self.keys}
         return configs
 
     def ask_overwrite(self) -> bool:

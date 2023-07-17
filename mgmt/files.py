@@ -1,6 +1,7 @@
 import os
 import gzip
 import shutil
+import pathlib
 import tarfile
 from typing import List
 from pathlib import Path
@@ -9,6 +10,7 @@ from zipfile import ZipFile
 import rarfile
 
 from mgmt.log import Log
+from mgmt.config import Config
 
 
 class FileManager:
@@ -17,10 +19,12 @@ class FileManager:
         if base_path:
             self.base_path = Path(base_path)
         else:
-            self.base_path = Path.home() / "media"
-            self.base_path = self.base_path.resolve()
+            config = Config()
+            self.base_path = config.configs.get('MGMT_LOCAL_DIR')
+            # self.base_path = Path.home() / "media"
+            # self.base_path = self.base_path.resolve()
         if not self.base_path.exists():
-            self.logger.error(f'-- ValueError -- Path {str(self.base_path)} is not a valid path from root')
+            self.logger.error(f"-- ValueError -- Path {str(self.base_path)} is not a valid path from root")
             self.logger.error("rerun `mgmt config`")
 
     def zip_single_file(self, filename: str) -> str:
@@ -65,14 +69,13 @@ class FileManager:
             return self.gzip_single_file(target_path)
 
     def files_in_media_dir(self) -> List[str]:
-        tmp = os.listdir(self.base_path)
-        tmp = [
-            os.listdir(os.path.join(self.base_path, folder))
-            if os.path.isdir(os.path.join(self.base_path, folder))
-            else [folder]
-            for folder in tmp
-        ]
-        return [item for sublist in tmp for item in sublist]
+        file_list = []
+        path = Path(self.base_path)
+        for file in path.glob('**/*'):
+            if file.is_file() and file.suffix.lower() in ['.rar', '.mkv', '.mp4'] and 'subs' not in str(file).lower() and 'sample' not in str(file).lower():
+                # print(file)
+                file_list.append(file)
+        return ['/'.join(str(file).split('/')[-2:]) for file in file_list]
 
     def list_all_files(self):
         for file in self.base_path.glob("**/*"):
