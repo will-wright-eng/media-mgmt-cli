@@ -10,6 +10,7 @@ from rich.table import Table
 from rich.console import Console
 
 from mgmt.aws import AwsStorageMgmt
+
 # from mgmt.log import Log
 from mgmt.files import FileManager
 from mgmt.utils import check_selection
@@ -25,7 +26,8 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     Uploads the specified file to S3
 
     Args:
-        filename (str): The name of the file or directory to upload. Use 'all' to upload all files in the directory.
+        filename (str): The name of the file or directory to upload.
+            Use 'all' to upload all files in the directory.
         compression (Optional[str]): The compression algorithm to use. Defaults to 'gzip'.
     """
     target = filename
@@ -181,26 +183,26 @@ def ls(location: Optional[str] = "global") -> None:
     Lists the files in the specified location
 
     Args:
-        location (Optional[str]): The location to list files in: 'local', 'gloabl', or 's3'. Defaults to 'global'.
+        location (Optional[str]): The location to list files in: 'local', 'gloabl', or 's3'.
+        Defaults to 'global'.
     """
-    if location=='global':
+    if location == "global":
         local_files, s3_keys = aws.get_files(location=location)
-    elif location=='local':
+    elif location == "local":
         local_files = aws.get_files(location=location)
-        s3_keys = ['']
-    elif location=='s3':
+        s3_keys = [""]
+    elif location == "s3":
         s3_keys = aws.get_files(location=location)
-        local_files = ['']
+        local_files = [""]
 
     echo()
-    echo('Local Files...')
+    echo("Local Files...")
     for obj in local_files:
         echo(obj)
     echo()
-    echo('Bucket Objects...')
+    echo("Bucket Objects...")
     for obj in s3_keys:
         echo(obj)
-
 
 
 def write_config(config):

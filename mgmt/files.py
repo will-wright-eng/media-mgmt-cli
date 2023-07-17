@@ -20,7 +20,7 @@ class FileManager:
             self.base_path = Path(base_path)
         else:
             config = Config()
-            self.base_path = config.configs.get('MGMT_LOCAL_DIR')
+            self.base_path = config.configs.get("MGMT_LOCAL_DIR")
             # self.base_path = Path.home() / "media"
             # self.base_path = self.base_path.resolve()
         if not self.base_path.exists():
@@ -71,11 +71,16 @@ class FileManager:
     def files_in_media_dir(self) -> List[str]:
         file_list = []
         path = Path(self.base_path)
-        for file in path.glob('**/*'):
-            if file.is_file() and file.suffix.lower() in ['.rar', '.mkv', '.mp4'] and 'subs' not in str(file).lower() and 'sample' not in str(file).lower():
+        for file in path.glob("**/*"):
+            if (
+                file.is_file()
+                and file.suffix.lower() in [".rar", ".mkv", ".mp4"]
+                and "subs" not in str(file).lower()
+                and "sample" not in str(file).lower()
+            ):
                 # print(file)
                 file_list.append(file)
-        return ['/'.join(str(file).split('/')[-2:]) for file in file_list]
+        return ["/".join(str(file).split("/")[-2:]) for file in file_list]
 
     def list_all_files(self):
         for file in self.base_path.glob("**/*"):
