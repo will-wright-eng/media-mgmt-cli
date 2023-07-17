@@ -10,8 +10,6 @@ from rich.table import Table
 from rich.console import Console
 
 from mgmt.aws import AwsStorageMgmt
-
-# from mgmt.log import Log
 from mgmt.files import FileManager
 from mgmt.utils import check_selection
 from mgmt.config import Config
@@ -35,7 +33,6 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
     target_path = cwd / target
     files_created = []
     skip_files = [".DS_Store"]
-
     try:
         if target == "all":
             echo("uploading all media objects to S3")
@@ -73,16 +70,13 @@ def search(keyword: str) -> None:
     location = "global"
     file_mgmt = FileManager()
     local_files, s3_keys = aws.get_files(location=location)
-
     echo(f"\nSearching `{location}` for keyword `{keyword}`...")
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
-
     if len(local_matches + s3_matches) >= 1:
         echo("at least one match found\n")
         echo("Local File Matches")
         echo("\n".join(local_matches))
-
         console = Console()
         table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
         table.add_column("Option #", style="cyan", no_wrap=True)
@@ -114,7 +108,6 @@ def search(keyword: str) -> None:
                 return
             else:
                 return
-
         if not typer.confirm("Check Status?", default=False):
             echo("Aborted.")
         else:
@@ -194,7 +187,6 @@ def ls(location: Optional[str] = "global") -> None:
     elif location == "s3":
         s3_keys = aws.get_files(location=location)
         local_files = [""]
-
     echo()
     echo("Local Files...")
     for obj in local_files:
@@ -237,7 +229,6 @@ def config() -> None:
             write_config(config)
     else:
         write_config(config)
-
     echo("Configuration complete.")
     config.print_current_config()
 
