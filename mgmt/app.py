@@ -232,6 +232,7 @@ def write_config(config):
         env_vars[key] = res
 
     config.write_env_vars(env_vars)
+    config.print_current_config()
 
 
 @app.command()
@@ -251,7 +252,6 @@ def config() -> None:
         write_config(config)
 
     echo("Configuration complete.")
-    config.print_current_config()
 
 
 def entry_point() -> None:
