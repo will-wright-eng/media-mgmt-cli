@@ -1,7 +1,6 @@
 import os
 import gzip
 import shutil
-import pathlib
 import tarfile
 from typing import List
 from pathlib import Path
