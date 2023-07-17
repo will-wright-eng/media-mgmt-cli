@@ -17,8 +17,6 @@ from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
-logger = Log(debug=False)
-file_mgmt = FileManager()
 
 
 @app.command()
@@ -54,7 +52,7 @@ def upload(filename: str, compression: Optional[str] = "gzip") -> None:
             echo("invalid file or directory")
             return False
     except Exception as e:
-        logger.error(f"An error occurred while uploading: {e}")
+        echo(f"An error occurred while uploading: {e}", err=True)
     finally:
         if files_created:
             for file in files_created:
@@ -71,6 +69,7 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         keyword (str): The keyword to search for in file names.
         location (Optional[str]): The location to search in. Defaults to 'global'.
     """
+    file_mgmt = FileManager()
     local_files, s3_keys = aws.get_files(location=location)
 
     echo(f"\nSearching `{location}` for keyword `{keyword}`...")
@@ -101,7 +100,7 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
                 table.add_row(str(i), storage_class, str(last_modified).split(" ")[0], file_name, str(restored_status))
                 doptions[i] = file_name
             except Exception as e:
-                logger.error(f"An error occurred while getting metadata: {e}")
+                echo(f"An error occurred while getting metadata: {e}", err=True)
 
         console.print(table)
         if not typer.confirm("Download?", default=False):
@@ -109,7 +108,7 @@ def search(keyword: str, location: Optional[str] = "global") -> None:
         else:
             resp = typer.prompt("Which file? [option #]", type=int)
             if check_selection(resp, list(doptions)):
-                aws.download_file(object_name=doptions[resp])
+                aws.download(object_name=doptions[resp])
                 return
             else:
                 return
@@ -137,7 +136,7 @@ def download(filename: str, bucket_name: Optional[str] = None) -> None:
         bucket_name (Optional[str]): The name of the bucket from which to download the file. If not provided, the default bucket is used.
     """
     echo(f"Downloading {filename} from S3...")
-    aws.download_file(object_name=filename, bucket_name=bucket_name)
+    aws.download(object_name=filename, bucket_name=bucket_name)
     return
 
 
@@ -172,7 +171,7 @@ def delete(filename: str) -> None:
             aws.delete_file(filename)
             echo(f"{filename} successfully deleted from S3")
         except Exception as e:
-            logger.error(f"An error occurred while deleting {filename}: {e}")
+            echo(f"An error occurred while deleting {filename}: {e}", err=True)
     return
 
 
@@ -192,18 +191,40 @@ def ls(location: Optional[str] = "global") -> None:
     return
 
 
+def write_config(config):
+    echo('aws buckets...')
+    echo('\n'.join(aws.get_bucket_list()))
+    config.dotenv_path.unlink(missing_ok=True)
+    config.dotenv_path.touch()
+    echo()
+    env_vars = {}
+    config_dict = config.configs
+    for _, val in config.keys_dict.items():
+        key = val.get("name")
+        if config_dict:
+            res_default = config_dict.get(key)
+        else:
+            res_default = None
+        res = typer.prompt(f"{key} ({val.get('note')})", type=str, default=res_default)
+        env_vars[key] = res
+    config.write_env_vars(env_vars)
+
 @app.command()
 def config() -> None:
     """
     Configures the application
     """
     config = Config()
-    config.load_env()
-    config.print_current_config()
-    if not config.ask_overwrite():
-        return
+    if config.check_exists():
+        config.load_env()
+        config.print_current_config()
+        if config.ask_overwrite():
+            write_config(config)
+    else:
+        write_config(config)
 
     echo("Configuration complete.")
+    config.print_current_config()
 
 
 def entry_point() -> None:

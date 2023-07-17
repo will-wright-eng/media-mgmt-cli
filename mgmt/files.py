@@ -20,7 +20,8 @@ class FileManager:
             self.base_path = Path.home() / "media"
             self.base_path = self.base_path.resolve()
         if not self.base_path.exists():
-            raise ValueError(f"Path {str(self.base_path)} does not exist")
+            self.logger.error(f'-- ValueError -- Path {str(self.base_path)} is not a valid path from root')
+            self.logger.error("rerun `mgmt config`")
 
     def zip_single_file(self, filename: str) -> str:
         zip_file = filename.split(".")[0] + ".zip"
