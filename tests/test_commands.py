@@ -20,10 +20,10 @@ def test_upload(mocker):
 
 def test_download(mocker):
     mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
-    mock_aws.download_file.return_value = "test_file"
+    mock_aws.download_standard.return_value = "test_file"
     runner = CliRunner()
     result = runner.invoke(app, ["download", "test_file", "--bucket_name", "test_bucket"])
-    mock_aws.download_file.assert_called_once_with("test_file", "test_bucket")
+    mock_aws.download_standard.assert_called_once_with("test_file", "test_bucket")
     assert result.exit_code == 0
 
 

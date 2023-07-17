@@ -21,9 +21,9 @@ class AwsStorageMgmt:
     def load_config_file(self):
         if self.config.check_exists():
             self.configs = self.config.get_configs()
-            self.bucket = self.configs.get("BUCKET")
-            self.object_prefix = self.configs.get("OBJECT_PREFIX")
-            self.local_dir = self.configs.get("LOCAL_DIR")
+            self.bucket = self.configs.get("MGMT_BUCKET")
+            self.object_prefix = self.configs.get("MGMT_OBJECT_PREFIX")
+            self.local_dir = self.configs.get("MGMT_LOCAL_DIR")
             self.file_mgmt = FileManager(self.local_dir)
         else:
             self.logger.debug("Config file not found. Please run `mgmt config` to set up the configuration.")
@@ -44,16 +44,16 @@ class AwsStorageMgmt:
             return False
         return True
 
-    def download_file(self, object_name: str, bucket_name: str = None) -> bool:
+    def download_standard(self, object_name: str, bucket_name: str = None) -> bool:
         if not bucket_name:
             bucket_name = self.bucket
         self.logger.info(f"Downloading `{object_name}` from `{bucket_name}`")
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
-                self.s3_client.download_fileobj(bucket_name, object_name, data)
+                self.s3_client.download_standardobj(bucket_name, object_name, data)
         except ClientError as e:
-            self.logger.error(f"-- ClientError --\n{str(e)}")
+            self.logger.error(f"-- ClientError -- {str(e)}")
             os.remove(file_name)
             return False
         return True
@@ -106,7 +106,7 @@ class AwsStorageMgmt:
         )
         return response
 
-    def download_from_glacier(self, object_name: str):
+    def download(self, object_name: str):
         self.get_obj_head(object_name)
         try:
             tier = self.obj_head["StorageClass"]
@@ -135,7 +135,7 @@ class AwsStorageMgmt:
                     self.logger.debug(f"status: {status}, exiting...")
                     return
             self.logger.debug("downloading restored file")
-            return self.download_file(object_name=object_name)
+            return self.download_standard(object_name=object_name)
         else:
             self.logger.debug(f"object in {tier}, object will be restored in 12-24 hours")
             return
@@ -175,3 +175,8 @@ class AwsStorageMgmt:
             self.logger.error("invalid location input")
             self.logger.error(location)
         return file_list
+
+    def get_bucket_list(self):
+        response = self.s3_client.list_buckets()
+        buckets = [bucket["Name"] for bucket in response["Buckets"]]
+        return buckets
