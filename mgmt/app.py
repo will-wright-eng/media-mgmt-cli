@@ -98,6 +98,7 @@ def search(keyword: str) -> None:
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
 
+    echo(f"total matches found = {str(len(local_matches)+len(s3_matches))}")
     if len(local_matches + s3_matches) >= 1:
         echo("at least one match found\n")
         echo("Local File Matches")

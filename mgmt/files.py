@@ -19,7 +19,7 @@ class FileManager:
             self.base_path = Path(base_path)
         else:
             config = Config()
-            self.base_path = config.configs.get("MGMT_LOCAL_DIR")
+            self.base_path = Path(config.configs.get("MGMT_LOCAL_DIR"))
         if not self.base_path.exists():
             self.logger.error(f"-- ValueError -- Path {str(self.base_path)} is not a valid path from root")
             self.logger.error("rerun `mgmt config`")
