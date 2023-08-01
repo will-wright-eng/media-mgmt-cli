@@ -3,6 +3,7 @@ import json
 from typing import Optional
 from pathlib import Path
 
+import toml
 import typer
 from rich import box
 from typer import echo
@@ -16,6 +17,27 @@ from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
+
+
+def get_version():
+    pyproject = toml.load("pyproject.toml")
+    return pyproject["tool"]["poetry"]["version"]
+
+
+def version_callback(value: bool):
+    if value:
+        print(f"Media MGMT CLI Version: {get_version()}")
+        raise typer.Exit()
+
+
+@app.callback()
+def common(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        None, "--version", callback=version_callback, help="Show the version and exit.", is_eager=True
+    ),
+):
+    pass
 
 
 @app.command()
@@ -75,6 +97,7 @@ def search(keyword: str) -> None:
     local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
     s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
 
+    echo(f"total matches found = {str(len(local_matches)+len(s3_matches))}")
     if len(local_matches + s3_matches) >= 1:
         echo("at least one match found\n")
         echo("Local File Matches")
