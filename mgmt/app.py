@@ -9,7 +9,6 @@ from rich import box
 from typer import echo
 from rich.table import Table
 from rich.console import Console
-from typing_extensions import Annotated
 
 from mgmt.aws import AwsStorageMgmt
 from mgmt.files import FileManager
