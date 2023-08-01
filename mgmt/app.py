@@ -3,11 +3,13 @@ import json
 from typing import Optional
 from pathlib import Path
 
+import toml
 import typer
 from rich import box
 from typer import echo
 from rich.table import Table
 from rich.console import Console
+from typing_extensions import Annotated
 
 from mgmt.aws import AwsStorageMgmt
 from mgmt.files import FileManager
@@ -16,6 +18,27 @@ from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
+
+
+def get_version():
+    pyproject = toml.load("pyproject.toml")
+    return pyproject["tool"]["poetry"]["version"]
+
+
+def version_callback(value: bool):
+    if value:
+        print(f"Media MGMT CLI Version: {get_version()}")
+        raise typer.Exit()
+
+
+@app.callback()
+def common(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        None, "--version", callback=version_callback, help="Show the version and exit.", is_eager=True
+    ),
+):
+    pass
 
 
 @app.command()
