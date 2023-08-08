@@ -41,7 +41,7 @@ def common(
 
 
 @app.command()
-def upload(filename: str, compression: Optional[str] = "gzip") -> None:
+def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
     """
     Uploads the specified file to S3
 

@@ -33,23 +33,23 @@ mgmt --help
 Commands:
 
 ```bash
-➜  media-mgmt-cli git:(cleanup6) mgmt --help                                                                 22:02:55
+➜ mgmt --help
 
  Usage: mgmt [OPTIONS] COMMAND [ARGS]...
 
-╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                                                        │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ config         Configures the application                                                                          │
-│ delete         Deletes the specified file from S3; requires confirmation                                           │
-│ download       Downloads the specified file from S3                                                                │
-│ ls             Lists the files in the specified location                                                           │
-│ search         Searches for files that contain the specified keyword in their names                                │
-│ status         Retrieves and prints the metadata of the specified file                                             │
-│ upload         Uploads the specified file to S3                                                                    │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --version          Show the version and exit.                                                                   │
+│ --help             Show this message and exit.                                                                  │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ config        Configures the application                                                                        │
+│ delete        Deletes the specified file from S3; requires confirmation                                         │
+│ download      Downloads the specified file from S3                                                              │
+│ ls            Lists the files in the specified location                                                         │
+│ search        Searches for files that contain the specified keyword in their names                              │
+│ status        Retrieves and prints the metadata of the specified file                                           │
+│ upload        Uploads the specified file to S3                                                                  │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Why not use `awscli`?
