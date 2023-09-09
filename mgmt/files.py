@@ -14,7 +14,7 @@ from mgmt.config import Config
 
 class FileManager:
     def __init__(self, base_path=None):
-        self.logger = Log(debug=False)
+        self.logger = Log()
         if base_path:
             self.base_path = Path(base_path)
         else:

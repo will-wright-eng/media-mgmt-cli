@@ -104,9 +104,9 @@ def search(keyword: str) -> None:
         echo("\n".join(local_matches))
         console = Console()
         table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
-        table.add_column("Option #", style="cyan", no_wrap=True)
-        table.add_column("Storage Tier", style="green")
-        table.add_column("Last Modified")
+        table.add_column("#", style="cyan", no_wrap=True)
+        table.add_column("StorageClass", style="green")
+        table.add_column("LastModified")
         table.add_column("Object Key", style="magenta")
         table.add_column("Restored Status")
         doptions = {}
@@ -154,16 +154,15 @@ def search(keyword: str) -> None:
 
 
 @app.command()
-def download(filename: str, bucket_name: Optional[str] = None) -> None:
+def download(filename: str) -> None:
     """
     Downloads the specified file from S3
 
     Args:
         filename (str): The name of the file to download.
-        bucket_name (Optional[str]): The name of the bucket from which to download the file. If not provided, the default bucket is used.
     """
-    echo(f"Downloading {filename} from S3...")
-    aws.download(object_name=filename, bucket_name=bucket_name)
+    # echo(f"Downloading {filename} from S3...")
+    aws.download(object_name=filename)
     return
 
 

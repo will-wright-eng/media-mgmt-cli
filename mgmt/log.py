@@ -4,7 +4,7 @@ import logging
 
 
 class Log:
-    def __init__(self, debug=False):
+    def __init__(self, debug=True):
         self.logger = logging.getLogger(__name__)
         if not self.logger.handlers:
             self.logger.setLevel(logging.DEBUG if debug else logging.INFO)

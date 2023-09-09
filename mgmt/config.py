@@ -11,7 +11,7 @@ class Config:
         self.path = Path("~/.config/mgmt").expanduser()
         self.path.mkdir(parents=True, exist_ok=True)
         self.dotenv_path = self.path / "config"
-        self.logger = Log(debug=False)
+        self.logger = Log()
         self.keys_dict = {
             "aws_bucket": {"name": "MGMT_BUCKET", "note": "storage bucket in aws"},
             "object_prefix": {"name": "MGMT_OBJECT_PREFIX", "note": "prefix added to storage blob"},

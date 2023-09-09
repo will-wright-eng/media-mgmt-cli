@@ -15,7 +15,7 @@ class AwsStorageMgmt:
         self.s3_resource = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
         self.config = Config()
-        self.logger = Log(debug=False)
+        self.logger = Log(debug=True)
         self.load_config_file()
 
     def load_config_file(self):
@@ -78,9 +78,9 @@ class AwsStorageMgmt:
         return response
 
     def get_obj_restore_status(self, object_name):
-        response = self.get_obj_head(object_name)
+        self.get_obj_head(object_name)
         try:
-            resp_string = response["Restore"]
+            resp_string = self.obj_head.get("Restore")
             self.logger.debug(resp_string)
             if "ongoing-request" in resp_string and "true" in resp_string:
                 status = "incomplete"
@@ -107,15 +107,26 @@ class AwsStorageMgmt:
         return response
 
     def download(self, object_name: str):
+        """
+        ideal control flow...
+        1. get object http head
+        2. if non-standard storage tier: restore then download (or exit for deep_archive)
+        3. else standard storage tier: download obj
+        """
+        self.logger.debug("download")
         self.get_obj_head(object_name)
         try:
-            tier = self.obj_head["StorageClass"]
+            tier = self.obj_head.get("StorageClass", "STANDARD")
             if tier == "DEEP_ARCHIVE":
                 restore_tier = "Standard"
             elif tier == "GLACIER":
                 restore_tier = "Expedited"
+            elif tier == "STANDARD":
+                return self.download_standard(object_name=object_name)
+            elif "ongoing-request" in resp_string and "false" in resp_string:
+                return self.download_standard(object_name=object_name)
         except KeyError as e:
-            self.logger.error(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
+            self.logger.error(f"KeyError: {str(e)}, object tier {tier} invalid OR restore in progress")
             return
 
         self.logger.debug(f"restoring object from {tier}: {object_name}")
