@@ -13,3 +13,15 @@ def check_selection(selection: int, option_list: List[int]):
     except TypeError as e:
         raise e
     return
+
+
+def get_restore_status_short(restore_status: str) -> str:
+    if not restore_status:
+        status = "None"
+    elif "ongoing-request" in restore_status and "true" in restore_status:
+        status = "incomplete"
+    elif "ongoing-request" in restore_status and "false" in restore_status:
+        status = "complete"
+    else:
+        status = "unknown"
+    return status
