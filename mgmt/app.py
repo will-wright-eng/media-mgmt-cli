@@ -276,7 +276,8 @@ def config() -> None:
         config.load_env()
         config.print_current_config()
 
-        if config.ask_overwrite():
+        if typer.confirm("Would you like to overwrite these settings?", default=False):
+            echo("Overwriting")
             write_config(config)
     else:
         write_config(config)

@@ -20,7 +20,7 @@ class Config:
         self.keys = [ele.get("name") for key, ele in self.keys_dict.items()]
         if not self.check_exists():
             self.logger.error("config file not found")
-            # self.logger.info(f"check config file exists: {str(self.check_exists())}")
+            self.logger.info(f"check config file exists: {str(self.check_exists())}")
             self.logger.info(f"dotenv_path: {str(self.dotenv_path)}")
             self.configs = None
         else:
@@ -44,9 +44,6 @@ class Config:
             self.load_env()
             configs = {key: os.getenv(key) for key in self.keys}
         return configs
-
-    def ask_overwrite(self) -> bool:
-        return input("Would you like to overwrite these settings? (y/n) ").lower() == "y"
 
     def set_key(self, key: str, value: str):
         dotenv.set_key(self.dotenv_path, key, value)
