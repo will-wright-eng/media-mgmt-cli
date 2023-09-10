@@ -12,7 +12,7 @@ from rich.console import Console
 
 from mgmt.aws import AwsStorageMgmt
 from mgmt.files import FileManager
-from mgmt.utils import check_selection
+from mgmt.utils import check_selection, get_restore_status_short
 from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
@@ -41,7 +41,7 @@ def common(
 
 
 @app.command()
-def upload(filename: str, compression: Optional[str] = "gzip") -> None:
+def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
     """
     Uploads the specified file to S3
 
@@ -102,13 +102,15 @@ def search(keyword: str) -> None:
         echo("at least one match found\n")
         echo("Local File Matches")
         echo("\n".join(local_matches))
+        echo()
         console = Console()
         table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
-        table.add_column("Option #", style="cyan", no_wrap=True)
-        table.add_column("Storage Tier", style="green")
-        table.add_column("Last Modified")
+        table.add_column("#", style="cyan")
+        table.add_column("StorageClass", style="green")
+        table.add_column("LastModified")
         table.add_column("Object Key", style="magenta")
-        table.add_column("Restored Status")
+        table.add_column("Restore")
+        table.add_column("GBs")
         doptions = {}
 
         for i, file_name in enumerate(s3_matches):
@@ -116,12 +118,18 @@ def search(keyword: str) -> None:
                 resp = aws.get_obj_head(file_name)
                 storage_class = resp.get("StorageClass", "STANDARD")
                 last_modified = resp.get("LastModified", "")
-                restored_status = resp.get("Restore")
+                restore_status = get_restore_status_short(resp.get("Restore"))
+                content_length = resp.get("ContentLength")
+                content_length_gb = round(int(content_length) / (1024**3), 2)
 
-                if restored_status:
-                    restored_status = str(restored_status).split("expiry-date=")[-1].replace('"', "")
-
-                table.add_row(str(i), storage_class, str(last_modified).split(" ")[0], file_name, str(restored_status))
+                table.add_row(
+                    str(i),
+                    storage_class,
+                    str(last_modified).split(" ")[0],
+                    file_name,
+                    str(restore_status),
+                    str(content_length_gb),
+                )
                 doptions[i] = file_name
             except Exception as e:
                 echo(f"An error occurred while getting metadata: {e}", err=True)
@@ -154,16 +162,15 @@ def search(keyword: str) -> None:
 
 
 @app.command()
-def download(filename: str, bucket_name: Optional[str] = None) -> None:
+def download(filename: str) -> None:
     """
     Downloads the specified file from S3
 
     Args:
         filename (str): The name of the file to download.
-        bucket_name (Optional[str]): The name of the bucket from which to download the file. If not provided, the default bucket is used.
     """
-    echo(f"Downloading {filename} from S3...")
-    aws.download(object_name=filename, bucket_name=bucket_name)
+    # echo(f"Downloading {filename} from S3...")
+    aws.download(object_name=filename)
     return
 
 

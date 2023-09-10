@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 
 from mgmt.log import Log
 from mgmt.files import FileManager
+from mgmt.utils import get_restore_status_short
 from mgmt.config import Config
 
 
@@ -15,7 +16,7 @@ class AwsStorageMgmt:
         self.s3_resource = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
         self.config = Config()
-        self.logger = Log(debug=False)
+        self.logger = Log(debug=True)
         self.load_config_file()
 
     def load_config_file(self):
@@ -51,7 +52,7 @@ class AwsStorageMgmt:
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
-                self.s3_client.download_standardobj(bucket_name, object_name, data)
+                self.s3_client.download_fileobj(bucket_name, object_name, data)
         except ClientError as e:
             self.logger.error(f"-- ClientError -- {str(e)}")
             os.remove(file_name)
@@ -78,16 +79,11 @@ class AwsStorageMgmt:
         return response
 
     def get_obj_restore_status(self, object_name):
-        response = self.get_obj_head(object_name)
+        self.get_obj_head(object_name)
         try:
-            resp_string = response["Restore"]
-            self.logger.debug(resp_string)
-            if "ongoing-request" in resp_string and "true" in resp_string:
-                status = "incomplete"
-            elif "ongoing-request" in resp_string and "false" in resp_string:
-                status = "complete"
-            else:
-                status = "unknown"
+            restore_status = self.obj_head.get("Restore")
+            self.logger.debug(restore_status)
+            status = get_restore_status_short(restore_status)
         except Exception as e:
             status = str(e)
         self.logger.debug(status)
@@ -107,15 +103,27 @@ class AwsStorageMgmt:
         return response
 
     def download(self, object_name: str):
+        """
+        ideal control flow...
+        1. get object http head
+        2. if non-standard storage tier: restore then download (or exit for deep_archive)
+        3. else standard storage tier: download obj
+        """
+        self.logger.debug("download")
         self.get_obj_head(object_name)
         try:
-            tier = self.obj_head["StorageClass"]
-            if tier == "DEEP_ARCHIVE":
+            tier = self.obj_head.get("StorageClass", "STANDARD")
+            restore_status = self.obj_head.get("Restore")
+            if (tier == "STANDARD") or ("ongoing-request" in restore_status and "false" in restore_status):
+                return self.download_standard(object_name=object_name)
+            elif tier == "DEEP_ARCHIVE":
                 restore_tier = "Standard"
             elif tier == "GLACIER":
                 restore_tier = "Expedited"
         except KeyError as e:
-            self.logger.error(f"KeyError: {str(e)}, object not in glacier storage -- check control flow")
+            self.logger.error(
+                f"KeyError: {str(e)}, object tier {tier} invalid OR restore in progress; restore status = {str(restore_status)}"
+            )
             return
 
         self.logger.debug(f"restoring object from {tier}: {object_name}")
