@@ -22,6 +22,26 @@ python -m pip install mgmt
 
 Media Management Command Line Interface officially supports Python 3.8+.
 
+## Quick Start
+
+- setup global config file `~/.config/mgmt/config`
+
+```bash
+mgmt config
+```
+
+*fill out prompts*
+
+```bash
+mgmt config
+```
+
+*check configs are correct*
+
+```bash
+mgmt ls
+```
+
 ## Supported Features & Usage
 
 For help, run:

@@ -1,7 +1,7 @@
 # Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
 [tool.poetry]
 name = "mgmt"
-version = "0.7.5"
+version = "0.7.6"
 description = ""
 readme = "README.md"
 authors = ["Will Wright <willwright@example.com>"]
