@@ -2,7 +2,7 @@
 
 ## process
 
-1. upversion string in `setup.py` file using symantic versioning (major, minor, patch)
+1. upversion string in `setup.py` file using semantic versioning (major, minor, patch)
 
 ```python
 VERSION = "0.1.0"

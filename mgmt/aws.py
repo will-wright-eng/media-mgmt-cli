@@ -113,9 +113,12 @@ class AwsStorageMgmt:
         self.get_obj_head(object_name)
         try:
             tier = self.obj_head.get("StorageClass", "STANDARD")
-            restore_status = self.obj_head.get("Restore")
+            restore_status = self.obj_head.get("Restore", "None")
             if (tier == "STANDARD") or ("ongoing-request" in restore_status and "false" in restore_status):
                 return self.download_standard(object_name=object_name)
+            elif "ongoing-request" in restore_status and "true" in restore_status:
+                self.logger.info("RestoreAlreadyInProgress")
+                return
             elif tier == "DEEP_ARCHIVE":
                 restore_tier = "Standard"
             elif tier == "GLACIER":
