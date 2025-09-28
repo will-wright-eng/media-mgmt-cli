@@ -1,7 +1,5 @@
 #* Variables
 SHELL := /usr/bin/env bash
-PYTHON := python3
-PYTHONPATH := `pwd`
 
 #* Setup
 .PHONY: $(shell sed -n -e '/^$$/ { n ; /^[^ .\#][^ ]*:/ { s/:.*$$// ; p ; } ; }' $(MAKEFILE_LIST))
@@ -11,57 +9,64 @@ help: ## list make commands
 	@echo ${MAKEFILE_LIST}
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# https://jupyter-docker-stacks.readthedocs.io/en/latest/
-run-nb: ## run jupyter notebook on port 10000
-	@echo ""
-	@echo "http://<hostname>:10000/?token=<token>"
-	@echo "http://127.0.0.1:10000/lab"
-	@echo ""
-	docker run -it --rm -p 10000:8888 -v "${HOME}/repos/_tmp":/home/jovyan/work jupyter/datascience-notebook:85f615d5cafa
+#* Installation & Setup
+install: ## install dependencies with uv
+	uv sync --extra test --extra dev
 
-#* Poetry
-poetry-download: ## poetry-download
-	curl -sSL https://install.python-poetry.org | $(PYTHON) -
+setup: ## complete project setup
+	@echo "Setting up media-mgmt-cli project..."
+	uv sync --extra test --extra dev
+	uv run pre-commit install
+	@echo "✅ Project setup complete!"
 
-poetry-remove: ## poetry-remove
-	curl -sSL https://install.python-poetry.org | $(PYTHON) - --uninstall
+#* Development
+dev: ## start development environment
+	uv sync --extra test --extra dev
+	uv run pre-commit install
+	@echo "Development environment ready!"
 
-# ADD_REQ_TXT := $(shell cat requirements.txt | grep -E '^[^# ]' | cut -d= -f1 | xargs -n 1 poetry add)
-# # ADD_REQ_TXT := $(shell cat requirements.txt | xargs poetry add) # <-- if version numbers aren't included in requirements txt
-# poetry-init: ## init repo and add requirements.txt (with version numbers) to pypackage.toml
-# 	poetry init # to generate pyproject toml (appended to existing)
-# 	${ADD_REQ_TXT}
+#* Testing
+test: ## run tests
+	uv run pytest
 
-#* Installation
-install: ## install
-	poetry lock -n && poetry export --without-hashes > requirements.txt
-	poetry install -n
+test-coverage: ## run tests with coverage
+	uv run pytest --cov=mgmt --cov-report=html --cov-report=term
 
-pcreset: ## reset pre-commit
-	poetry run pre-commit uninstall
-	poetry run pre-commit clean
-	poetry run pre-commit install
+#* Code Quality
+lint: ## run linting and formatting checks
+	uv run ruff check mgmt/ tests/
+	uv run ruff format --check mgmt/ tests/
 
-pcrun: ## pre-commit run --all-files within poetry
-	poetry run pre-commit run --all-files
+lint-fix: ## fix linting issues and format code
+	uv run ruff check --fix mgmt/ tests/
+	uv run ruff format mgmt/ tests/
+
+#* Pre-commit
+pre-commit: ## run pre-commit on all files
+	uv run pre-commit run --all-files
+
+#* CLI Commands
+cli: ## show CLI help
+	uv run mgmt --help
+
+#* Build & Distribution
+build: ## build package
+	uv build
+
+publish: ## publish to PyPI (requires authentication)
+	uv publish
 
 #* Cleaning
-pycache-remove: ## cleanup subcommand - pycache-remove
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
+clean: ## clean up build artifacts, caches, and temp files
+	rm -rf build/ dist/ *.egg-info/ .uv/
+	rm -f test_file* *.tar.gz *.zip
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -name "*.pyc" -delete 2>/dev/null || true
+	find . -name ".DS_Store" -delete 2>/dev/null || true
+	find . -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
 
-dsstore-remove: ## cleanup subcommand - dsstore-remove
-	find . | grep -E ".DS_Store" | xargs rm -rf
-
-mypycache-remove: ## cleanup subcommand - mypycache-remove
-	find . | grep -E ".mypy_cache" | xargs rm -rf
-
-ipynbcheckpoints-remove: ## cleanup subcommand - ipynbcheckpoints-remove
-	find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
-
-pytestcache-remove: ## cleanup subcommand - pytestcache-remove
-	find . | grep -E ".pytest_cache" | xargs rm -rf
-
-build-remove: ## build-remove
-	rm -rf build/
-
-cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
+#* Status
+status: ## show project status
+	@echo "📦 Package Manager: uv"
+	@echo "🐍 Python Version: $(shell uv run python --version)"
+	@echo "📋 Dependencies: $(shell uv pip list | wc -l) packages installed"

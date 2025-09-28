@@ -1,15 +1,15 @@
-import os
 import gzip
+import os
 import shutil
 import tarfile
-from typing import List
 from pathlib import Path
+from typing import List
 from zipfile import ZipFile
 
 import rarfile
 
-from mgmt.log import Log
 from mgmt.config import Config
+from mgmt.log import Log
 
 
 class FileManager:
@@ -21,7 +21,9 @@ class FileManager:
             config = Config()
             self.base_path = Path(config.configs.get("MGMT_LOCAL_DIR"))
         if not self.base_path.exists():
-            self.logger.error(f"-- ValueError -- Path {str(self.base_path)} is not a valid path from root")
+            self.logger.error(
+                f"-- ValueError -- Path {str(self.base_path)} is not a valid path from root"
+            )
             self.logger.error("rerun `mgmt config`")
 
     def zip_single_file(self, filename: str) -> str:

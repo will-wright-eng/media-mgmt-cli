@@ -14,8 +14,14 @@ class Config:
         self.logger = Log()
         self.keys_dict = {
             "aws_bucket": {"name": "MGMT_BUCKET", "note": "storage bucket in aws"},
-            "object_prefix": {"name": "MGMT_OBJECT_PREFIX", "note": "prefix added to storage blob"},
-            "local_dir": {"name": "MGMT_LOCAL_DIR", "note": "full path to media dir on local machine"},
+            "object_prefix": {
+                "name": "MGMT_OBJECT_PREFIX",
+                "note": "prefix added to storage blob",
+            },
+            "local_dir": {
+                "name": "MGMT_LOCAL_DIR",
+                "note": "full path to media dir on local machine",
+            },
         }
         self.keys = [ele.get("name") for key, ele in self.keys_dict.items()]
         if not self.check_exists():
