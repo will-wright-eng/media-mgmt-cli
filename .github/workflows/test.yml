@@ -2,39 +2,48 @@ name: Test
 
 on:
   pull_request:
-    branches:
-    - '**'
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
 
 permissions:
   contents: read
 
 jobs:
-  test-py-os:
+  test:
+    name: Test Python ${{ matrix.python-version }}
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        os: [ubuntu-20.04]
-    runs-on: ${{ matrix.os }}
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+      fail-fast: false
+    runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - uses: actions/cache@v3
-      name: Configure uv caching
-      with:
-        path: ~/.cache/uv
-        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-uv-
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
-    - name: Install dependencies
-      run: |
-        uv sync --extra test --extra dev
-    - name: Run tests
-      run: |
-        uv run pytest
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install dependencies
+        run: uv sync --extra test --extra dev
+
+      - name: Run tests
+        run: uv run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
