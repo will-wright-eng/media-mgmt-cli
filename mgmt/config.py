@@ -53,48 +53,27 @@ class Config:
                 print(f"Current configuration:\n{f.read()}")
 
     def get_configs(self) -> Optional[Dict[str, Optional[str]]]:
-        """Get the current configuration as a dictionary.
-
-        Returns:
-            Dictionary of configuration values or None if config file doesn't exist
-        """
+        """Get the current configuration as a dictionary"""
         if self.dotenv_path.is_file():
             self.load_env()
             configs = {key: os.getenv(key) for key in self.keys}
         return configs
 
     def set_key(self, key: str, value: str) -> None:
-        """Set a configuration key-value pair.
-
-        Args:
-            key: The configuration key
-            value: The configuration value
-        """
+        """Set a configuration key-value pair"""
         dotenv.set_key(self.dotenv_path, key, value)
 
     def update_config(self, atts_dict: Dict[str, str]) -> None:
-        """Update multiple configuration values.
-
-        Args:
-            atts_dict: Dictionary of key-value pairs to update
-        """
+        """Update multiple configuration values"""
         for key, value in atts_dict.items():
             self.set_key(key, value)
 
     def check_exists(self) -> bool:
-        """Check if the configuration file exists.
-
-        Returns:
-            True if config file exists, False otherwise
-        """
+        """Check if the configuration file exists"""
         return self.dotenv_path.is_file()
 
     def write_env_vars(self, env_vars: Dict[str, str]) -> None:
-        """Write environment variables to the config file.
-
-        Args:
-            env_vars: Dictionary of environment variables to write
-        """
+        """Write environment variables to the config file"""
         with self.dotenv_path.open(mode="a") as f:
             for key, value in env_vars.items():
                 f.write(f"{key}={value}\n")

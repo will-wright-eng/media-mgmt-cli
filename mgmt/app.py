@@ -20,21 +20,13 @@ aws = AwsStorageMgmt()
 
 
 def get_version() -> str:
-    """Get the version from pyproject.toml.
-
-    Returns:
-        Version string
-    """
+    """Get the version from pyproject.toml"""
     pyproject = toml.load("pyproject.toml")
     return str(pyproject["project"]["version"])
 
 
 def version_callback(value: bool) -> None:
-    """Callback function for version option.
-
-    Args:
-        value: Whether version was requested
-    """
+    """Callback function for version option"""
     if value:
         print(f"Media MGMT CLI Version: {get_version()}")
         raise typer.Exit()

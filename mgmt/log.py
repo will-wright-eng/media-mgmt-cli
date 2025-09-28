@@ -5,11 +5,7 @@ import sys
 
 class Log:
     def __init__(self, debug: bool = True) -> None:
-        """Initialize the Log class.
-
-        Args:
-            debug: Whether to enable debug logging
-        """
+        """Initialize the Log class"""
         self.logger = logging.getLogger(__name__)
         if not self.logger.handlers:
             self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
@@ -24,20 +20,12 @@ class Log:
             self.logger.handlers[0].setLevel(logging.DEBUG if debug else logging.INFO)
 
     def set_debug(self, debug: bool) -> None:
-        """Set the debug level.
-
-        Args:
-            debug: Whether to enable debug logging
-        """
+        """Set the debug level"""
         log_level = logging.DEBUG if debug else logging.INFO
         self.logger.setLevel(log_level)
 
     def debug(self, message: str) -> None:
-        """Log a debug message.
-
-        Args:
-            message: The debug message to log
-        """
+        """Log a debug message"""
         frame = inspect.currentframe()
         if frame and frame.f_back:
             file_name = frame.f_back.f_code.co_filename
@@ -47,11 +35,7 @@ class Log:
             self.logger.debug(message)
 
     def info(self, message: str) -> None:
-        """Log an info message.
-
-        Args:
-            message: The info message to log
-        """
+        """Log an info message"""
         frame = inspect.currentframe()
         if frame and frame.f_back:
             file_name = frame.f_back.f_code.co_filename
@@ -61,11 +45,7 @@ class Log:
             self.logger.info(message)
 
     def warning(self, message: str) -> None:
-        """Log a warning message.
-
-        Args:
-            message: The warning message to log
-        """
+        """Log a warning message"""
         frame = inspect.currentframe()
         if frame and frame.f_back:
             file_name = frame.f_back.f_code.co_filename
@@ -75,11 +55,7 @@ class Log:
             self.logger.warning(message)
 
     def error(self, message: str) -> None:
-        """Log an error message.
-
-        Args:
-            message: The error message to log
-        """
+        """Log an error message"""
         frame = inspect.currentframe()
         if frame and frame.f_back:
             file_name = frame.f_back.f_code.co_filename

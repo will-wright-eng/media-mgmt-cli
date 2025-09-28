@@ -45,14 +45,7 @@ class AwsStorageMgmt:
             )
 
     def upload_file(self, file_name: Union[str, Path]) -> bool:
-        """Upload a file to S3.
-
-        Args:
-            file_name: Path to the file to upload
-
-        Returns:
-            True if upload successful, False otherwise
-        """
+        """Upload a file to S3"""
         self.logger.debug("upload_file")
         file_name_str = str(file_name)
         object_name = file_name_str.split("/")[-1]
@@ -72,15 +65,7 @@ class AwsStorageMgmt:
     def download_standard(
         self, object_name: str, bucket_name: Optional[str] = None
     ) -> bool:
-        """Download a file from S3 using standard storage.
-
-        Args:
-            object_name: S3 object key
-            bucket_name: S3 bucket name (uses config default if None)
-
-        Returns:
-            True if download successful, False otherwise
-        """
+        """Download a file from S3 using standard storage"""
         if not bucket_name:
             bucket_name = self.bucket
         self.logger.info(f"Downloading `{object_name}` from `{bucket_name}`")
@@ -95,14 +80,7 @@ class AwsStorageMgmt:
         return True
 
     def get_bucket_objs(self, bucket_name: Optional[str] = None) -> List[Any]:
-        """Get all objects from a bucket.
-
-        Args:
-            bucket_name: S3 bucket name (uses config default if None)
-
-        Returns:
-            List of S3 objects
-        """
+        """Get all objects from a bucket"""
         if not bucket_name:
             bucket_name = self.bucket
         self.logger.debug(f"bucket = {bucket_name}")
@@ -111,22 +89,11 @@ class AwsStorageMgmt:
         return list(my_bucket.objects.all())
 
     def get_bucket_obj_keys(self) -> List[str]:
-        """Get all object keys from the configured bucket.
-
-        Returns:
-            List of S3 object keys
-        """
+        """Get all object keys from the configured bucket"""
         return [obj.key for obj in self.get_bucket_objs()]
 
     def get_obj_head(self, object_name: str) -> Dict[str, Any]:
-        """Get object metadata from S3.
-
-        Args:
-            object_name: S3 object key
-
-        Returns:
-            Dictionary containing object metadata
-        """
+        """Get object metadata from S3"""
         response = self.s3_client.head_object(
             Bucket=self.bucket,
             Key=object_name,
@@ -135,14 +102,7 @@ class AwsStorageMgmt:
         return response  # type: ignore[no-any-return]
 
     def get_obj_restore_status(self, object_name: str) -> str:
-        """Get the restore status of an object.
-
-        Args:
-            object_name: S3 object key
-
-        Returns:
-            Restore status string
-        """
+        """Get the restore status of an object"""
         self.get_obj_head(object_name)
         try:
             restore_status = self.obj_head.get("Restore")
@@ -156,15 +116,7 @@ class AwsStorageMgmt:
     def restore_from_glacier(
         self, object_name: str, restore_tier: str
     ) -> Dict[str, Any]:
-        """Restore an object from Glacier storage.
-
-        Args:
-            object_name: S3 object key
-            restore_tier: Restore tier (Standard, Expedited, Bulk)
-
-        Returns:
-            S3 restore response
-        """
+        """Restore an object from Glacier storage"""
         response = self.s3_client.restore_object(
             Bucket=self.bucket,
             Key=object_name,
@@ -178,20 +130,7 @@ class AwsStorageMgmt:
         return response  # type: ignore[no-any-return]
 
     def download(self, object_name: str) -> Optional[bool]:
-        """Download an object from S3, handling different storage classes.
-
-        Args:
-            object_name: S3 object key
-
-        Returns:
-            True if download successful, None if restore needed, False if error
-        """
-        """
-        ideal control flow...
-        1. get object http head
-        2. if non-standard storage tier: restore then download (or exit for deep_archive)
-        3. else standard storage tier: download obj
-        """
+        """Download an object from S3, handling different storage classes"""
         self.logger.debug("download")
         self.get_obj_head(object_name)
         try:
@@ -241,15 +180,7 @@ class AwsStorageMgmt:
     def upload_target(
         self, target_path: Union[str, Path], compression: Optional[str]
     ) -> str:
-        """Upload a target (file or directory) with compression.
-
-        Args:
-            target_path: Path to upload
-            compression: Compression type ("zip" or "gzip")
-
-        Returns:
-            Name of the created compressed file
-        """
+        """Upload a target (file or directory) with compression"""
         self.logger.debug(f"upload_target: {str(target_path)} {compression}")
         target_path_obj = Path(target_path)
         if not self.file_mgmt:
@@ -267,14 +198,7 @@ class AwsStorageMgmt:
     def get_files(
         self, location: str
     ) -> Union[List[str], Tuple[List[str], List[str]], bool]:
-        """Get files from specified location.
-
-        Args:
-            location: Location to get files from ("local", "s3", or "global")
-
-        Returns:
-            List of files, tuple of (local_files, s3_keys), or False if error
-        """
+        """Get files from specified location"""
         if location == "local" and self.local_dir and self.file_mgmt:
             return self.file_mgmt.files_in_media_dir()
         elif location == "s3":
@@ -287,14 +211,7 @@ class AwsStorageMgmt:
             return False
 
     def list_func(self, location: str) -> List[str]:
-        """List files in specified location.
-
-        Args:
-            location: Location to list ("local", "s3", "global", or "here")
-
-        Returns:
-            List of file names
-        """
+        """List files in specified location"""
         file_list: List[str] = []
         if location in ("local", "s3", "global"):
             if location == "global":
@@ -313,24 +230,13 @@ class AwsStorageMgmt:
         return file_list
 
     def get_bucket_list(self) -> List[str]:
-        """Get list of all S3 buckets.
-
-        Returns:
-            List of bucket names
-        """
+        """Get list of all S3 buckets"""
         response = self.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         return buckets
 
     def delete_file(self, filename: str) -> bool:
-        """Delete a file from S3.
-
-        Args:
-            filename: S3 object key to delete
-
-        Returns:
-            True if deletion successful, False otherwise
-        """
+        """Delete a file from S3"""
         try:
             self.s3_client.delete_object(Bucket=self.bucket, Key=filename)
             return True

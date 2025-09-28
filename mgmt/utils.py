@@ -4,18 +4,7 @@ from typer import echo
 
 
 def check_selection(selection: int, option_list: List[int]) -> bool:
-    """Check if selection is valid from the option list.
-
-    Args:
-        selection: The user's selection
-        option_list: List of valid options
-
-    Returns:
-        True if selection is valid, False otherwise
-
-    Raises:
-        TypeError: If option_list contains invalid types
-    """
+    """Check if selection is valid from the option list"""
     try:
         if option_list and selection in option_list:
             return True
@@ -27,14 +16,7 @@ def check_selection(selection: int, option_list: List[int]) -> bool:
 
 
 def get_restore_status_short(restore_status: Optional[str]) -> str:
-    """Get a short status string from AWS restore status.
-
-    Args:
-        restore_status: The restore status string from AWS
-
-    Returns:
-        Short status string: "None", "incomplete", "complete", or "unknown"
-    """
+    """Get a short status string from AWS restore status"""
     if not restore_status:
         status = "None"
     elif "ongoing-request" in restore_status and "true" in restore_status:
