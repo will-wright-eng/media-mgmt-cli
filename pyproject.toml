@@ -1,6 +1,6 @@
 [project]
 name = "mgmt"
-version = "0.8.0"
+version = "0.8.1"
 description = "An intuitive command line interface that wraps boto3 to search and manage media assets"
 readme = "README.md"
 authors = [
@@ -14,13 +14,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.26.54",
     "botocore>=1.29.54",
@@ -63,7 +60,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.12"
 # Basic type checking - not too strict
 warn_return_any = true
 warn_unused_configs = true
@@ -104,7 +101,7 @@ doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAI
 skip = '.git,venv'
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
