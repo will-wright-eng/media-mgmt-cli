@@ -17,10 +17,21 @@
 `mgmt` is available on PyPI:
 
 ```bash
+# Using pip (traditional)
 python -m pip install mgmt
+
+# Using uv (recommended - faster and more reliable)
+uv add mgmt
+
+# Or install in a virtual environment
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install mgmt
 ```
 
-Media Management Command Line Interface officially supports Python 3.8+.
+**Current Version**: 0.8.0
+
+Media Management Command Line Interface officially supports Python 3.8, 3.9, 3.10, and 3.11+.
 
 ## Quick Start
 
@@ -85,34 +96,118 @@ git clone https://github.com/will-wright-eng/media-mgmt-cli.git
 cd media-mgmt-cli
 ```
 
-Then create a new virtual environment:
+### Prerequisites
+
+This project uses `uv` for fast and reliable dependency management. Install `uv` if you haven't already:
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+# Install uv (recommended)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or via pip
+pip install uv
 ```
 
-Now install the dependencies and test dependencies:
+### Development Setup
+
+The project includes a comprehensive Makefile for development tasks:
 
 ```bash
-pip install -e '.[test]'
+# Complete project setup (installs dependencies and pre-commit hooks)
+make setup
+
+# Or manually:
+uv sync --extra test --extra dev
+uv run pre-commit install
 ```
 
-To run the tests:
+### Available Development Commands
 
 ```bash
-pytest
+# Run tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Run linting and formatting
+make lint
+
+# Fix linting issues
+make lint-fix
+
+# Run pre-commit on all files
+make pre-commit
+
+# Show CLI help
+make cli
+
+# Build package
+make build
+
+# Clean up build artifacts
+make clean
+
+# Show project status
+make status
 ```
 
-Install pre-commit before submitting a PR:
+### Testing
 
 ```bash
-brew install pre-commit
-pre-commit install
+# Run tests
+make test
+
+# Run tests with coverage reporting
+make test-coverage
 ```
+
+### Code Quality
+
+The project uses modern Python tooling for code quality:
+
+- **Ruff**: Fast linting and formatting
+- **MyPy**: Type checking
+- **Pre-commit**: Automated quality checks
+- **Codespell**: Spelling checks
+
+All quality checks run automatically on commit via pre-commit hooks.
+
+### Why `uv`?
+
+This project uses `uv` for dependency management because it offers:
+
+- **🚀 Speed**: 10-100x faster than pip for dependency resolution
+- **🔒 Reliability**: Deterministic builds with lock files
+- **🛠️ Modern tooling**: Built-in support for virtual environments, project management, and publishing
+- **📦 Better dependency resolution**: More reliable conflict resolution than traditional tools
+- **🔄 Drop-in replacement**: Compatible with existing pip workflows
+
+### Project Status
+
+This project follows modern Python development practices:
+
+- ✅ **Modern dependency management** with `uv`
+- ✅ **Comprehensive CI/CD** with GitHub Actions
+- ✅ **Automated code quality** with Ruff, MyPy, and pre-commit
+- ✅ **Type safety** with comprehensive type hints
+- ✅ **Testing** with pytest and coverage reporting
+- ✅ **Documentation** with automated quality checks
+
+## Modern Python Development
+
+This project showcases modern Python development practices:
+
+- **`uv`** for fast dependency management and project tooling
+- **Ruff** for lightning-fast linting and formatting
+- **MyPy** for static type checking
+- **Pre-commit** for automated quality gates
+- **GitHub Actions** for CI/CD automation
+- **Hatchling** for modern Python packaging
 
 ## References
 
 - [PyPI Package](https://pypi.org/project/mgmt)
+- [uv Documentation](https://docs.astral.sh/uv/)
 - Based on cookiecutter template [will-wright-eng/click-app](https://github.com/will-wright-eng/click-app)
 - Rewrite of original project [will-wright-eng/media_mgmt_cli](https://github.com/will-wright-eng/media_mgmt_cli)
