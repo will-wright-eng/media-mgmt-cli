@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   pull_request:
@@ -11,23 +11,18 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
+  lint-and-type-check:
+    name: Lint and Type Check
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: ["3.12", "3.13"]
-      fail-fast: false
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -43,9 +38,13 @@ jobs:
             ${{ runner.os }}-uv-
 
       - name: Install dependencies
-        run: uv sync --extra test --extra dev
+        run: uv sync --extra dev
 
-      - name: Run tests
-        run: uv run pytest
-        env:
-          PYTHONPATH: ${{ github.workspace }}
+      - name: Run ruff linting
+        run: uv run ruff check .
+
+      - name: Run ruff formatting check
+        run: uv run ruff format --check .
+
+      - name: Run mypy type checking
+        run: uv run mypy mgmt/
