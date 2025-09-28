@@ -14,6 +14,17 @@ def runner() -> CliRunner:
 def test_upload(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.upload_target.return_value = "test_file.gz"
+    # Mock os.listdir to return our test file
+    mocker.patch("os.listdir", return_value=["test_file"])
+    # Mock Path operations to avoid file system issues
+    mock_path = mocker.patch("mgmt.app.Path")
+    mock_cwd = mocker.MagicMock()
+    mock_cwd.resolve.return_value = mock_cwd
+    mock_cwd.__truediv__.return_value = mock_cwd
+    mock_cwd.iterdir.return_value = []
+    mock_path.return_value = mock_cwd
+    # Mock os.remove to avoid file system issues
+    mocker.patch("os.remove")
     runner = CliRunner()
     result = runner.invoke(
         app, ["upload", "--filename", "test_file", "--compression", "gzip"]
@@ -36,11 +47,14 @@ def test_search(mocker: Any) -> None:
     mock_file_mgmt = mocker.patch("mgmt.app.FileManager")
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.get_files.return_value = (["test_file"], ["s3_test_file"])
-    mock_file_mgmt.keyword_in_string.return_value = True
+    mock_file_mgmt_instance = mock_file_mgmt.return_value
+    mock_file_mgmt_instance.keyword_in_string.return_value = True
+    # Mock typer.confirm to avoid interactive prompts
+    mocker.patch("mgmt.app.typer.confirm", return_value=False)
     runner = CliRunner()
     result = runner.invoke(app, ["search", "test"])
     mock_aws.get_files.assert_called_once_with(location="global")
-    mock_file_mgmt.keyword_in_string.assert_called()
+    mock_file_mgmt_instance.keyword_in_string.assert_called()
     assert result.exit_code == 0
 
 
