@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from typer.testing import CliRunner
 
@@ -5,11 +7,11 @@ from mgmt.app import app
 
 
 @pytest.fixture
-def runner():
+def runner() -> CliRunner:
     return CliRunner()
 
 
-def test_upload(mocker):
+def test_upload(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.upload_target.return_value = "test_file.gz"
     runner = CliRunner()
@@ -21,7 +23,7 @@ def test_upload(mocker):
     assert result.exit_code == 0
 
 
-def test_download(mocker):
+def test_download(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.download.return_value = "test_file"
     runner = CliRunner()
@@ -30,7 +32,7 @@ def test_download(mocker):
     assert result.exit_code == 0
 
 
-def test_search(mocker):
+def test_search(mocker: Any) -> None:
     mock_file_mgmt = mocker.patch("mgmt.app.FileManager")
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.get_files.return_value = (["test_file"], ["s3_test_file"])
@@ -42,7 +44,7 @@ def test_search(mocker):
     assert result.exit_code == 0
 
 
-def test_delete(mocker):
+def test_delete(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.delete_file.return_value = None
     mocker.patch("mgmt.app.typer.confirm", return_value=True)

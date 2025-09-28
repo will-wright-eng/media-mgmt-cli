@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import toml
 import typer
@@ -19,12 +19,22 @@ app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
 
 
-def get_version():
+def get_version() -> str:
+    """Get the version from pyproject.toml.
+
+    Returns:
+        Version string
+    """
     pyproject = toml.load("pyproject.toml")
-    return pyproject["project"]["version"]
+    return str(pyproject["project"]["version"])
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
+    """Callback function for version option.
+
+    Args:
+        value: Whether version was requested
+    """
     if value:
         print(f"Media MGMT CLI Version: {get_version()}")
         raise typer.Exit()
@@ -40,7 +50,8 @@ def common(
         help="Show the version and exit.",
         is_eager=True,
     ),
-):
+) -> None:
+    """Common callback for all commands."""
     pass
 
 
@@ -76,7 +87,7 @@ def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
             files_created.append(aws.upload_target(target_path, compression))
         else:
             echo("invalid file or directory")
-            return False
+            return
     except Exception as e:
         echo(f"An error occurred while uploading: {e}", err=True)
     finally:
@@ -96,7 +107,12 @@ def search(keyword: str) -> None:
     """
     location = "global"
     file_mgmt = FileManager()
-    local_files, s3_keys = aws.get_files(location=location)
+    files_result = aws.get_files(location=location)
+    if isinstance(files_result, tuple):
+        local_files, s3_keys = files_result
+    else:
+        local_files = []
+        s3_keys = []
     echo(f"\nSearching `{location}` for keyword `{keyword}`...")
     local_matches = [
         file for file in local_files if file_mgmt.keyword_in_string(keyword, file)
@@ -128,7 +144,7 @@ def search(keyword: str) -> None:
                 last_modified = resp.get("LastModified", "")
                 restore_status = get_restore_status_short(resp.get("Restore"))
                 content_length = resp.get("ContentLength")
-                content_length_gb = round(int(content_length) / (1024**3), 2)
+                content_length_gb = round(int(content_length or 0) / (1024**3), 2)
 
                 table.add_row(
                     str(i),
@@ -147,10 +163,10 @@ def search(keyword: str) -> None:
         if not typer.confirm("Download?", default=False):
             echo("Aborted.")
         else:
-            resp = typer.prompt("Which file? [option #]", type=int)
+            download_resp: int = typer.prompt("Which file? [option #]", type=int)
 
-            if check_selection(resp, list(doptions)):
-                aws.download(object_name=doptions[resp])
+            if check_selection(download_resp, list(doptions.keys())):
+                aws.download(object_name=doptions[download_resp])
                 return
             else:
                 return
@@ -158,10 +174,10 @@ def search(keyword: str) -> None:
         if not typer.confirm("Check Status?", default=False):
             echo("Aborted.")
         else:
-            resp = typer.prompt("Which file? [option #]", type=int)
+            status_resp: int = typer.prompt("Which file? [option #]", type=int)
 
-            if check_selection(resp, list(doptions)):
-                aws.get_obj_head(object_name=doptions[resp])
+            if check_selection(status_resp, list(doptions.keys())):
+                aws.get_obj_head(object_name=doptions[status_resp])
                 echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
                 return
             else:
@@ -228,12 +244,25 @@ def ls(location: Optional[str] = "global") -> None:
         Defaults to 'global'.
     """
     if location == "global":
-        local_files, s3_keys = aws.get_files(location=location)
+        files_result = aws.get_files(location=location)
+        if isinstance(files_result, tuple):
+            local_files, s3_keys = files_result
+        else:
+            local_files = []
+            s3_keys = []
     elif location == "local":
-        local_files = aws.get_files(location=location)
+        files_result = aws.get_files(location=location)
+        if isinstance(files_result, list):
+            local_files = files_result
+        else:
+            local_files = []
         s3_keys = [""]
     elif location == "s3":
-        s3_keys = aws.get_files(location=location)
+        files_result = aws.get_files(location=location)
+        if isinstance(files_result, list):
+            s3_keys = files_result
+        else:
+            s3_keys = []
         local_files = [""]
 
     echo()
@@ -249,7 +278,12 @@ def ls(location: Optional[str] = "global") -> None:
         echo(obj)
 
 
-def write_config(config):
+def write_config(config: Any) -> None:
+    """Write configuration interactively.
+
+    Args:
+        config: Config object
+    """
     echo("aws buckets...")
     echo("\n".join(aws.get_bucket_list()))
     config.dotenv_path.unlink(missing_ok=True)
@@ -294,6 +328,7 @@ def config() -> None:
 
 
 def entry_point() -> None:
+    """Entry point for the CLI application."""
     app()
 
 
