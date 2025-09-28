@@ -1,14 +1,14 @@
 import os
-from time import sleep
 from pathlib import Path
+from time import sleep
 
 import boto3
 from botocore.exceptions import ClientError
 
-from mgmt.log import Log
-from mgmt.files import FileManager
-from mgmt.utils import get_restore_status_short
 from mgmt.config import Config
+from mgmt.files import FileManager
+from mgmt.log import Log
+from mgmt.utils import get_restore_status_short
 
 
 class AwsStorageMgmt:
@@ -27,7 +27,9 @@ class AwsStorageMgmt:
             self.local_dir = self.configs.get("MGMT_LOCAL_DIR")
             self.file_mgmt = FileManager(self.local_dir)
         else:
-            self.logger.debug("Config file not found. Please run `mgmt config` to set up the configuration.")
+            self.logger.debug(
+                "Config file not found. Please run `mgmt config` to set up the configuration."
+            )
 
     def upload_file(self, file_name) -> bool:
         self.logger.debug("upload_file")
@@ -65,7 +67,7 @@ class AwsStorageMgmt:
         self.logger.debug(f"bucket = {bucket_name}")
         my_bucket = self.s3_resource.Bucket(bucket_name)
         self.logger.debug(my_bucket)
-        return [obj for obj in my_bucket.objects.all()]
+        return list(my_bucket.objects.all())
 
     def get_bucket_obj_keys(self):
         return [obj.key for obj in self.get_bucket_objs()]
@@ -114,7 +116,9 @@ class AwsStorageMgmt:
         try:
             tier = self.obj_head.get("StorageClass", "STANDARD")
             restore_status = self.obj_head.get("Restore", "None")
-            if (tier == "STANDARD") or ("ongoing-request" in restore_status and "false" in restore_status):
+            if (tier == "STANDARD") or (
+                "ongoing-request" in restore_status and "false" in restore_status
+            ):
                 return self.download_standard(object_name=object_name)
             elif "ongoing-request" in restore_status and "true" in restore_status:
                 self.logger.info("RestoreAlreadyInProgress")
@@ -148,7 +152,9 @@ class AwsStorageMgmt:
             self.logger.debug("downloading restored file")
             return self.download_standard(object_name=object_name)
         else:
-            self.logger.debug(f"object in {tier}, object will be restored in 12-24 hours")
+            self.logger.debug(
+                f"object in {tier}, object will be restored in 12-24 hours"
+            )
             return
 
     def upload_target(self, target_path, compression):

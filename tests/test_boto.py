@@ -8,8 +8,8 @@ https://stackoverflow.com/a/37144161/14343465
 
 import boto3
 import pytest
-from botocore.stub import Stubber
 from botocore.exceptions import ParamValidationError
+from botocore.stub import Stubber
 
 
 def test_boto3_s3():

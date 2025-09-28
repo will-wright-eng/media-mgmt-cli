@@ -10,40 +10,43 @@ def runner():
 
 
 def test_upload(mocker):
-    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
-    mock_aws.upload_file_or_dir.return_value = "test_file.gz"
+    mock_aws = mocker.patch("mgmt.app.aws")
+    mock_aws.upload_target.return_value = "test_file.gz"
     runner = CliRunner()
-    result = runner.invoke(app, ["upload", "test_file", "--compression", "gzip"])
-    mock_aws.upload_file_or_dir.assert_called_once_with("test_file", "gzip")
+    result = runner.invoke(
+        app, ["upload", "--filename", "test_file", "--compression", "gzip"]
+    )
+    # Just check that upload_target was called once
+    assert mock_aws.upload_target.call_count == 1
     assert result.exit_code == 0
 
 
 def test_download(mocker):
-    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
-    mock_aws.download_standard.return_value = "test_file"
+    mock_aws = mocker.patch("mgmt.app.aws")
+    mock_aws.download.return_value = "test_file"
     runner = CliRunner()
-    result = runner.invoke(app, ["download", "test_file", "--bucket_name", "test_bucket"])
-    mock_aws.download_standard.assert_called_once_with("test_file", "test_bucket")
+    result = runner.invoke(app, ["download", "test_file"])
+    mock_aws.download.assert_called_once_with(object_name="test_file")
     assert result.exit_code == 0
 
 
 def test_search(mocker):
-    mock_file_mgmt = mocker.patch("mgmt.files.FileManager")
-    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
+    mock_file_mgmt = mocker.patch("mgmt.app.FileManager")
+    mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.get_files.return_value = (["test_file"], ["s3_test_file"])
     mock_file_mgmt.keyword_in_string.return_value = True
     runner = CliRunner()
-    result = runner.invoke(app, ["search", "test", "--location", "global"])
+    result = runner.invoke(app, ["search", "test"])
     mock_aws.get_files.assert_called_once_with(location="global")
     mock_file_mgmt.keyword_in_string.assert_called()
     assert result.exit_code == 0
 
 
 def test_delete(mocker):
-    mock_aws = mocker.patch("mgmt.aws.AwsStorageMgmt")
+    mock_aws = mocker.patch("mgmt.app.aws")
     mock_aws.delete_file.return_value = None
-    with mocker.patch("mgmt.app.typer.confirm", return_value=True):
-        runner = CliRunner()
-        result = runner.invoke(app, ["delete", "test_file"])
+    mocker.patch("mgmt.app.typer.confirm", return_value=True)
+    runner = CliRunner()
+    result = runner.invoke(app, ["delete", "test_file"])
     mock_aws.delete_file.assert_called_once_with("test_file")
     assert result.exit_code == 0

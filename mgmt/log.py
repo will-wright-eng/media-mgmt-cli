@@ -1,6 +1,6 @@
-import sys
 import inspect
 import logging
+import sys
 
 
 class Log:
@@ -8,7 +8,9 @@ class Log:
         self.logger = logging.getLogger(__name__)
         if not self.logger.handlers:
             self.logger.setLevel(logging.DEBUG if debug else logging.INFO)
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
             stream_handler = logging.StreamHandler(sys.stdout)
             stream_handler.setLevel(logging.DEBUG)
             stream_handler.setFormatter(formatter)

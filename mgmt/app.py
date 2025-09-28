@@ -1,19 +1,19 @@
-import os
 import json
-from typing import Optional
+import os
 from pathlib import Path
+from typing import Optional
 
 import toml
 import typer
 from rich import box
-from typer import echo
-from rich.table import Table
 from rich.console import Console
+from rich.table import Table
+from typer import echo
 
 from mgmt.aws import AwsStorageMgmt
+from mgmt.config import Config
 from mgmt.files import FileManager
 from mgmt.utils import check_selection, get_restore_status_short
-from mgmt.config import Config
 
 app = typer.Typer(add_completion=False)
 aws = AwsStorageMgmt()
@@ -21,7 +21,7 @@ aws = AwsStorageMgmt()
 
 def get_version():
     pyproject = toml.load("pyproject.toml")
-    return pyproject["tool"]["poetry"]["version"]
+    return pyproject["project"]["version"]
 
 
 def version_callback(value: bool):
@@ -34,7 +34,11 @@ def version_callback(value: bool):
 def common(
     ctx: typer.Context,
     version: bool = typer.Option(
-        None, "--version", callback=version_callback, help="Show the version and exit.", is_eager=True
+        None,
+        "--version",
+        callback=version_callback,
+        help="Show the version and exit.",
+        is_eager=True,
     ),
 ):
     pass
@@ -94,10 +98,14 @@ def search(keyword: str) -> None:
     file_mgmt = FileManager()
     local_files, s3_keys = aws.get_files(location=location)
     echo(f"\nSearching `{location}` for keyword `{keyword}`...")
-    local_matches = [file for file in local_files if file_mgmt.keyword_in_string(keyword, file)]
-    s3_matches = [file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)]
+    local_matches = [
+        file for file in local_files if file_mgmt.keyword_in_string(keyword, file)
+    ]
+    s3_matches = [
+        file for file in s3_keys if file_mgmt.keyword_in_string(keyword, file)
+    ]
 
-    echo(f"total matches found = {str(len(local_matches)+len(s3_matches))}")
+    echo(f"total matches found = {str(len(local_matches) + len(s3_matches))}")
     if len(local_matches + s3_matches) >= 1:
         echo("at least one match found\n")
         echo("Local File Matches")
