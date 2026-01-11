@@ -167,7 +167,7 @@ make test-coverage
 The project uses modern Python tooling for code quality:
 
 - **Ruff**: Fast linting and formatting
-- **MyPy**: Type checking
+- **ty**: Type checking
 - **Pre-commit**: Automated quality checks
 - **Codespell**: Spelling checks
 
@@ -189,7 +189,7 @@ This project follows modern Python development practices:
 
 - ✅ **Modern dependency management** with `uv`
 - ✅ **Comprehensive CI/CD** with GitHub Actions
-- ✅ **Automated code quality** with Ruff, MyPy, and pre-commit
+- ✅ **Automated code quality** with Ruff, ty, and pre-commit
 - ✅ **Type safety** with comprehensive type hints
 - ✅ **Testing** with pytest and coverage reporting
 - ✅ **Documentation** with automated quality checks
@@ -200,7 +200,7 @@ This project showcases modern Python development practices:
 
 - **`uv`** for fast dependency management and project tooling
 - **Ruff** for lightning-fast linting and formatting
-- **MyPy** for static type checking
+- **ty** for static type checking
 - **Pre-commit** for automated quality gates
 - **GitHub Actions** for CI/CD automation
 - **Hatchling** for modern Python packaging

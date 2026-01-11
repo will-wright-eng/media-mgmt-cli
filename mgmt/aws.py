@@ -58,7 +58,7 @@ class AwsStorageMgmt:
             with open(file_name_str, "rb") as data:
                 self.s3_client.upload_fileobj(data, self.bucket, object_name)
         except ClientError as e:
-            self.logger.error(e)
+            self.logger.error(str(e))
             return False
         return True
 
@@ -99,7 +99,7 @@ class AwsStorageMgmt:
             Key=object_name,
         )
         self.obj_head = response
-        return response  # type: ignore[no-any-return]
+        return response
 
     def get_obj_restore_status(self, object_name: str) -> str:
         """Get the restore status of an object"""
@@ -127,7 +127,7 @@ class AwsStorageMgmt:
                 },
             },
         )
-        return response  # type: ignore[no-any-return]
+        return response
 
     def download(self, object_name: str) -> Optional[bool]:
         """Download an object from S3, handling different storage classes"""
