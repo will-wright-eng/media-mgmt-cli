@@ -16,13 +16,11 @@ install: ## install dependencies with uv
 setup: ## complete project setup
 	@echo "Setting up media-mgmt-cli project..."
 	uv sync --extra test --extra dev
-	uv run pre-commit install
 	@echo "✅ Project setup complete!"
 
 #* Development
 dev: ## start development environment
 	uv sync --extra test --extra dev
-	uv run pre-commit install
 	@echo "Development environment ready!"
 
 #* Testing
@@ -41,9 +39,9 @@ lint-fix: ## fix linting issues and format code
 	uv run ruff check --fix mgmt/ tests/
 	uv run ruff format mgmt/ tests/
 
-#* Pre-commit
-pre-commit: ## run pre-commit on all files
-	uv run pre-commit run --all-files
+#* Type Checking
+type-check: ## run type checking with ty
+	uv run ty check mgmt/ tests/
 
 #* CLI Commands
 cli: ## show CLI help
