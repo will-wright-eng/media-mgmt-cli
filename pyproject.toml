@@ -49,6 +49,7 @@ test = [
 dev = [
     "ruff>=0.1.0",
     "mypy>=1.7.0",
+    "ty>=0.0.1a26",
 ]
 
 [project.scripts]
@@ -96,6 +97,36 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.ty.environment]
+python-version = "3.9"
+
+[tool.ty.rules]
+# Type checking rules - mapped from mypy settings
+# Note: ty uses different rule names than mypy - only include rules that ty supports
+unused-ignore-comment = "warn"
+redundant-cast = "warn"
+possibly-unresolved-reference = "ignore"  # Global: ignore missing imports
+
+# Module-specific overrides for third-party libraries
+[[tool.ty.overrides]]
+include = [
+    "**/boto3/**",
+    "**/botocore/**",
+    "**/rarfile/**",
+    "**/toml/**",
+    "**/typer/**",
+    "**/rich/**",
+    "**/dotenv/**",
+]
+[tool.ty.overrides.rules]
+possibly-unresolved-reference = "ignore"
+
+# Override for test files - pytest is in test dependencies
+[[tool.ty.overrides]]
+include = ["tests/**"]
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+
 [tool.pytest.ini_options]
 norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
@@ -132,4 +163,5 @@ known-first-party = ["mgmt"]
 [tool.uv]
 dev-dependencies = [
     "mypy>=1.14.1",
+    "ty>=0.0.1a26",
 ]

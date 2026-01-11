@@ -39,6 +39,10 @@ lint-fix: ## fix linting issues and format code
 	uv run ruff check --fix mgmt/ tests/
 	uv run ruff format mgmt/ tests/
 
+#* Type Checking
+type-check: ## run type checking with ty
+	uv run ty check mgmt/ tests/
+
 #* CLI Commands
 cli: ## show CLI help
 	uv run mgmt --help
