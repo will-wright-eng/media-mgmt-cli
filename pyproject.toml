@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 requires-python = ">=3.9"
 dependencies = [
@@ -63,7 +64,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 # Basic type checking - not too strict
 warn_return_any = true
 warn_unused_configs = true
@@ -104,7 +105,7 @@ doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAI
 skip = '.git,venv'
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
 
 [tool.ruff.lint]
