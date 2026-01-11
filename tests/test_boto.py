@@ -6,7 +6,7 @@ Mocking boto3 S3 client method Python
 https://stackoverflow.com/a/37144161/14343465
 """
 
-from typing import Any, Dict
+from typing import Any
 
 import boto3
 import pytest
@@ -17,11 +17,11 @@ from botocore.stub import Stubber
 def test_boto3_s3() -> None:
     client = boto3.client("s3")
     stubber = Stubber(client)
-    list_buckets_response: Dict[str, Any] = {
+    list_buckets_response: dict[str, Any] = {
         "Owner": {"DisplayName": "name", "ID": "EXAMPLE123"},
         "Buckets": [{"CreationDate": "2016-05-25T16:55:48.000Z", "Name": "foo"}],
     }
-    expected_params: Dict[str, Any] = {}
+    expected_params: dict[str, Any] = {}
     stubber.add_response("list_buckets", list_buckets_response, expected_params)
     with stubber:
         response = client.list_buckets()

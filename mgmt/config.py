@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import dotenv
 
@@ -25,7 +25,7 @@ class Config:
                 "note": "full path to media dir on local machine",
             },
         }
-        self.keys: List[str] = [
+        self.keys: list[str] = [
             ele.get("name") or "" for key, ele in self.keys_dict.items()
         ]
         if not self.check_exists():
@@ -52,7 +52,7 @@ class Config:
             with self.dotenv_path.open() as f:
                 print(f"Current configuration:\n{f.read()}")
 
-    def get_configs(self) -> Optional[Dict[str, Optional[str]]]:
+    def get_configs(self) -> Optional[dict[str, Optional[str]]]:
         """Get the current configuration as a dictionary"""
         if self.dotenv_path.is_file():
             self.load_env()
@@ -63,7 +63,7 @@ class Config:
         """Set a configuration key-value pair"""
         dotenv.set_key(self.dotenv_path, key, value)
 
-    def update_config(self, atts_dict: Dict[str, str]) -> None:
+    def update_config(self, atts_dict: dict[str, str]) -> None:
         """Update multiple configuration values"""
         for key, value in atts_dict.items():
             self.set_key(key, value)
@@ -72,7 +72,7 @@ class Config:
         """Check if the configuration file exists"""
         return self.dotenv_path.is_file()
 
-    def write_env_vars(self, env_vars: Dict[str, str]) -> None:
+    def write_env_vars(self, env_vars: dict[str, str]) -> None:
         """Write environment variables to the config file"""
         with self.dotenv_path.open(mode="a") as f:
             for key, value in env_vars.items():

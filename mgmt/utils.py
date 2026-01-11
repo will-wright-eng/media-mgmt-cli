@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 
 from typer import echo
 
 
-def check_selection(selection: int, option_list: List[int]) -> bool:
+def check_selection(selection: int, option_list: list[int]) -> bool:
     """Check if selection is valid from the option list"""
     try:
         if option_list and selection in option_list:

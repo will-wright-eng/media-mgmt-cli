@@ -3,7 +3,7 @@ import os
 import shutil
 import tarfile
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 from zipfile import ZipFile
 
 import rarfile
@@ -77,7 +77,7 @@ class FileManager:
             self.logger.error(str(e))
             return self.gzip_single_file(str(target_path))
 
-    def files_in_media_dir(self) -> List[str]:
+    def files_in_media_dir(self) -> list[str]:
         """Get list of media files in the configured directory"""
         file_list = []
         path = Path(self.base_path)

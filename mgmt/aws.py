@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from time import sleep
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import boto3
 from botocore.exceptions import ClientError
@@ -79,7 +79,7 @@ class AwsStorageMgmt:
             return False
         return True
 
-    def get_bucket_objs(self, bucket_name: Optional[str] = None) -> List[Any]:
+    def get_bucket_objs(self, bucket_name: Optional[str] = None) -> list[Any]:
         """Get all objects from a bucket"""
         if not bucket_name:
             bucket_name = self.bucket
@@ -88,11 +88,11 @@ class AwsStorageMgmt:
         self.logger.debug(my_bucket)
         return list(my_bucket.objects.all())
 
-    def get_bucket_obj_keys(self) -> List[str]:
+    def get_bucket_obj_keys(self) -> list[str]:
         """Get all object keys from the configured bucket"""
         return [obj.key for obj in self.get_bucket_objs()]
 
-    def get_obj_head(self, object_name: str) -> Dict[str, Any]:
+    def get_obj_head(self, object_name: str) -> dict[str, Any]:
         """Get object metadata from S3"""
         response = self.s3_client.head_object(
             Bucket=self.bucket,
@@ -115,7 +115,7 @@ class AwsStorageMgmt:
 
     def restore_from_glacier(
         self, object_name: str, restore_tier: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Restore an object from Glacier storage"""
         response = self.s3_client.restore_object(
             Bucket=self.bucket,
@@ -197,7 +197,7 @@ class AwsStorageMgmt:
 
     def get_files(
         self, location: str
-    ) -> Union[List[str], Tuple[List[str], List[str]], bool]:
+    ) -> Union[list[str], tuple[list[str], list[str]], bool]:
         """Get files from specified location"""
         if location == "local" and self.local_dir and self.file_mgmt:
             return self.file_mgmt.files_in_media_dir()
@@ -210,9 +210,9 @@ class AwsStorageMgmt:
             self.logger.error(str(self.local_dir or ""))
             return False
 
-    def list_func(self, location: str) -> List[str]:
+    def list_func(self, location: str) -> list[str]:
         """List files in specified location"""
-        file_list: List[str] = []
+        file_list: list[str] = []
         if location in ("local", "s3", "global"):
             if location == "global":
                 files_result = self.get_files(location=location)
@@ -229,7 +229,7 @@ class AwsStorageMgmt:
             self.logger.error(location)
         return file_list
 
-    def get_bucket_list(self) -> List[str]:
+    def get_bucket_list(self) -> list[str]:
         """Get list of all S3 buckets"""
         response = self.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
