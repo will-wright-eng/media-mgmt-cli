@@ -17,19 +17,8 @@
 `mgmt` is available on PyPI:
 
 ```bash
-# Using pip (traditional)
-python -m pip install mgmt
-
-# Using uv (recommended - faster and more reliable)
-uv add mgmt
-
-# Or install in a virtual environment
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install mgmt
+uv tool install mgmt
 ```
-
-**Current Version**: 0.8.0
 
 Media Management Command Line Interface officially supports Python 3.9, 3.10, 3.11, 3.12, 3.13, and 3.14.
 
@@ -56,12 +45,6 @@ mgmt ls
 ## Supported Features & Usage
 
 For help, run:
-
-```bash
-mgmt --help
-```
-
-Commands:
 
 ```bash
 ➜ mgmt --help
@@ -127,39 +110,20 @@ uv run pre-commit install
 # Run tests
 make test
 
-# Run tests with coverage
-make test-coverage
-
 # Run linting and formatting
 make lint
 
 # Fix linting issues
 make lint-fix
 
-# Run pre-commit on all files
-make pre-commit
-
 # Show CLI help
 make cli
-
-# Build package
-make build
 
 # Clean up build artifacts
 make clean
 
 # Show project status
 make status
-```
-
-### Testing
-
-```bash
-# Run tests
-make test
-
-# Run tests with coverage reporting
-make test-coverage
 ```
 
 ### Code Quality
