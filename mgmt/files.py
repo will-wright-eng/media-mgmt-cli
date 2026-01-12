@@ -4,10 +4,8 @@ import os
 import shutil
 import tarfile
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 from zipfile import ZipFile
-
-import rarfile
 
 from mgmt.config import Config
 
@@ -103,66 +101,7 @@ class FileManager:
                 file_list.append(file)
         return ["/".join(str(file).split("/")[-2:]) for file in file_list]
 
-    def list_all_files(self) -> None:
-        """List all files in the base directory."""
-        for file in self.base_path.glob("**/*"):
-            self.logger.info(str(file))
-
-    def list_all_dirs(self) -> None:
-        """List all directories in the base directory."""
-        for directory in self.base_path.glob("**/"):
-            self.logger.info(str(directory))
-
-    @staticmethod
-    def clean_string(string: str) -> str:
-        """Clean a string by removing special characters"""
-        string = "".join(e for e in string if e.isalnum() or e == " " or e == "/")
-        string = string.replace("  ", " ").replace("  ", " ").replace(" ", "_")
-        return string
-
     @staticmethod
     def keyword_in_string(keyword: str, file: str) -> bool:
         """Check if keyword is in file string (case insensitive)"""
         return file.lower().find(keyword.lower()) != -1
-
-    @staticmethod
-    def abort_if_false(ctx: Any, param: Any, value: bool) -> None:
-        """Abort if value is False"""
-        if not value:
-            ctx.abort()
-
-
-class RarHandler:
-    def __init__(
-        self,
-        path: Union[str, Path],
-        logger: logging.Logger | None = None,
-    ) -> None:
-        """Initialize the RarHandler.
-
-        Args:
-            path: Path to RAR files directory.
-            logger: Optional logger instance. If None, uses module-level logger.
-                   Allows dependency injection for testing.
-        """
-        self.path = Path(path)
-        self.logger = logger or logging.getLogger(__name__)
-        if not self.path.exists():
-            raise ValueError(f"Path {path} does not exist")
-
-    def extract_all(self, destination: Union[str, Path]) -> None:
-        """Extract all RAR files to destination"""
-        destination = Path(destination)
-        if not destination.exists():
-            destination.mkdir(parents=True)
-
-        for rar_file in self.path.glob("**/*.rar"):
-            with rarfile.RarFile(rar_file) as rf:
-                rf.extractall(destination)
-
-    def list_all(self) -> None:
-        """List contents of all RAR files"""
-        for rar_file in self.path.glob("**/*.rar"):
-            with rarfile.RarFile(rar_file) as rf:
-                self.logger.info(f"Contents of {rar_file}:")
-                self.logger.info(rf.namelist())

@@ -34,8 +34,6 @@ dependencies = [
     "urllib3>=1.26.14",
     "typer>=0.9.0",
     "rich>=13.3.5",
-    "python-dotenv>=1.0.0",
-    "rarfile>=4.0",
     "toml>=0.10.2",
 ]
 
@@ -78,11 +76,9 @@ possibly-unresolved-reference = "ignore"  # Global: ignore missing imports
 include = [
     "**/boto3/**",
     "**/botocore/**",
-    "**/rarfile/**",
     "**/toml/**",
     "**/typer/**",
     "**/rich/**",
-    "**/dotenv/**",
 ]
 [tool.ty.overrides.rules]
 possibly-unresolved-reference = "ignore"
