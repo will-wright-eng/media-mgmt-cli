@@ -1,11 +1,12 @@
 import json
 import logging
 import os
+import re
 import time
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Optional
 
-import toml
 import typer
 from rich import box
 from rich.console import Console
@@ -32,9 +33,23 @@ aws = AwsStorageMgmt(logger=aws_logger)
 
 
 def get_version() -> str:
-    """Get the version from pyproject.toml"""
-    pyproject = toml.load("pyproject.toml")
-    return str(pyproject["project"]["version"])
+    """Get the version from installed package or pyproject.toml"""
+    try:
+        # Try to get version from installed package
+        return version("mgmt")
+    except PackageNotFoundError:
+        # Fallback: parse version from pyproject.toml
+        pyproject_path = Path("pyproject.toml")
+        if pyproject_path.exists():
+            with pyproject_path.open(encoding="utf-8") as f:
+                content = f.read()
+                # Match version = "x.y.z" pattern
+                match = re.search(
+                    r'^version\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE
+                )
+                if match:
+                    return match.group(1)
+        return "unknown"
 
 
 def version_callback(value: bool) -> None:
