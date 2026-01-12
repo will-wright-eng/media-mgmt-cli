@@ -1,9 +1,80 @@
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Optional
 
-import dotenv
+
+def load_dotenv(dotenv_path: Path) -> None:
+    """Load environment variables from a .env file.
+
+    This is a pure Python implementation that replaces python-dotenv.
+
+    Args:
+        dotenv_path: Path to the .env file
+    """
+    if not dotenv_path.exists():
+        return
+
+    with dotenv_path.open(encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+
+            # Parse KEY=VALUE format
+            # Handle quoted values (single or double quotes)
+            match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+            if match:
+                key = match.group(1)
+                value = match.group(2).strip()
+
+                # Remove surrounding quotes if present
+                if (value.startswith('"') and value.endswith('"')) or (
+                    value.startswith("'") and value.endswith("'")
+                ):
+                    value = value[1:-1]
+
+                # Only set if not already in environment (don't override existing env vars)
+                if key not in os.environ:
+                    os.environ[key] = value
+
+
+def set_key(dotenv_path: Path, key: str, value: str) -> None:
+    """Set or update a key-value pair in a .env file.
+
+    This is a pure Python implementation that replaces python-dotenv.
+
+    Args:
+        dotenv_path: Path to the .env file
+        key: The key to set
+        value: The value to set
+    """
+    lines: list[str] = []
+    key_found = False
+
+    # Read existing file if it exists
+    if dotenv_path.exists():
+        with dotenv_path.open(encoding="utf-8") as f:
+            for line in f:
+                # Check if this line contains the key we're updating
+                match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line.strip())
+                if match and match.group(1) == key:
+                    # Replace the existing line
+                    lines.append(f"{key}={value}\n")
+                    key_found = True
+                else:
+                    # Keep the original line
+                    lines.append(line)
+
+    # If key wasn't found, append it
+    if not key_found:
+        lines.append(f"{key}={value}\n")
+
+    # Write back to file
+    with dotenv_path.open("w", encoding="utf-8") as f:
+        f.writelines(lines)
 
 
 class Config:
@@ -42,7 +113,7 @@ class Config:
 
     def load_env(self) -> None:
         """Load environment variables from the config file."""
-        dotenv.load_dotenv(dotenv_path=self.dotenv_path)
+        load_dotenv(dotenv_path=self.dotenv_path)
 
     def log_current_config(self) -> None:
         """Log the current configuration to the logger."""
@@ -65,7 +136,7 @@ class Config:
 
     def set_key(self, key: str, value: str) -> None:
         """Set a configuration key-value pair"""
-        dotenv.set_key(self.dotenv_path, key, value)
+        set_key(self.dotenv_path, key, value)
 
     def update_config(self, atts_dict: dict[str, str]) -> None:
         """Update multiple configuration values"""
