@@ -1,19 +1,23 @@
+import logging
 import os
 from pathlib import Path
 from typing import Optional
 
 import dotenv
 
-from mgmt.log import Log
-
 
 class Config:
-    def __init__(self) -> None:
-        """Initialize the Config class."""
+    def __init__(self, logger: logging.Logger | None = None) -> None:
+        """Initialize the Config class.
+
+        Args:
+            logger: Optional logger instance. If None, uses module-level logger.
+                   Allows dependency injection for testing.
+        """
+        self.logger = logger or logging.getLogger(__name__)
         self.path = Path("~/.config/mgmt").expanduser()
         self.path.mkdir(parents=True, exist_ok=True)
         self.dotenv_path = self.path / "config"
-        self.logger = Log()
         self.keys_dict = {
             "aws_bucket": {"name": "MGMT_BUCKET", "note": "storage bucket in aws"},
             "object_prefix": {

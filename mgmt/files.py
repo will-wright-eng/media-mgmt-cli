@@ -1,4 +1,5 @@
 import gzip
+import logging
 import os
 import shutil
 import tarfile
@@ -9,17 +10,27 @@ from zipfile import ZipFile
 import rarfile
 
 from mgmt.config import Config
-from mgmt.log import Log
 
 
 class FileManager:
-    def __init__(self, base_path: Optional[Union[str, Path]] = None) -> None:
-        """Initialize the FileManager"""
-        self.logger = Log()
+    def __init__(
+        self,
+        base_path: Optional[Union[str, Path]] = None,
+        logger: logging.Logger | None = None,
+    ) -> None:
+        """Initialize the FileManager.
+
+        Args:
+            base_path: Optional base path for file operations.
+            logger: Optional logger instance. If None, uses module-level logger.
+                   Allows dependency injection for testing.
+        """
+        self.logger = logger or logging.getLogger(__name__)
         if base_path:
             self.base_path = Path(base_path)
         else:
-            config = Config()
+            # Pass logger to Config so they share the same logger
+            config = Config(logger=self.logger)
             if config.configs and config.configs.get("MGMT_LOCAL_DIR"):
                 local_dir = config.configs.get("MGMT_LOCAL_DIR")
                 if local_dir:
@@ -122,10 +133,20 @@ class FileManager:
 
 
 class RarHandler:
-    def __init__(self, path: Union[str, Path]) -> None:
-        """Initialize the RarHandler"""
+    def __init__(
+        self,
+        path: Union[str, Path],
+        logger: logging.Logger | None = None,
+    ) -> None:
+        """Initialize the RarHandler.
+
+        Args:
+            path: Path to RAR files directory.
+            logger: Optional logger instance. If None, uses module-level logger.
+                   Allows dependency injection for testing.
+        """
         self.path = Path(path)
-        self.logger = Log()
+        self.logger = logger or logging.getLogger(__name__)
         if not self.path.exists():
             raise ValueError(f"Path {path} does not exist")
 

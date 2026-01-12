@@ -1,6 +1,6 @@
 [project]
 name = "mgmt"
-version = "0.8.0"
+version = "0.9.0"
 description = "An intuitive command line interface that wraps boto3 to search and manage media assets"
 readme = "README.md"
 authors = [

@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from time import sleep
@@ -8,17 +9,22 @@ from botocore.exceptions import ClientError
 
 from mgmt.config import Config
 from mgmt.files import FileManager
-from mgmt.log import Log
 from mgmt.utils import get_restore_status_short
 
 
 class AwsStorageMgmt:
-    def __init__(self) -> None:
-        """Initialize the AWS Storage Management class."""
+    def __init__(self, logger: logging.Logger | None = None) -> None:
+        """Initialize the AWS Storage Management class.
+
+        Args:
+            logger: Optional logger instance. If None, uses module-level logger.
+                   Allows dependency injection for testing.
+        """
+        self.logger = logger or logging.getLogger(__name__)
         self.s3_resource = boto3.resource("s3")
         self.s3_client = boto3.client("s3")
-        self.config = Config()
-        self.logger = Log(debug=True)
+        # Pass logger to Config so they share the same logger
+        self.config = Config(logger=self.logger)
         self.file_mgmt: Optional[FileManager] = None
         self.load_config_file()
 
@@ -31,7 +37,7 @@ class AwsStorageMgmt:
                 self.object_prefix = self.configs.get("MGMT_OBJECT_PREFIX")
                 self.local_dir = self.configs.get("MGMT_LOCAL_DIR")
                 if self.local_dir:
-                    self.file_mgmt = FileManager(self.local_dir)
+                    self.file_mgmt = FileManager(self.local_dir, logger=self.logger)
                 else:
                     self.file_mgmt = None
             else:

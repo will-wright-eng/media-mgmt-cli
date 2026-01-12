@@ -1,5 +1,7 @@
 import json
+import logging
 import os
+import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -13,10 +15,20 @@ from typer import echo
 from mgmt.aws import AwsStorageMgmt
 from mgmt.config import Config
 from mgmt.files import FileManager
+from mgmt.log import get_log_file_path, setup_logging
 from mgmt.utils import check_selection, get_restore_status_short
 
+# Initialize logging at application startup
+setup_logging(debug=True)
+
+# Create module-level logger for app.py
+logger = logging.getLogger(__name__)
+
 app = typer.Typer(add_completion=False)
-aws = AwsStorageMgmt()
+
+# Create AWS instance with logger (will be passed to Config and FileManager)
+aws_logger = logging.getLogger("mgmt.aws")
+aws = AwsStorageMgmt(logger=aws_logger)
 
 
 def get_version() -> str:
@@ -98,6 +110,7 @@ def search(keyword: str) -> None:
         keyword (str): The keyword to search for in file names
     """
     location = "global"
+    # FileManager will use module-level logger if not provided
     file_mgmt = FileManager()
     files_result = aws.get_files(location=location)
     if isinstance(files_result, tuple):
@@ -304,7 +317,9 @@ def config() -> None:
     """
     Configures the application
     """
-    config = Config()
+    # Config will use module-level logger if not provided
+    config_logger = logging.getLogger("mgmt.config")
+    config = Config(logger=config_logger)
 
     if config.check_exists():
         config.load_env()
@@ -317,6 +332,66 @@ def config() -> None:
         write_config(config)
 
     echo("Configuration complete.")
+
+
+@app.command()
+def log(
+    tail: int = typer.Option(
+        0,
+        "--tail",
+        "-n",
+        help="Show only the last N lines of the log file",
+    ),
+    follow: bool = typer.Option(
+        False,
+        "--follow",
+        "-f",
+        help="Follow the log file (like tail -f)",
+    ),
+) -> None:
+    """
+    Display the log file contents.
+
+    Args:
+        tail: Show only the last N lines (0 = show all)
+        follow: Follow the log file for new entries (like tail -f)
+    """
+    log_file = get_log_file_path()
+
+    if not log_file.exists():
+        echo(f"Log file not found: {log_file}", err=True)
+        raise typer.Exit(1)
+
+    try:
+        if follow:
+            # Follow mode - continuously read new lines
+            echo(f"Following log file: {log_file}")
+            echo("Press Ctrl+C to stop\n")
+            try:
+                with log_file.open(encoding="utf-8") as f:
+                    # Go to end of file
+                    f.seek(0, 2)
+                    while True:
+                        line = f.readline()
+                        if line:
+                            echo(line.rstrip())
+                        else:
+                            time.sleep(0.1)  # Small delay to avoid busy waiting
+            except KeyboardInterrupt:
+                echo("\nStopped following log file.")
+        elif tail > 0:
+            # Show last N lines
+            with log_file.open(encoding="utf-8") as f:
+                lines = f.readlines()
+                for line in lines[-tail:]:
+                    echo(line.rstrip())
+        else:
+            # Show entire file
+            with log_file.open(encoding="utf-8") as f:
+                echo(f.read().rstrip())
+    except Exception as e:
+        echo(f"Error reading log file: {e}", err=True)
+        raise typer.Exit(1) from None
 
 
 def entry_point() -> None:

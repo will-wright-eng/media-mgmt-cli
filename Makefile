@@ -105,7 +105,7 @@ publish: ## publish to PyPI (requires authentication)
 
 #* Cleaning
 clean: ## clean up build artifacts, caches, and temp files
-	rm -rf build/ dist/ *.egg-info/ .uv/
+	rm -rf build/ dist/ *.egg-info/ .uv/ .venv/
 	rm -f test_file* *.tar.gz *.zip
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.pyc" -delete 2>/dev/null || true
