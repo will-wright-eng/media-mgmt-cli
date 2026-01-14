@@ -53,6 +53,11 @@ class AwsStorageMgmt:
     def upload_file(self, file_name: Union[str, Path]) -> bool:
         """Upload a file to S3"""
         self.logger.debug("upload_file")
+        if not self.bucket:
+            self.logger.error("Bucket not configured")
+            raise ValueError(
+                "Bucket not configured. Please run 'mgmt config' to set up configuration."
+            )
         file_name_str = str(file_name)
         object_name = file_name_str.split("/")[-1]
         if self.object_prefix:
@@ -183,22 +188,16 @@ class AwsStorageMgmt:
             )
             return None
 
-    def upload_target(
-        self, target_path: Union[str, Path], compression: Optional[str]
-    ) -> str:
-        """Upload a target (file or directory) with compression"""
-        self.logger.debug(f"upload_target: {str(target_path)} {compression}")
+    def upload_target(self, target_path: Union[str, Path]) -> str:
+        """Upload a target (file or directory) with gzip compression"""
+        self.logger.debug(f"upload_target: {str(target_path)} gzip")
         target_path_obj = Path(target_path)
         if not self.file_mgmt:
             raise ValueError("File manager not initialized")
-        if compression == "zip":
-            file_created = self.file_mgmt.zip_process(target_path_obj)
-        elif compression == "gzip":
-            self.logger.debug("gzip")
-            file_created = self.file_mgmt.gzip_process(target_path_obj)
-        else:
-            raise ValueError("Invalid compression type")
-        self.upload_file(file_name=file_created)
+        self.logger.debug("gzip")
+        file_created = self.file_mgmt.gzip_process(target_path_obj)
+        if not self.upload_file(file_name=file_created):
+            raise RuntimeError(f"Failed to upload {file_created}")
         return file_created
 
     def get_files(
