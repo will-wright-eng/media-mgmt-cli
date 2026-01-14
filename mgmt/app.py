@@ -88,31 +88,60 @@ def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
     cwd = Path(".").resolve()
     target_path = cwd / target
     files_created = []
+    files_uploaded_successfully = []
     skip_files = [".DS_Store"]
 
     try:
         if target == "all":
             echo("uploading all media objects to S3")
             for _file_or_dir in cwd.iterdir():
-                if str(_file_or_dir) not in skip_files:
+                if _file_or_dir.name not in skip_files:
                     echo()
                     echo("compressing...")
                     echo(str(_file_or_dir))
-                    files_created.append(aws.upload_target(_file_or_dir, compression))
+                    try:
+                        file_created = aws.upload_target(_file_or_dir, compression)
+                        files_created.append(file_created)
+                        files_uploaded_successfully.append(file_created)
+                    except Exception as e:
+                        echo(
+                            f"An error occurred while uploading {_file_or_dir}: {e}",
+                            err=True,
+                        )
+                        # Keep the compressed file for potential retry
         elif target in os.listdir(cwd):
             echo()
             echo("file found, compressing...")
             echo(str(target))
-            files_created.append(aws.upload_target(target_path, compression))
+            try:
+                file_created = aws.upload_target(target_path, compression)
+                files_created.append(file_created)
+                files_uploaded_successfully.append(file_created)
+            except Exception as e:
+                echo(f"An error occurred while uploading {target}: {e}", err=True)
+                # Keep the compressed file for potential retry
         else:
             echo("invalid file or directory")
             return
     except Exception as e:
         echo(f"An error occurred while uploading: {e}", err=True)
     finally:
-        if files_created:
-            for file in files_created:
-                os.remove(file)
+        # Only delete files that were successfully uploaded
+        if files_uploaded_successfully:
+            for file in files_uploaded_successfully:
+                try:
+                    os.remove(file)
+                except Exception as e:
+                    echo(f"Warning: Could not delete {file}: {e}", err=True)
+        # Log files that failed to upload (kept for retry)
+        failed_files = [
+            f for f in files_created if f not in files_uploaded_successfully
+        ]
+        if failed_files:
+            echo(
+                f"Note: Compressed files kept for retry: {', '.join(failed_files)}",
+                err=True,
+            )
     return
 
 

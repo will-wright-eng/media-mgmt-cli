@@ -1,6 +1,5 @@
 import gzip
 import logging
-import os
 import shutil
 import tarfile
 from pathlib import Path
@@ -43,17 +42,32 @@ class FileManager:
 
     def zip_single_file(self, filename: str) -> str:
         """Create a zip file from a single file"""
-        zip_file = filename.split(".")[0] + ".zip"
+        # Handle both absolute and relative paths
+        file_path = Path(filename)
+        if file_path.is_absolute():
+            source_file = file_path
+            arcname = file_path.name
+        else:
+            source_file = self.base_path / filename
+            arcname = filename
+
+        zip_file = str(source_file).rsplit(".", 1)[0] + ".zip"
         with ZipFile(zip_file, "w") as zipf:
-            zipf.write(os.path.join(self.base_path, filename), arcname=filename)
+            zipf.write(source_file, arcname=arcname)
         return zip_file
 
     def gzip_single_file(self, filename: str) -> str:
         """Create a gzip file from a single file"""
-        gzip_file = f"{filename}.gz"
-        with open(os.path.join(self.base_path, filename), "rb") as f_in, gzip.open(
-            os.path.join(self.base_path, gzip_file), "wb"
-        ) as f_out:
+        # Handle both absolute and relative paths
+        file_path = Path(filename)
+        if file_path.is_absolute():
+            source_file = file_path
+            gzip_file = f"{source_file}.gz"
+        else:
+            source_file = self.base_path / filename
+            gzip_file = str(self.base_path / f"{filename}.gz")
+
+        with open(source_file, "rb") as f_in, gzip.open(gzip_file, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
         return gzip_file
 
