@@ -1,10 +1,7 @@
-import gzip
 import logging
-import shutil
 import tarfile
 from pathlib import Path
 from typing import Optional, Union
-from zipfile import ZipFile
 
 from mgmt.config import Config
 
@@ -40,65 +37,19 @@ class FileManager:
             )
             self.logger.error("rerun `mgmt config`")
 
-    def zip_single_file(self, filename: str) -> str:
-        """Create a zip file from a single file"""
-        # Handle both absolute and relative paths
-        file_path = Path(filename)
-        if file_path.is_absolute():
-            source_file = file_path
-            arcname = file_path.name
-        else:
-            source_file = self.base_path / filename
-            arcname = filename
-
-        zip_file = str(source_file).rsplit(".", 1)[0] + ".zip"
-        with ZipFile(zip_file, "w") as zipf:
-            zipf.write(source_file, arcname=arcname)
-        return zip_file
-
-    def gzip_single_file(self, filename: str) -> str:
-        """Create a gzip file from a single file"""
-        # Handle both absolute and relative paths
-        file_path = Path(filename)
-        if file_path.is_absolute():
-            source_file = file_path
-            gzip_file = f"{source_file}.gz"
-        else:
-            source_file = self.base_path / filename
-            gzip_file = str(self.base_path / f"{filename}.gz")
-
-        with open(source_file, "rb") as f_in, gzip.open(gzip_file, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
-        return gzip_file
-
-    def zip_process(self, target_path: Path) -> str:
-        """Create a zip archive from a path (file or directory)"""
-        try:
-            # dir_name = str(self.base_path / target_path)
-            dir_name = str(target_path)
-            zip_path = shutil.make_archive(dir_name, "zip", dir_name)
-            return zip_path.split("/")[-1]
-        except NotADirectoryError as e:
-            self.logger.error(str(e))
-            return self.zip_single_file(str(target_path))
-
     def gzip_process(self, target_path: Path) -> str:
         """Create a gzip tar archive from a path (file or directory)"""
         self.logger.debug("gzip_process")
-        try:
-            # dir_path = str(self.base_path / target_path)
-            dir_path = str(target_path)
-            self.logger.debug(dir_path)
-            gzip_file = f"{target_path}.tar.gz"
-            self.logger.debug("tarfile open")
-            tar = tarfile.open(gzip_file, "w:gz")
-            self.logger.debug("tarfile add")
-            tar.add(dir_path, arcname=target_path)
-            tar.close()
-            return gzip_file
-        except NotADirectoryError as e:
-            self.logger.error(str(e))
-            return self.gzip_single_file(str(target_path))
+        dir_path = str(target_path)
+        self.logger.debug(dir_path)
+        gzip_file = f"{target_path}.tar.gz"
+        self.logger.debug("tarfile open")
+        tar = tarfile.open(gzip_file, "w:gz")
+        self.logger.debug("tarfile add")
+        # tarfile.add() works for both files and directories
+        tar.add(dir_path, arcname=target_path.name)
+        tar.close()
+        return gzip_file
 
     def files_in_media_dir(self) -> list[str]:
         """Get list of media files in the configured directory"""

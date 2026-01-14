@@ -13,7 +13,8 @@ def runner() -> CliRunner:
 
 def test_upload(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
-    mock_aws.upload_target.return_value = "test_file.gz"
+    # Now always returns .tar.gz files (consistent for both files and directories)
+    mock_aws.upload_target.return_value = "test_file.tar.gz"
     # Mock os.listdir to return our test file
     mocker.patch("os.listdir", return_value=["test_file"])
     # Mock Path operations to avoid file system issues
@@ -26,9 +27,7 @@ def test_upload(mocker: Any) -> None:
     # Mock os.remove to avoid file system issues
     mocker.patch("os.remove")
     runner = CliRunner()
-    result = runner.invoke(
-        app, ["upload", "--filename", "test_file", "--compression", "gzip"]
-    )
+    result = runner.invoke(app, ["upload", "--filename", "test_file"])
     # Just check that upload_target was called once
     assert mock_aws.upload_target.call_count == 1
     assert result.exit_code == 0

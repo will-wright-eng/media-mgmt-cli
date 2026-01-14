@@ -22,7 +22,7 @@ Assign a data structure to each uploaded file to track:
 
 - Original file/directory path
 - Upload timestamp
-- Compression type used
+- Compression type (always gzip/tar.gz)
 - S3 object key/name
 - File size (original and compressed)
 - Checksum/hash (optional, for verification)

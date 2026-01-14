@@ -75,14 +75,13 @@ def common(
 
 
 @app.command()
-def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
+def upload(filename: str = "all") -> None:
     """
-    Uploads the specified file to S3
+    Uploads the specified file to S3 with gzip compression
 
     Args:
         filename (str): The name of the file or directory to upload.
             Use 'all' to upload all files in the directory.
-        compression (Optional[str]): The compression algorithm to use. Defaults to 'gzip'.
     """
     target = filename
     cwd = Path(".").resolve()
@@ -100,7 +99,7 @@ def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
                     echo("compressing...")
                     echo(str(_file_or_dir))
                     try:
-                        file_created = aws.upload_target(_file_or_dir, compression)
+                        file_created = aws.upload_target(_file_or_dir)
                         files_created.append(file_created)
                         files_uploaded_successfully.append(file_created)
                     except Exception as e:
@@ -114,7 +113,7 @@ def upload(filename: str = "all", compression: Optional[str] = "gzip") -> None:
             echo("file found, compressing...")
             echo(str(target))
             try:
-                file_created = aws.upload_target(target_path, compression)
+                file_created = aws.upload_target(target_path)
                 files_created.append(file_created)
                 files_uploaded_successfully.append(file_created)
             except Exception as e:

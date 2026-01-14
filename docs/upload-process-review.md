@@ -10,7 +10,7 @@ The upload process involves multiple components:
 
 - `mgmt/app.py` - CLI command handler (`upload()` function)
 - `mgmt/aws.py` - AWS S3 operations (`upload_target()`, `upload_file()`)
-- `mgmt/files.py` - File compression operations (`zip_process()`, `gzip_process()`)
+- `mgmt/files.py` - File compression operations (`gzip_process()` - always uses gzip/tar.gz)
 
 ## Issues Found
 
@@ -33,18 +33,18 @@ Changed to use the filename property: `if _file_or_dir.name not in skip_files:`
 
 ### 2. Single File Compression Path Issue ✅ FIXED
 
-**Location:** `mgmt/files.py:44-58, 69, 87`
+**Location:** `mgmt/files.py`
 
-**Status:** Fixed
+**Status:** Fixed (and simplified)
 
 **Issue:**
-When `zip_process()` or `gzip_process()` fall back to `zip_single_file()`/`gzip_single_file()` for single files, these methods assumed files were in `self.base_path`. However, the target file may be in the current working directory (as passed from `app.py`). When `zip_process()` called these methods with `str(target_path)`, `filename` could be a full path, but the code treated it as a relative path in `base_path`.
+Previously, `gzip_process()` had separate handling for single files vs directories, with a fallback to `gzip_single_file()` for single files. This created complexity and path handling issues.
 
 **Impact:**
-Single file compression would fail with `FileNotFoundError` when the file was not in `base_path`.
+Single file compression had inconsistent behavior and path handling complexity.
 
 **Fix Applied:**
-Updated both `zip_single_file()` and `gzip_single_file()` to detect and handle absolute paths correctly. The methods now check if the path is absolute and use it directly, otherwise they use it relative to `base_path`.
+Simplified `gzip_process()` to always use `tarfile` for both files and directories, creating consistent `.tar.gz` archives. This removes the need for separate single-file handling and ensures consistent behavior regardless of input type.
 
 ---
 
@@ -137,7 +137,7 @@ See [Completed Directory Enhancement Proposal](./completed-directory-enhancement
 
 - `mgmt/app.py` - Upload command (fixed: skip files logic, error recovery)
 - `mgmt/aws.py` - AWS S3 operations (fixed: error handling, bucket validation)
-- `mgmt/files.py` - File compression operations (fixed: path handling for single files)
+- `mgmt/files.py` - File compression operations (simplified: always uses tar.gz for both files and directories)
 - `mgmt/config.py` - Configuration management
 
 ### Potential New Files for Enhancement
