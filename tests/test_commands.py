@@ -15,21 +15,25 @@ def test_upload(mocker: Any) -> None:
     mock_aws = mocker.patch("mgmt.app.aws")
     # Now always returns .tar.gz files (consistent for both files and directories)
     mock_aws.upload_target.return_value = "test_file.tar.gz"
-    # Mock os.listdir to return our test file
-    mocker.patch("os.listdir", return_value=["test_file"])
+    # Mock move_to_completed to return a path
+    mock_aws.move_to_completed.return_value = mocker.MagicMock()
     # Mock Path operations to avoid file system issues
     mock_path = mocker.patch("mgmt.app.Path")
     mock_cwd = mocker.MagicMock()
     mock_cwd.resolve.return_value = mock_cwd
-    mock_cwd.__truediv__.return_value = mock_cwd
+    mock_target_path = mocker.MagicMock()
+    mock_target_path.exists.return_value = True
+    mock_cwd.__truediv__.return_value = mock_target_path
     mock_cwd.iterdir.return_value = []
     mock_path.return_value = mock_cwd
     # Mock os.remove to avoid file system issues
     mocker.patch("os.remove")
     runner = CliRunner()
-    result = runner.invoke(app, ["upload", "--filename", "test_file"])
+    result = runner.invoke(app, ["upload", "test_file"])
     # Just check that upload_target was called once
     assert mock_aws.upload_target.call_count == 1
+    # Check that move_to_completed was called once
+    assert mock_aws.move_to_completed.call_count == 1
     assert result.exit_code == 0
 
 

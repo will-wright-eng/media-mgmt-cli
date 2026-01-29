@@ -99,6 +99,10 @@ class Config:
                 "name": "MGMT_LOCAL_DIR",
                 "note": "full path to media dir on local machine",
             },
+            "completed_dir": {
+                "name": "MGMT_COMPLETED_DIR",
+                "note": "directory to move files after successful upload (optional, defaults to ./completed)",
+            },
         }
         self.keys: list[str] = [
             ele.get("name") or "" for key, ele in self.keys_dict.items()

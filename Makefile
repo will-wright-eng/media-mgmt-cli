@@ -19,17 +19,25 @@ setup: ## complete project setup
 	@echo "✅ Project setup complete!"
 
 test: ## run tests
+	uv sync --extra test
 	uv run pytest
 
+test-upload-download: ## run test upload and download
+	uv sync --extra test
+	uv run scripts/test-upload-download.sh
+
 lint: ## run linting and formatting checks
+	uv sync --extra dev
 	uv run ruff check mgmt/ tests/
 	uv run ruff format --check mgmt/ tests/
 
 lint-fix: ## fix linting issues and format code
+	uv sync --extra dev
 	uv run ruff check --fix mgmt/ tests/
 	uv run ruff format mgmt/ tests/
 
 type-check: ## run type checking with ty
+	uv sync --extra dev
 	uv run ty check mgmt/ tests/
 
 cli: ## show CLI help
