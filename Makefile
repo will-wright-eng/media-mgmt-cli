@@ -22,6 +22,10 @@ test: ## run tests
 	uv sync --extra test
 	uv run pytest
 
+test-upload-download: ## run test upload and download
+	uv sync --extra test
+	uv run scripts/test-upload-download.sh
+
 lint: ## run linting and formatting checks
 	uv sync --extra dev
 	uv run ruff check mgmt/ tests/

@@ -82,16 +82,20 @@ class AwsStorageMgmt:
         """Download a file from S3 using standard storage"""
         if not bucket_name:
             bucket_name = self.bucket
+        print(f"Downloading `{object_name}` from `{bucket_name}`...")
         self.logger.info(f"Downloading `{object_name}` from `{bucket_name}`")
         file_name = object_name.split("/")[-1]
         try:
             with open(file_name, "wb") as data:
                 self.s3_client.download_fileobj(bucket_name, object_name, data)
+            print(f"Download complete: {file_name}")
+            return True
         except ClientError as e:
+            print(f"Error downloading file: {str(e)}")
             self.logger.error(f"-- ClientError -- {str(e)}")
-            os.remove(file_name)
+            if os.path.exists(file_name):
+                os.remove(file_name)
             return False
-        return True
 
     def get_bucket_objs(self, bucket_name: Optional[str] = None) -> list[Any]:
         """Get all objects from a bucket"""
@@ -155,6 +159,7 @@ class AwsStorageMgmt:
             ):
                 return self.download_standard(object_name=object_name)
             elif "ongoing-request" in restore_status and "true" in restore_status:
+                print("Restore already in progress. Please wait and try again later.")
                 self.logger.info("RestoreAlreadyInProgress")
                 return None
             elif tier == "DEEP_ARCHIVE":
@@ -167,25 +172,49 @@ class AwsStorageMgmt:
             )
             return None
 
+        print(f"File is in {tier} storage. Initiating restore request...")
         self.logger.debug(f"restoring object from {tier}: {object_name}")
         self.restore_from_glacier(object_name=object_name, restore_tier=restore_tier)
         if tier == "GLACIER":
+            print(
+                "Waiting for file to be restored (this may take 1-5 minutes for Expedited restore)..."
+            )
             restored = False
-            while not restored:
+            check_count = 0
+            max_checks = 20  # Maximum 20 checks = 10 minutes (20 * 30 seconds)
+            while not restored and check_count < max_checks:
+                check_count += 1
                 sleep(30)
+                print(
+                    f"Checking restore status... (attempt {check_count}/{max_checks})"
+                )
                 self.logger.debug("checking...")
                 status = self.get_obj_restore_status(object_name)
                 if status == "incomplete":
                     pass
                 elif status == "complete":
+                    print("File restored successfully. Downloading...")
                     self.logger.debug("restored = True")
                     restored = True
                 else:
+                    print(f"Restore status: {status}. Unable to complete download.")
                     self.logger.debug(f"status: {status}, exiting...")
                     return None
+            if not restored:
+                print(
+                    f"Restore is taking longer than expected. Maximum wait time reached ({max_checks * 30 / 60} minutes)."
+                )
+                print(
+                    "The restore is still in progress. You can check status later using: mgmt status <filename>"
+                )
+                return None
             self.logger.debug("downloading restored file")
             return self.download_standard(object_name=object_name)
         else:
+            print(
+                f"File is in {tier} storage. Restore initiated - file will be available in 12-24 hours."
+            )
+            print("You can check status later using: mgmt status <filename>")
             self.logger.debug(
                 f"object in {tier}, object will be restored in 12-24 hours"
             )
