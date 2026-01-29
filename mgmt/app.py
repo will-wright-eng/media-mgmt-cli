@@ -75,23 +75,30 @@ def common(
 
 
 @app.command()
-def upload(filename: str = "all") -> None:
+def upload(
+    filename: Optional[str] = typer.Argument(
+        None, help="File or directory path to upload"
+    ),
+    all: bool = typer.Option(
+        False, "--all", "-a", help="Upload all files in the current directory"
+    ),
+) -> None:
     """
-    Uploads the specified file to S3 with gzip compression
+    Uploads the specified file or directory to S3 with gzip compression.
 
-    Args:
-        filename (str): The name of the file or directory to upload.
-            Use 'all' to upload all files in the directory.
+    Either provide a filename/path as an argument, or use --all to upload all files in the current directory.
     """
-    target = filename
     cwd = Path(".").resolve()
-    target_path = cwd / target
-    files_created = []
-    files_uploaded_successfully = []
+    files_created = []  # Compressed files created
+    files_uploaded_successfully = []  # Compressed files successfully uploaded
+    original_files_uploaded = []  # Original files/directories successfully uploaded
     skip_files = [".DS_Store"]
 
     try:
-        if target == "all":
+        if all:
+            if filename:
+                echo("Error: Cannot specify both filename and --all option", err=True)
+                return
             echo("uploading all media objects to S3")
             for _file_or_dir in cwd.iterdir():
                 if _file_or_dir.name not in skip_files:
@@ -102,30 +109,57 @@ def upload(filename: str = "all") -> None:
                         file_created = aws.upload_target(_file_or_dir)
                         files_created.append(file_created)
                         files_uploaded_successfully.append(file_created)
+                        original_files_uploaded.append(_file_or_dir)
                     except Exception as e:
                         echo(
                             f"An error occurred while uploading {_file_or_dir}: {e}",
                             err=True,
                         )
                         # Keep the compressed file for potential retry
-        elif target in os.listdir(cwd):
-            echo()
-            echo("file found, compressing...")
-            echo(str(target))
-            try:
-                file_created = aws.upload_target(target_path)
-                files_created.append(file_created)
-                files_uploaded_successfully.append(file_created)
-            except Exception as e:
-                echo(f"An error occurred while uploading {target}: {e}", err=True)
-                # Keep the compressed file for potential retry
+        elif filename:
+            target_path = cwd / filename
+            if target_path.exists():
+                echo()
+                echo("file found, compressing...")
+                echo(str(filename))
+                try:
+                    file_created = aws.upload_target(target_path)
+                    files_created.append(file_created)
+                    files_uploaded_successfully.append(file_created)
+                    original_files_uploaded.append(target_path)
+                except Exception as e:
+                    echo(f"An error occurred while uploading {filename}: {e}", err=True)
+                    # Keep the compressed file for potential retry
+            else:
+                echo("invalid file or directory")
+                return
         else:
-            echo("invalid file or directory")
+            echo(
+                "Error: Must specify either a filename/path or use --all option",
+                err=True,
+            )
             return
     except Exception as e:
         echo(f"An error occurred while uploading: {e}", err=True)
     finally:
-        # Only delete files that were successfully uploaded
+        # Move original files to completed directory after successful upload
+        if original_files_uploaded:
+            for original_file in original_files_uploaded:
+                try:
+                    completed_path = aws.move_to_completed(original_file)
+                    if completed_path:
+                        echo(f"Moved {original_file.name} to completed directory")
+                    else:
+                        echo(
+                            f"Warning: Could not move {original_file.name} to completed directory",
+                            err=True,
+                        )
+                except Exception as e:
+                    echo(
+                        f"Warning: Error moving {original_file.name} to completed directory: {e}",
+                        err=True,
+                    )
+        # Only delete compressed files that were successfully uploaded
         if files_uploaded_successfully:
             for file in files_uploaded_successfully:
                 try:

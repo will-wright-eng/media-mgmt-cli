@@ -36,6 +36,7 @@ class AwsStorageMgmt:
                 self.bucket = self.configs.get("MGMT_BUCKET")
                 self.object_prefix = self.configs.get("MGMT_OBJECT_PREFIX")
                 self.local_dir = self.configs.get("MGMT_LOCAL_DIR")
+                self.completed_dir = self.configs.get("MGMT_COMPLETED_DIR")
                 if self.local_dir:
                     self.file_mgmt = FileManager(self.local_dir, logger=self.logger)
                 else:
@@ -44,11 +45,13 @@ class AwsStorageMgmt:
                 self.bucket = None
                 self.object_prefix = None
                 self.local_dir = None
+                self.completed_dir = None
                 self.file_mgmt = None
         else:
             self.logger.debug(
                 "Config file not found. Please run `mgmt config` to set up the configuration."
             )
+            self.completed_dir = None
 
     def upload_file(self, file_name: Union[str, Path]) -> bool:
         """Upload a file to S3"""
@@ -229,3 +232,60 @@ class AwsStorageMgmt:
         except ClientError as e:
             self.logger.error(f"Failed to delete {filename}: {e}")
             return False
+
+    def move_to_completed(self, target_path: Union[str, Path]) -> Optional[Path]:
+        """Move a file or directory to the completed directory after successful upload.
+
+        Args:
+            target_path: Path to the file or directory to move
+
+        Returns:
+            Path to the new location in completed directory, or None if move failed or
+            completed directory is not configured
+        """
+        target = Path(target_path)
+        if not target.exists():
+            self.logger.warning(f"Cannot move {target}: file does not exist")
+            return None
+
+        # Determine completed directory path
+        if self.completed_dir:
+            completed_path = Path(self.completed_dir).expanduser()
+        else:
+            # Default to ./completed in the current working directory
+            completed_path = Path(".").resolve() / "completed"
+
+        # Create completed directory if it doesn't exist
+        try:
+            completed_path.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            self.logger.error(
+                f"Failed to create completed directory {completed_path}: {e}"
+            )
+            return None
+
+        # Determine destination path
+        dest_path = completed_path / target.name
+
+        # Handle name conflicts by appending a number
+        if dest_path.exists():
+            base_name = target.stem if target.is_file() else target.name
+            extension = target.suffix if target.is_file() else ""
+            counter = 1
+            while dest_path.exists():
+                if target.is_file():
+                    new_name = f"{base_name}_{counter}{extension}"
+                else:
+                    new_name = f"{base_name}_{counter}"
+                dest_path = completed_path / new_name
+                counter += 1
+            self.logger.info(f"Destination already exists, using: {dest_path.name}")
+
+        # Move the file or directory
+        try:
+            target.rename(dest_path)
+            self.logger.info(f"Moved {target.name} to completed directory: {dest_path}")
+            return dest_path
+        except OSError as e:
+            self.logger.error(f"Failed to move {target} to {dest_path}: {e}")
+            return None
