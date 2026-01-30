@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -331,6 +332,9 @@ def search(keyword: str) -> None:
         console = Console()
         table, options_map = build_search_results_table(s3_matches)
         console.print(table)
+
+        if not sys.stdin.isatty():
+            return
 
         while True:
             action = display_action_menu()
