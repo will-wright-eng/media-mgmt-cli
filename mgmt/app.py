@@ -32,6 +32,121 @@ aws_logger = logging.getLogger("mgmt.aws")
 aws = AwsStorageMgmt(logger=aws_logger)
 
 
+def build_search_results_table(
+    s3_matches: list[str],
+) -> tuple[Table, dict[int, str]]:
+    table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
+    table.add_column("#", style="cyan")
+    table.add_column("StorageClass", style="green")
+    table.add_column("LastModified")
+    table.add_column("Object Key", style="magenta")
+    table.add_column("Restore")
+    table.add_column("GBs")
+    options_map: dict[int, str] = {}
+
+    for i, file_name in enumerate(s3_matches):
+        try:
+            resp = aws.get_obj_head(file_name)
+            storage_class = resp.get("StorageClass", "STANDARD")
+            last_modified = resp.get("LastModified", "")
+            restore_status = get_restore_status_short(resp.get("Restore"))
+            content_length = resp.get("ContentLength")
+            content_length_gb = round(int(content_length or 0) / (1024**3), 2)
+
+            table.add_row(
+                str(i),
+                storage_class,
+                str(last_modified).split(" ")[0],
+                file_name,
+                str(restore_status),
+                str(content_length_gb),
+            )
+            options_map[i] = file_name
+        except Exception as e:
+            echo(f"An error occurred while getting metadata: {e}", err=True)
+
+    return table, options_map
+
+
+def display_action_menu() -> int:
+    echo("\nWhat would you like to do?")
+    echo("[1] Download file")
+    echo("[2] Delete file")
+    echo("[3] Check status")
+    echo("[4] Exit")
+
+    while True:
+        try:
+            choice = typer.prompt("Select action", type=int)
+            if 1 <= choice <= 4:
+                return choice
+            echo("Invalid selection. Please choose 1-4.", err=True)
+        except ValueError:
+            echo("Invalid input. Please enter a number.", err=True)
+
+
+def handle_download_action(options: dict[int, str]) -> None:
+    file_idx = typer.prompt("Which file? [option #]", type=int)
+
+    if not check_selection(file_idx, list(options.keys())):
+        echo("Invalid selection.", err=True)
+        return
+
+    aws.download(object_name=options[file_idx])
+
+
+def handle_status_action(options: dict[int, str]) -> None:
+    file_idx = typer.prompt("Which file? [option #]", type=int)
+
+    if not check_selection(file_idx, list(options.keys())):
+        echo("Invalid selection.", err=True)
+        return
+
+    aws.get_obj_head(object_name=options[file_idx])
+    echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
+
+
+def handle_delete_action(options: dict[int, str]) -> None:
+    file_idx = typer.prompt("Which file to delete? [option #]", type=int)
+
+    if not check_selection(file_idx, list(options.keys())):
+        echo("Invalid selection.", err=True)
+        return
+
+    filename = options[file_idx]
+    try:
+        metadata = aws.get_obj_head(filename)
+        content_length = metadata.get("ContentLength", 0)
+        size_gb = float(content_length or 0) / (1024**3)
+        echo(f"\nFile: {filename}")
+        echo(f"Size: {size_gb:.2f} GB")
+        echo(f"Storage: {metadata.get('StorageClass', 'STANDARD')}")
+        echo(f"Modified: {metadata.get('LastModified', 'Unknown')}")
+    except Exception as e:
+        echo(f"Warning: Could not fetch metadata: {e}", err=True)
+
+    if not typer.confirm(f"\nConfirm deletion of '{filename}'?", default=False):
+        echo("Deletion cancelled.")
+        return
+
+    try:
+        aws.delete_file(filename)
+        echo(f"{filename} successfully deleted from S3")
+    except Exception as e:
+        echo(f"An error occurred while deleting {filename}: {e}", err=True)
+
+
+def handle_action(action: int, options: dict[int, str]) -> None:
+    if action == 1:
+        handle_download_action(options)
+    elif action == 2:
+        handle_delete_action(options)
+    elif action == 3:
+        handle_status_action(options)
+    else:
+        echo("Invalid selection.", err=True)
+
+
 def get_version() -> str:
     """Get the version from installed package or pyproject.toml"""
     try:
@@ -209,61 +324,19 @@ def search(keyword: str) -> None:
         echo("Local File Matches")
         echo("\n".join(local_matches))
         echo()
+        if not s3_matches:
+            echo("No S3 matches found.")
+            return
+
         console = Console()
-        table = Table(title="AWS S3 Search Matches", box=box.SIMPLE)
-        table.add_column("#", style="cyan")
-        table.add_column("StorageClass", style="green")
-        table.add_column("LastModified")
-        table.add_column("Object Key", style="magenta")
-        table.add_column("Restore")
-        table.add_column("GBs")
-        doptions = {}
-
-        for i, file_name in enumerate(s3_matches):
-            try:
-                resp = aws.get_obj_head(file_name)
-                storage_class = resp.get("StorageClass", "STANDARD")
-                last_modified = resp.get("LastModified", "")
-                restore_status = get_restore_status_short(resp.get("Restore"))
-                content_length = resp.get("ContentLength")
-                content_length_gb = round(int(content_length or 0) / (1024**3), 2)
-
-                table.add_row(
-                    str(i),
-                    storage_class,
-                    str(last_modified).split(" ")[0],
-                    file_name,
-                    str(restore_status),
-                    str(content_length_gb),
-                )
-                doptions[i] = file_name
-            except Exception as e:
-                echo(f"An error occurred while getting metadata: {e}", err=True)
-
+        table, options_map = build_search_results_table(s3_matches)
         console.print(table)
 
-        if not typer.confirm("Download?", default=False):
-            echo("Aborted.")
-        else:
-            download_resp: int = typer.prompt("Which file? [option #]", type=int)
-
-            if check_selection(download_resp, list(doptions.keys())):
-                aws.download(object_name=doptions[download_resp])
-                return
-            else:
-                return
-
-        if not typer.confirm("Check Status?", default=False):
-            echo("Aborted.")
-        else:
-            status_resp: int = typer.prompt("Which file? [option #]", type=int)
-
-            if check_selection(status_resp, list(doptions.keys())):
-                aws.get_obj_head(object_name=doptions[status_resp])
-                echo(json.dumps(aws.obj_head, indent=4, sort_keys=True, default=str))
-                return
-            else:
-                return
+        while True:
+            action = display_action_menu()
+            if action == 4:
+                break
+            handle_action(action, options_map)
     return
 
 
