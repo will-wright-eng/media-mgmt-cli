@@ -1,25 +1,46 @@
-# Configuration: https://dependabot.com/docs/config-file/
-# Docs: https://docs.github.com/en/github/administering-a-repository/keeping-your-dependencies-updated-automatically
-
 version: 2
-
 updates:
-- package-ecosystem: "uv"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-  allow:
-  - dependency-type: "all"
-  commit-message:
-    prefix: ":arrow_up:"
-  open-pull-requests-limit: 2
+  - package-ecosystem: "uv"
+    directories:
+      - "/ner"
+      - "/apps/worker"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
+    groups: # allow grouping multiple updates in a PR.  Major version bumps will get their own PR
+      version-bumps:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: security-updates
+        update-types:
+          - "minor"
+          - "patch"
 
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-  allow:
-  - dependency-type: "all"
-  commit-message:
-    prefix: ":arrow_up:"
-  open-pull-requests-limit: 2
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
+    groups: # allow grouping multiple updates in a PR.  Major version bumps will get their own PR
+      version-bumps:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: security-updates
+        update-types:
+          - "minor"
+          - "patch"
+
