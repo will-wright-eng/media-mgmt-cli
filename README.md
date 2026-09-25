@@ -168,6 +168,13 @@ This project showcases modern Python development practices:
 - **GitHub Actions** for CI/CD automation
 - **Hatchling** for modern Python packaging
 
+## License
+
+Copyright (C) 2022-2026 Will Wright
+
+Licensed under the GNU General Public License, version 3 or (at your option) any
+later version. See [LICENSE](LICENSE).
+
 ## References
 
 - [PyPI Package](https://pypi.org/project/mgmt)

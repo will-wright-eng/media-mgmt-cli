@@ -4,15 +4,15 @@ version = "0.11.0"
 description = "An intuitive command line interface that wraps boto3 to search and manage media assets"
 readme = "README.md"
 authors = [
-    {name = "Will Wright", email = "willwright@example.com"}
+    {name = "Will Wright", email = "will.wright.engineering@gmail.com"}
 ]
-license = {text = "GNU GPL v3.0"}
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -50,7 +50,7 @@ Homepage = "https://github.com/will-wright-eng/media-mgmt-cli"
 Repository = "https://github.com/will-wright-eng/media-mgmt-cli"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.ty.environment]
