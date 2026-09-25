@@ -78,7 +78,7 @@ def set_key(dotenv_path: Path, key: str, value: str) -> None:
 
 
 class Config:
-    def __init__(self, logger: logging.Logger | None = None) -> None:
+    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
         """Initialize the Config class.
 
         Args:

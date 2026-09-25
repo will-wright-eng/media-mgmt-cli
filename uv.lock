@@ -87,11 +87,6 @@ crt = [
     { name = "awscrt" },
 ]
 
-[package.optional-dependencies]
-crt = [
-    { name = "awscrt" },
-]
-
 [[package]]
 name = "certifi"
 version = "2026.1.4"

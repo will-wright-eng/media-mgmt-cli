@@ -13,7 +13,7 @@ from mgmt.utils import get_restore_status_short
 
 
 class AwsStorageMgmt:
-    def __init__(self, logger: logging.Logger | None = None) -> None:
+    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
         """Initialize the AWS Storage Management class.
 
         Args:

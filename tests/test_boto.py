@@ -33,8 +33,5 @@ def test_boto3_error() -> None:
     stubber = Stubber(client)
     stubber.add_client_error("upload_part_copy")
     stubber.activate()
-    try:
+    with pytest.raises(ParamValidationError):
         client.upload_part_copy()
-        pytest.fail("Should have raised ClietError")
-    except ParamValidationError:
-        assert 0 == 0

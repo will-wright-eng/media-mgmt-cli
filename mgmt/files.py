@@ -10,7 +10,7 @@ class FileManager:
     def __init__(
         self,
         base_path: Optional[Union[str, Path]] = None,
-        logger: logging.Logger | None = None,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         """Initialize the FileManager.
 
