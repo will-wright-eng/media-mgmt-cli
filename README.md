@@ -17,6 +17,7 @@ Via brew tap
 
 ```bash
 brew tap will-wright-eng/tools
+brew trust will-wright-eng/tools
 brew install mgmt
 ```
 
