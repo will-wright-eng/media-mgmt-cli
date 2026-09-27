@@ -13,6 +13,13 @@
 
 ## Installing `mgmt` & Supported Versions
 
+Via brew tap
+
+```bash
+brew tap will-wright-eng/tools
+brew install mgmt
+```
+
 `mgmt` is available on PyPI:
 
 ```bash
