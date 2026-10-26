@@ -2,7 +2,6 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Optional
 
 
 def load_dotenv(dotenv_path: Path) -> None:
@@ -78,7 +77,7 @@ def set_key(dotenv_path: Path, key: str, value: str) -> None:
 
 
 class Config:
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, logger: logging.Logger | None = None) -> None:
         """Initialize the Config class.
 
         Args:
@@ -131,7 +130,7 @@ class Config:
             with self.dotenv_path.open() as f:
                 print(f"Current configuration:\n{f.read()}")
 
-    def get_configs(self) -> Optional[dict[str, Optional[str]]]:
+    def get_configs(self) -> dict[str, str | None] | None:
         """Get the current configuration as a dictionary"""
         if self.dotenv_path.is_file():
             self.load_env()

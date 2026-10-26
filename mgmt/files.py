@@ -1,7 +1,6 @@
 import logging
 import tarfile
 from pathlib import Path
-from typing import Optional, Union
 
 from mgmt.config import Config
 
@@ -9,8 +8,8 @@ from mgmt.config import Config
 class FileManager:
     def __init__(
         self,
-        base_path: Optional[Union[str, Path]] = None,
-        logger: Optional[logging.Logger] = None,
+        base_path: str | Path | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the FileManager.
 

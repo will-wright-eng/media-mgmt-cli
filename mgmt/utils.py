@@ -1,5 +1,3 @@
-from typing import Optional
-
 from typer import echo
 
 
@@ -15,7 +13,7 @@ def check_selection(selection: int, option_list: list[int]) -> bool:
         raise e
 
 
-def get_restore_status_short(restore_status: Optional[str]) -> str:
+def get_restore_status_short(restore_status: str | None) -> str:
     """Get a short status string from AWS restore status"""
     if not restore_status:
         status = "None"

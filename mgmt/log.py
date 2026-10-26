@@ -1,10 +1,9 @@
 import inspect
 import logging
 from pathlib import Path
-from typing import Optional
 
 _initialized = False
-_log_file_path: Optional[Path] = None
+_log_file_path: Path | None = None
 
 
 def get_log_file_path() -> Path:
@@ -20,7 +19,7 @@ def get_log_file_path() -> Path:
     return log_dir / "mgmt.log"
 
 
-def setup_logging(debug: bool = True, log_file: Optional[Path] = None) -> None:
+def setup_logging(debug: bool = True, log_file: Path | None = None) -> None:
     """Initialize logging configuration. Should be called once at application startup.
 
     Args:
