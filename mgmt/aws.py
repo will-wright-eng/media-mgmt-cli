@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 from time import sleep
-from typing import Any, Optional, Union
+from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
@@ -13,7 +13,7 @@ from mgmt.utils import get_restore_status_short
 
 
 class AwsStorageMgmt:
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, logger: logging.Logger | None = None) -> None:
         """Initialize the AWS Storage Management class.
 
         Args:
@@ -25,7 +25,7 @@ class AwsStorageMgmt:
         self.s3_client = boto3.client("s3")
         # Pass logger to Config so they share the same logger
         self.config = Config(logger=self.logger)
-        self.file_mgmt: Optional[FileManager] = None
+        self.file_mgmt: FileManager | None = None
         self.load_config_file()
 
     def load_config_file(self) -> None:
@@ -53,7 +53,7 @@ class AwsStorageMgmt:
             )
             self.completed_dir = None
 
-    def upload_file(self, file_name: Union[str, Path]) -> bool:
+    def upload_file(self, file_name: str | Path) -> bool:
         """Upload a file to S3"""
         self.logger.debug("upload_file")
         if not self.bucket:
@@ -77,7 +77,7 @@ class AwsStorageMgmt:
         return True
 
     def download_standard(
-        self, object_name: str, bucket_name: Optional[str] = None
+        self, object_name: str, bucket_name: str | None = None
     ) -> bool:
         """Download a file from S3 using standard storage"""
         if not bucket_name:
@@ -97,7 +97,7 @@ class AwsStorageMgmt:
                 os.remove(file_name)
             return False
 
-    def get_bucket_objs(self, bucket_name: Optional[str] = None) -> list[Any]:
+    def get_bucket_objs(self, bucket_name: str | None = None) -> list[Any]:
         """Get all objects from a bucket"""
         if not bucket_name:
             bucket_name = self.bucket
@@ -147,7 +147,7 @@ class AwsStorageMgmt:
         )
         return response
 
-    def download(self, object_name: str) -> Optional[bool]:
+    def download(self, object_name: str) -> bool | None:
         """Download an object from S3, handling different storage classes"""
         self.logger.debug("download")
         self.get_obj_head(object_name)
@@ -220,7 +220,7 @@ class AwsStorageMgmt:
             )
             return None
 
-    def upload_target(self, target_path: Union[str, Path]) -> str:
+    def upload_target(self, target_path: str | Path) -> str:
         """Upload a target (file or directory) with gzip compression"""
         self.logger.debug(f"upload_target: {str(target_path)} gzip")
         target_path_obj = Path(target_path)
@@ -234,7 +234,7 @@ class AwsStorageMgmt:
 
     def get_files(
         self, location: str
-    ) -> Union[list[str], tuple[list[str], list[str]], bool]:
+    ) -> list[str] | tuple[list[str], list[str]] | bool:
         """Get files from specified location"""
         if location == "local" and self.local_dir and self.file_mgmt:
             return self.file_mgmt.files_in_media_dir()
@@ -262,7 +262,7 @@ class AwsStorageMgmt:
             self.logger.error(f"Failed to delete {filename}: {e}")
             return False
 
-    def move_to_completed(self, target_path: Union[str, Path]) -> Optional[Path]:
+    def move_to_completed(self, target_path: str | Path) -> Path | None:
         """Move a file or directory to the completed directory after successful upload.
 
         Args:

@@ -6,7 +6,7 @@ import sys
 import time
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import typer
 from rich import box
@@ -192,7 +192,7 @@ def common(
 
 @app.command()
 def upload(
-    filename: Optional[str] = typer.Argument(
+    filename: str | None = typer.Argument(
         None, help="File or directory path to upload"
     ),
     all: bool = typer.Option(
@@ -394,7 +394,7 @@ def delete(filename: str) -> None:
 
 
 @app.command()
-def ls(location: Optional[str] = "global") -> None:
+def ls(location: str | None = "global") -> None:
     """
     Lists the files in the specified location
 
